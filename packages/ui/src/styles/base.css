@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════════
+   Base  -  réinitialisation et éléments globaux
+   standalone.reference.html, l. 75-100
+   ═══════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--brand-600);
+  text-underline-offset: 3px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--brand-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Motif blueprint  -  seul motif décoratif du site */
+.bp {
+  position: relative;
+  isolation: isolate;
+}
+
+.bp::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--on-brand-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--on-brand-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 30%, transparent 78%);
+}
+
+/* Contenu réservé aux technologies d'assistance.
+   Volontairement SANS `position: absolute` : un élément absolu dont aucun
+   ancêtre n'est positionné prend le bloc conteneur initial pour référence,
+   échappe au rognage d'un conteneur `overflow: auto`  -  un tableau qui
+   défile, par exemple  -  et élargit alors le document entier. */
+.sr-only {
+  display: inline-block;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* Légende de tableau alignée sur la grille des cellules. */
+.tbl-caption {
+  caption-side: top;
+  text-align: left;
+  padding: 13px 16px;
+  font-size: 12.5px;
+  color: var(--ink-500);
+}

@@ -1,0 +1,139 @@
+/* ═══════════════════════════════════════════════════════════
+   Adaptations  -  standalone.reference.html, l. 502-533
+   Points de rupture validés : 1180, 1024 et 760 px.
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1180px) {
+  .mainnav a {
+    padding: 9px 8px;
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --sec: 72px;
+    --gut: 20px;
+  }
+  .burger {
+    display: grid;
+  }
+  .mainnav,
+  .hd-tools .lang {
+    display: none;
+  }
+  .split {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .c4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ft-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+  .adm {
+    grid-template-columns: 1fr;
+  }
+  .adm-side {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    gap: 6px;
+    align-items: center;
+  }
+  .adm-side .adm-grp,
+  .adm-brand .txt {
+    display: none;
+  }
+  .adm-side-foot {
+    margin-top: 0;
+    padding-top: 0;
+    display: flex;
+    gap: 6px;
+  }
+  .adm-nav {
+    width: auto;
+    white-space: nowrap;
+    padding: 9px 13px;
+  }
+  .adm-body {
+    padding: 20px;
+  }
+  .adm-top {
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --sec: 64px;
+  }
+  .c2,
+  .c3,
+  .c4 {
+    grid-template-columns: 1fr;
+  }
+  .ft-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .hd-in {
+    height: 66px;
+    gap: 12px;
+  }
+  .card-pad {
+    padding: 20px;
+  }
+  .wa span {
+    display: none;
+  }
+  .wa {
+    padding: 14px;
+    border-radius: 50%;
+  }
+  .row.actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .row.actions .btn {
+    width: 100%;
+  }
+  .site-hd .btn,
+  .adm-top .btn {
+    width: auto;
+  }
+  .brandmark .tg {
+    display: none;
+  }
+  .brandmark .nm {
+    font-size: 15.5px;
+  }
+  .adm-body {
+    padding: 16px;
+  }
+  .kpi .vl {
+    font-size: 26px;
+  }
+}
+
+/* ── Correctif : très petits écrans (≤ 480 px) ─────────────────────────
+   Le prototype déborde horizontalement à 320 px : la marque, le bouton
+   « Contact » et le bouton de menu ne tiennent pas dans les 280 px utiles.
+   Le critère de recette exige l'absence de débordement à 320 px, donc
+   l'appel à l'action de l'en-tête s'efface à cette taille  -  il reste
+   présent, en pleine largeur, dans le menu mobile.
+   Aucune couleur, aucune typographie et aucun espacement validés ne sont
+   modifiés par ce correctif. */
+@media (max-width: 480px) {
+  .site-hd .hd-cta {
+    display: none;
+  }
+  .brandmark {
+    min-width: 0;
+  }
+  .brandmark .nm {
+    overflow-wrap: anywhere;
+  }
+}

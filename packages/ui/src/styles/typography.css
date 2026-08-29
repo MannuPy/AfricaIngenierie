@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════
+   Typographie  -  standalone.reference.html, l. 127-145
+   ═══════════════════════════════════════════════════════════ */
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.eyebrow::before {
+  display: none;
+}
+
+.eyebrow.on-brand {
+  color: var(--on-brand-accent);
+}
+.eyebrow.on-brand::before {
+  display: none;
+}
+
+.d1 {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: clamp(38px, 5.4vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+}
+.h1 {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: clamp(32px, 4.2vw, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.012em;
+}
+.h2 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: clamp(26px, 3.2vw, 36px);
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+}
+.h3 {
+  font-family: var(--f-ui);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.28;
+  letter-spacing: -0.005em;
+}
+.h4 {
+  font-family: var(--f-ui);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.lead {
+  font-size: clamp(17px, 1.35vw, 19px);
+  line-height: 1.62;
+  color: var(--ink-700);
+}
+.body {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-700);
+}
+.small {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-500);
+}
+.tiny {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-500);
+}
+
+.on-brand .lead,
+.on-brand .body {
+  color: var(--on-brand-soft);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.serif-it {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 500;
+}

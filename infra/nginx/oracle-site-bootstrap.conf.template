@@ -1,0 +1,6 @@
+server {
+  listen 80;
+  server_name ${PUBLIC_DOMAIN} ${ADMIN_DOMAIN};
+  location ^~ /.well-known/acme-challenge/ { root /var/www/certbot; default_type text/plain; }
+  location / { include /etc/nginx/oracle-proxy.conf; proxy_pass http://web:3000; }
+}

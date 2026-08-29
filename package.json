@@ -1,0 +1,47 @@
+{
+  "name": "africa-ingenierie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plateforme web Africa Ingenierie  -  Next.js (public) + Payload CMS (dashboard)",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dc": "docker compose --env-file .env.local",
+    "up": "docker compose --env-file .env.local up -d",
+    "up:data": "docker compose --env-file .env.local up -d postgres minio mailpit",
+    "down": "docker compose --env-file .env.local down",
+    "down:hard": "docker compose --env-file .env.local down -v",
+    "ps": "docker compose --env-file .env.local ps",
+    "logs": "docker compose --env-file .env.local logs -f --tail=100",
+    "config": "docker compose --env-file .env.local config",
+    "verify": "bash scripts/verify-stack.sh",
+    "dev:web": "pnpm --filter @africa-ingenierie/web dev",
+    "dev:cms": "pnpm --filter @africa-ingenierie/cms dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "logs:deps": "docker compose --env-file .env.local logs deps",
+    "reset:deps": "docker compose --env-file .env.local down && docker volume rm -f africa-ingenierie_nm_root africa-ingenierie_nm_web africa-ingenierie_nm_cms africa-ingenierie_nm_ui africa-ingenierie_nm_validation",
+    "migrate": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms migrate",
+    "migrate:create": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms migrate:create",
+    "migrate:status": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms migrate:status",
+    "db:reset": "docker compose --env-file .env.local rm -sf postgres && docker volume rm -f africa-ingenierie_postgres_data && docker compose --env-file .env.local up -d postgres",
+    "bootstrap:users": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms bootstrap:users",
+    "seed:demo": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms seed:demo",
+    "db:clean-tests": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms db:clean-tests",
+    "generate:types": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms generate:types",
+    "test": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms test",
+    "test:e2e": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms test:e2e",
+    "test:host": "pnpm -r test",
+    "routes:check": "node scripts/check-routes.mjs",
+    "ci": "bash scripts/ci-check.sh"
+  },
+  "devDependencies": {
+    "eslint": "9.25.1",
+    "eslint-config-next": "16.3.3",
+    "typescript": "5.9.3"
+  }
+}

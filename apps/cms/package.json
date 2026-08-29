@@ -1,0 +1,53 @@
+{
+  "name": "@africa-ingenierie/cms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3001 --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "lint": "eslint .",
+    "payload": "payload",
+    "generate:types": "payload generate:types",
+    "generate:importmap": "payload generate:importmap",
+    "migrate": "payload migrate",
+    "migrate:create": "payload migrate:create",
+    "migrate:status": "payload migrate:status",
+    "bootstrap:users": "tsx src/scripts/bootstrap-users.ts",
+    "seed:demo": "tsx src/scripts/seed-demo.ts",
+    "test": "tsx src/scripts/prepare-test-db.ts && vitest run",
+    "test:db": "tsx src/scripts/prepare-test-db.ts",
+    "db:clean-tests": "tsx src/scripts/clean-test-data.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts"
+  },
+  "dependencies": {
+    "@africa-ingenierie/validation": "workspace:*",
+    "@payloadcms/db-postgres": "3.88.0",
+    "@payloadcms/email-nodemailer": "3.88.0",
+    "@payloadcms/next": "3.88.0",
+    "@payloadcms/richtext-lexical": "3.88.0",
+    "@payloadcms/storage-s3": "3.88.0",
+    "@payloadcms/translations": "3.88.0",
+    "graphql": "16.14.2",
+    "next": "16.3.3",
+    "payload": "3.88.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sharp": "0.35.4"
+  },
+  "devDependencies": {
+    "eslint": "9.25.1",
+    "eslint-config-next": "16.3.3",
+    "@types/node": "22.20.1",
+    "@types/pg": "8.15.6",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "dotenv": "17.2.4",
+    "pg": "8.20.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

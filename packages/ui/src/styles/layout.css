@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════════════
+   Mise en page  -  standalone.reference.html, l. 102-125
+   ═══════════════════════════════════════════════════════════ */
+
+.wrap {
+  width: min(100% - 40px, var(--wrap));
+  margin-inline: auto;
+}
+
+.sec {
+  padding-block: var(--sec);
+}
+.sec-sm {
+  padding-block: 64px;
+}
+.sec.tint {
+  background: var(--surface);
+}
+.sec.brand {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+.sec.brand-deep {
+  background: var(--brand-deep);
+  color: var(--on-brand);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Échelle de gaps du prototype. Les valeurs g4, g6, g10, g14, g18, g20
+   sont utilisées dans le balisage du prototype sans exister dans sa
+   feuille de style : elles y retombent donc sur gap:0. Elles ne sont
+   pas ajoutées ici, pour ne pas modifier l'espacement validé. */
+.g8 {
+  gap: 8px;
+}
+.g12 {
+  gap: 12px;
+}
+.g16 {
+  gap: 16px;
+}
+.g24 {
+  gap: 24px;
+}
+.g32 {
+  gap: 32px;
+}
+.g48 {
+  gap: 48px;
+}
+
+.grid {
+  display: grid;
+  gap: var(--gut);
+}
+
+/* Empêche le « grid blowout » : sans min-width:0, une colonne fr ne peut pas
+   descendre sous la largeur min-content de son contenu et déborde le conteneur. */
+.grid > *,
+.split > *,
+.stack > *,
+.row > * {
+  min-width: 0;
+}
+
+/* Un .stack placé dans une .row occupe l'espace restant plutôt que de passer à la ligne */
+.row > .stack {
+  flex: 1 1 0;
+}
+.row.nowrap {
+  flex-wrap: nowrap;
+}
+.eyebrow {
+  flex-wrap: wrap;
+}
+
+.c2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.c3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.c4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.measure {
+  max-width: 62ch;
+}
