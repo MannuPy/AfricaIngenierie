@@ -1,0 +1,30 @@
+{
+  "name": "@africa-ingenierie/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --webpack --port 3000 --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@africa-ingenierie/ui": "workspace:*",
+    "@africa-ingenierie/validation": "workspace:*",
+    "@fontsource-variable/playfair-display": "5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "eslint": "9.25.1",
+    "eslint-config-next": "16.3.3",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "typescript": "5.9.3"
+  }
+}

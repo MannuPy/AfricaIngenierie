@@ -1,0 +1,18 @@
+/* ═══════════════════════════════════════════════════════════
+   Design system Africa Ingénierie  -  feuille unique.
+
+   L'ordre d'importation reproduit celui du prototype validé :
+   une règle plus tardive doit pouvoir surcharger une règle
+   antérieure exactement comme dans standalone.reference.html.
+
+   Les polices sont importées séparément par l'application
+   (voir README de packages/ui).
+   ═══════════════════════════════════════════════════════════ */
+
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './typography.css';
+@import './components.css';
+@import './admin.css';
+@import './responsive.css';

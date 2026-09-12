@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.pdf binary
+*.ico binary
+standalone.html          text eol=lf
+standalone.reference.html text eol=lf linguist-generated=true
+pnpm-lock.yaml           text eol=lf -diff

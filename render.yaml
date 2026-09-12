@@ -1,0 +1,191 @@
+# Blueprint Render de production.
+#
+# Le CMS reste un service web public uniquement pour rendre /admin accessible
+# sur son URL Render ou, plus tard, sur admin.africaingenieries.com. Les données ne sont pas exposées : Payload
+# protège l’API et l’administration par authentification et contrôle RBAC.
+# Les deux services doivent rester dans la même région pour le réseau privé.
+
+previews:
+  generation: off
+
+envVarGroups:
+  - name: africa-ingenierie-production-shared
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REVALIDATION_SECRET
+        generateValue: true
+      - key: PREVIEW_SECRET
+        generateValue: true
+      - key: CONTACT_HASH_SECRET
+        generateValue: true
+      - key: CONTACT_INTERNAL_SECRET
+        generateValue: true
+      - key: CMS_INTERNAL_READ_SECRET
+        generateValue: true
+
+services:
+  - type: web
+    name: africa-ingenierie-web
+    runtime: node
+    region: frankfurt
+    plan: 1c-2g
+    autoDeployTrigger: commit
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @africa-ingenierie/web build
+    startCommand: pnpm --filter @africa-ingenierie/web start
+    healthCheckPath: /healthz
+    maxShutdownDelaySeconds: 30
+    # Les URL onrender.com fonctionnent sans domaine acheté. Ajouter ensuite
+    # africaingenieries.com dans le Dashboard Render si le domaine est acquis.
+    renderSubdomainPolicy: enabled
+    buildFilter:
+      paths:
+        - apps/web/**
+        - packages/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - tsconfig.base.json
+    envVars:
+      - fromGroup: africa-ingenierie-production-shared
+      - key: PORT
+        value: "10000"
+      - key: PUBLIC_DOMAIN
+        value: africa-ingenierie-web.onrender.com
+      - key: ADMIN_DOMAIN
+        value: africa-ingenierie-cms.onrender.com
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://africa-ingenierie-web.onrender.com
+      - key: CMS_INTERNAL_HOSTPORT
+        fromService:
+          type: web
+          name: africa-ingenierie-cms
+          property: hostport
+      - key: PAYLOAD_PUBLIC_SERVER_URL
+        value: https://africa-ingenierie-cms.onrender.com
+
+  - type: web
+    name: africa-ingenierie-cms
+    runtime: node
+    region: frankfurt
+    plan: 1c-2g
+    autoDeployTrigger: commit
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @africa-ingenierie/cms build
+    preDeployCommand: pnpm --filter @africa-ingenierie/cms migrate
+    startCommand: pnpm --filter @africa-ingenierie/cms start
+    healthCheckPath: /healthz
+    maxShutdownDelaySeconds: 30
+    # Conserver l’URL Render pour permettre l’administration sans domaine.
+    renderSubdomainPolicy: enabled
+    buildFilter:
+      paths:
+        - apps/cms/**
+        - packages/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - tsconfig.base.json
+    envVars:
+      - fromGroup: africa-ingenierie-production-shared
+      - key: PORT
+        value: "10000"
+      - key: PUBLIC_DOMAIN
+        value: africa-ingenierie-web.onrender.com
+      - key: ADMIN_DOMAIN
+        value: africa-ingenierie-cms.onrender.com
+      - key: PAYLOAD_PUBLIC_SERVER_URL
+        value: https://africa-ingenierie-cms.onrender.com
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://africa-ingenierie-web.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: africa-ingenierie-db
+          property: connectionString
+      - key: PAYLOAD_SECRET
+        generateValue: true
+      - key: REVALIDATION_URL
+        value: https://africa-ingenierie-web.onrender.com/api/revalidate
+      - key: AUTH_COOKIE_DOMAIN
+        value: africa-ingenierie-cms.onrender.com
+      - key: CONTACT_RETENTION_MONTHS
+        value: "24"
+      - key: BOOTSTRAP_USERS_ENABLED
+        value: "false"
+      - key: BOOTSTRAP_USERS_ENV
+        value: production
+      - key: MINIO_ENDPOINT
+        sync: false
+      - key: MINIO_PORT
+        value: "443"
+      - key: MINIO_USE_SSL
+        value: "true"
+      - key: MINIO_REGION
+        value: auto
+      - key: MINIO_BUCKET
+        sync: false
+      - key: MINIO_ACCESS_KEY
+        sync: false
+      - key: MINIO_SECRET_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "true"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_NAME
+        value: Africa Ingenierie
+      - key: SMTP_FROM_ADDRESS
+        sync: false
+      - key: CONTACT_TO
+        sync: false
+
+  # Render Cron n'a pas de disque persistant : le script chiffre le dump dans
+  # /tmp puis l’envoie obligatoirement vers un bucket S3-compatible durable.
+  - type: cron
+    name: africa-ingenierie-backup
+    runtime: docker
+    region: frankfurt
+    plan: 0.5c-512mb
+    schedule: "30 2 * * *"
+    dockerfilePath: infra/docker/backup-render.Dockerfile
+    dockerContext: .
+    dockerCommand: /usr/local/bin/backup-render.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: africa-ingenierie-db
+          property: connectionString
+      - key: MEDIA_ENDPOINT
+        sync: false
+      - key: MEDIA_ACCESS_KEY
+        sync: false
+      - key: MEDIA_SECRET_KEY
+        sync: false
+      - key: MEDIA_BUCKET
+        sync: false
+      - key: BACKUP_S3_ENDPOINT
+        sync: false
+      - key: BACKUP_S3_BUCKET
+        sync: false
+      - key: BACKUP_S3_ACCESS_KEY
+        sync: false
+      - key: BACKUP_S3_SECRET_KEY
+        sync: false
+      - key: BACKUP_ENCRYPTION_KEY
+        sync: false
+
+databases:
+  - name: africa-ingenierie-db
+    plan: 0.5c-1g
+    region: frankfurt
+    databaseName: africa_ingenierie
+    user: cms_user
+    postgresMajorVersion: "17"
+    diskSizeGB: 15
+    storageAutoscalingEnabled: true
+    connectionPool: none

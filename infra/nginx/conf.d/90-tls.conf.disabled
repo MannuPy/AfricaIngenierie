@@ -1,0 +1,33 @@
+# ──────────────────────────────────────────────────────────────────
+#  HTTPS local (port 8443)  -  DÉSACTIVÉ PAR DÉFAUT.
+#
+#  Activation :
+#    1. bash scripts/generate-local-certs.sh
+#    2. renommer ce fichier en 90-tls.conf
+#    3. docker compose --env-file .env.local exec nginx nginx -t
+#    4. docker compose --env-file .env.local restart nginx
+#
+#  Les certificats vivent dans infra/nginx/certs/ et sont ignorés par
+#  Git. En production, Let's Encrypt remplace ces certificats de test.
+# ──────────────────────────────────────────────────────────────────
+server {
+    listen      8443 ssl;
+    # `http2 on;` est une directive autonome depuis nginx 1.25.1  -  l'image
+    # `nginx:stable-alpine` du projet la supporte. Sur une version antérieure,
+    # revenir à la forme héritée : `listen 8443 ssl http2;`.
+    http2       on;
+    server_name localhost admin.localhost;
+
+    ssl_certificate     /etc/nginx/certs/local.crt;
+    ssl_certificate_key /etc/nginx/certs/local.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL:10m;
+
+    include /etc/nginx/snippets/security-headers.conf;
+
+    location / {
+        include /etc/nginx/snippets/proxy.conf;
+        proxy_pass http://web_upstream;
+    }
+}

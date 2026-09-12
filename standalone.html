@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Maquette de refonte - Africa Ingenierie">
+<title>Maquette Africa Ingénierie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+
+<style>
+/* ═══════════════════════════════════════════════════════════
+   AFRICA INGÉNIERIE  -  Système de design
+   Tokens : couleur, type, espace. Thème clair + sombre.
+   ═══════════════════════════════════════════════════════════ */
+
+:root{
+  /* Marque */
+  --brand:#003087; --brand-deep:#001F57; --brand-600:#1E5BC6;
+  --brand-100:#E7EEF9; --brand-50:#F4F7FC;
+  /* Accent action (rare, discipliné) */
+  --accent:#E01E37; --accent-700:#B71528; --accent-50:#FDECEE;
+  /* Neutres à biais bleu */
+  --ink:#0F1720; --ink-700:#33404D; --ink-500:#5F6B7A; --ink-400:#8A96A5;
+  --line:#D9E0E9; --line-soft:#EAEFF5;
+  /* Surfaces */
+  --ground:#FFFFFF; --surface:#F4F7FC; --surface-2:#EDF2F9; --card:#FFFFFF;
+  /* Sémantique interface */
+  --ok:#1E8E5A; --warn:#B36A00; --err:#C0243A; --info:#1E5BC6;
+  --ok-bg:#E8F5EF; --warn-bg:#FDF3E3; --err-bg:#FDECEE; --info-bg:#E7EEF9;
+  /* Sur panneau bleu */
+  --on-brand:#FFFFFF; --on-brand-soft:#B9C9E4; --on-brand-line:rgba(255,255,255,.16);
+  /* Élévation */
+  --sh-1:0 1px 2px rgba(0,31,87,.06);
+  --sh-2:0 4px 18px rgba(0,31,87,.08);
+  --sh-3:0 14px 40px rgba(0,31,87,.13);
+  /* Rayons */
+  --r-btn:8px; --r-card:14px; --r-field:8px; --r-pill:999px;
+  /* Type */
+  --f-display:"Playfair Display",Georgia,"Times New Roman",serif;
+  --f-ui:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  /* Rythme */
+  --wrap:1200px; --gut:24px; --sec:96px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --brand:#2E63C8; --brand-deep:#071733; --brand-600:#5A8BE0;
+    --brand-100:#16294A; --brand-50:#101E36;
+    --accent:#FF4257; --accent-700:#FF6274; --accent-50:#2A1219;
+    --ink:#EAF0F8; --ink-700:#C3CFDE; --ink-500:#93A2B6; --ink-400:#75849A;
+    --line:#26364F; --line-soft:#1B2942;
+    --ground:#0A1424; --surface:#0E1B2F; --surface-2:#13243D; --card:#12203A;
+    --ok:#4BD0A0; --warn:#F0B44B; --err:#FF6274; --info:#5A8BE0;
+    --ok-bg:#0F2A22; --warn-bg:#2B2210; --err-bg:#2A1219; --info-bg:#10233E;
+    --on-brand:#EAF0F8; --on-brand-soft:#93A6C4; --on-brand-line:rgba(255,255,255,.12);
+    --sh-1:0 1px 2px rgba(0,0,0,.4); --sh-2:0 4px 18px rgba(0,0,0,.45);
+    --sh-3:0 14px 40px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#2E63C8; --brand-deep:#071733; --brand-600:#5A8BE0;
+  --brand-100:#16294A; --brand-50:#101E36;
+  --accent:#FF4257; --accent-700:#FF6274; --accent-50:#2A1219;
+  --ink:#EAF0F8; --ink-700:#C3CFDE; --ink-500:#93A2B6; --ink-400:#75849A;
+  --line:#26364F; --line-soft:#1B2942;
+  --ground:#0A1424; --surface:#0E1B2F; --surface-2:#13243D; --card:#12203A;
+  --ok:#4BD0A0; --warn:#F0B44B; --err:#FF6274; --info:#5A8BE0;
+  --ok-bg:#0F2A22; --warn-bg:#2B2210; --err-bg:#2A1219; --info-bg:#10233E;
+  --on-brand:#EAF0F8; --on-brand-soft:#93A6C4; --on-brand-line:rgba(255,255,255,.12);
+  --sh-1:0 1px 2px rgba(0,0,0,.4); --sh-2:0 4px 18px rgba(0,0,0,.45);
+  --sh-3:0 14px 40px rgba(0,0,0,.55);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-ui); font-size:16px; line-height:1.6;
+  font-weight:400; -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:var(--brand-600);text-underline-offset:3px}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+p{margin:0}
+ul,ol{margin:0;padding:0}
+:focus-visible{outline:3px solid var(--brand-600);outline-offset:2px;border-radius:4px}
+
+/* Motif blueprint  -  seul motif décoratif du site */
+.bp{position:relative;isolation:isolate}
+.bp::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    linear-gradient(var(--on-brand-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--on-brand-line) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 78%);
+}
+
+/* ── Mise en page ─────────────────────────────────────────── */
+.wrap{width:min(100% - 40px,var(--wrap));margin-inline:auto}
+.sec{padding-block:var(--sec)}
+.sec-sm{padding-block:64px}
+.sec.tint{background:var(--surface)}
+.sec.brand{background:var(--brand);color:var(--on-brand)}
+.sec.brand-deep{background:var(--brand-deep);color:var(--on-brand)}
+.stack{display:flex;flex-direction:column}
+.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g24{gap:24px}.g32{gap:32px}.g48{gap:48px}
+.grid{display:grid;gap:var(--gut)}
+/* Empêche le « grid blowout » : sans min-width:0, une colonne fr ne peut pas
+   descendre sous la largeur min-content de son contenu et déborde le conteneur. */
+.grid>*,.split>*,.stack>*,.row>*{min-width:0}
+/* Un .stack placé dans une .row occupe l'espace restant plutôt que de passer à la ligne */
+.row>.stack{flex:1 1 0}
+.row.nowrap{flex-wrap:nowrap}
+.eyebrow{flex-wrap:wrap}
+.c2{grid-template-columns:repeat(2,1fr)}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.between{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.measure{max-width:62ch}
+
+/* ── Typographie ──────────────────────────────────────────── */
+.eyebrow{
+  font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px;display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);flex:none}
+.eyebrow.on-brand{color:#FF8B98}
+.eyebrow.on-brand::before{background:#FF8B98}
+.d1{font-family:var(--f-display);font-weight:700;font-size:clamp(38px,5.4vw,64px);line-height:1.04;letter-spacing:-.015em}
+.h1{font-family:var(--f-display);font-weight:700;font-size:clamp(32px,4.2vw,48px);line-height:1.08;letter-spacing:-.012em}
+.h2{font-family:var(--f-display);font-weight:600;font-size:clamp(26px,3.2vw,36px);line-height:1.14;letter-spacing:-.01em}
+.h3{font-family:var(--f-ui);font-weight:700;font-size:20px;line-height:1.28;letter-spacing:-.005em}
+.h4{font-family:var(--f-ui);font-weight:700;font-size:16px;line-height:1.35}
+.lead{font-size:clamp(17px,1.35vw,19px);line-height:1.62;color:var(--ink-700)}
+.body{font-size:16px;line-height:1.65;color:var(--ink-700)}
+.small{font-size:14px;line-height:1.55;color:var(--ink-500)}
+.tiny{font-size:12.5px;line-height:1.45;color:var(--ink-500)}
+.on-brand .lead,.on-brand .body{color:var(--on-brand-soft)}
+.num{font-variant-numeric:tabular-nums}
+.serif-it{font-family:var(--f-display);font-style:italic;font-weight:500}
+
+/* ── Boutons ──────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:48px;padding:0 22px;border-radius:var(--r-btn);border:1.5px solid transparent;
+  font-size:15px;font-weight:700;letter-spacing:.005em;text-decoration:none;cursor:pointer;
+  transition:transform .16s ease,background .16s ease,box-shadow .16s ease,border-color .16s ease;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+/* Primaire rouge  -  un seul visible par écran */
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(224,30,55,.28)}
+.btn-primary:hover{background:var(--accent-700);box-shadow:0 6px 18px rgba(224,30,55,.34)}
+.btn-brand{background:var(--brand);color:#fff}
+.btn-brand:hover{background:var(--brand-deep)}
+.btn-outline{background:transparent;color:var(--brand);border-color:var(--line)}
+.btn-outline:hover{border-color:var(--brand);background:var(--brand-50)}
+.btn-ghost-light{background:transparent;color:var(--on-brand);border-color:rgba(255,255,255,.4)}
+.btn-ghost-light:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.btn-sm{min-height:40px;padding:0 16px;font-size:14px}
+.btn-block{width:100%}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.tlink{
+  display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;
+  color:var(--brand-600);text-decoration:none;background:none;border:0;padding:6px 0;cursor:pointer;
+}
+.tlink svg{transition:transform .18s ease}
+.tlink:hover svg{transform:translateX(4px)}
+.tlink:hover{text-decoration:underline}
+.tlink.on-brand{color:#fff}
+
+/* ── Pastilles & étiquettes ───────────────────────────────── */
+.pill{
+  display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);
+  padding:5px 12px;font-size:12.5px;font-weight:700;letter-spacing:.02em;
+  background:var(--brand-100);color:var(--brand);border:1px solid transparent;
+}
+.pill.red{background:var(--accent-50);color:var(--accent-700)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.err{background:var(--err-bg);color:var(--err)}
+.pill.neutral{background:var(--surface-2);color:var(--ink-500)}
+.pill.outline{background:transparent;border-color:var(--line);color:var(--ink-500)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+/* ── Cartes ───────────────────────────────────────────────── */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
+  overflow:hidden;position:relative;transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;
+  display:flex;flex-direction:column;text-decoration:none;color:inherit;
+}
+a.card:hover,.card.hoverable:hover{box-shadow:var(--sh-3);transform:translateY(-3px);border-color:var(--line-soft)}
+/* Règle rouge révélée au survol  -  l'accent n'apparaît qu'à l'interaction */
+.card.ruled::after{
+  content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;transition:transform .24s ease;
+}
+a.card.ruled:hover::after,.card.ruled.hoverable:hover::after{transform:scaleX(1)}
+.card-pad{padding:26px}
+.card-pad-sm{padding:20px}
+
+/* ── Plaque blueprint (emplacement photo) ─────────────────── */
+.plate{
+  position:relative;background:linear-gradient(140deg,var(--brand) 0%,var(--brand-deep) 100%);
+  overflow:hidden;display:grid;place-items:center;color:#fff;isolation:isolate;
+}
+.plate::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.10) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:80px 80px,80px 80px,16px 16px,16px 16px;
+}
+.plate::after{
+  content:"";position:absolute;inset:14px;border:1px solid rgba(255,255,255,.22);
+  border-radius:4px;
+}
+.plate-lbl{
+  position:relative;z-index:1;text-align:center;padding:22px;max-width:80%;
+  font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:rgba(255,255,255,.82);line-height:1.5;
+}
+.plate-lbl svg{margin:0 auto 10px;display:block;opacity:.7}
+.ratio-43{aspect-ratio:4/3}.ratio-169{aspect-ratio:16/9}
+.ratio-11{aspect-ratio:1}.ratio-32{aspect-ratio:3/2}
+
+/* ── En-tête ──────────────────────────────────────────────── */
+.skip{
+  position:absolute;left:16px;top:-60px;z-index:200;background:var(--accent);color:#fff;
+  padding:12px 18px;border-radius:var(--r-btn);font-weight:700;font-size:14px;
+  text-decoration:none;transition:top .18s ease;
+}
+.skip:focus{top:16px}
+.site-hd{
+  position:sticky;top:0;z-index:100;background:var(--ground);
+  border-bottom:1px solid var(--line-soft);
+}
+.hd-in{display:flex;align-items:center;gap:20px;height:78px}
+.brandmark{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;flex:none}
+.brandmark .mk{
+  width:40px;height:40px;border-radius:9px;flex:none;
+  background:linear-gradient(140deg,var(--brand),var(--brand-deep));
+  display:grid;place-items:center;color:#fff;
+}
+.brandmark .nm{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.1;letter-spacing:-.01em;color:var(--ink)}
+.brandmark .tg{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-400)}
+.mainnav{display:flex;align-items:center;gap:2px;margin-left:auto;flex-wrap:nowrap}
+.mainnav a{
+  position:relative;padding:9px 11px;border-radius:6px;font-size:14.5px;font-weight:600;
+  color:var(--ink-700);text-decoration:none;white-space:nowrap;transition:color .15s ease,background .15s ease;
+}
+.mainnav a:hover{color:var(--brand);background:var(--brand-50)}
+.mainnav a[aria-current="page"]{color:var(--brand);font-weight:700}
+.mainnav a[aria-current="page"]::after{
+  content:"";position:absolute;left:11px;right:11px;bottom:2px;height:2.5px;
+  background:var(--accent);border-radius:2px;
+}
+.hd-tools{display:flex;align-items:center;gap:8px;flex:none}
+.icon-btn{
+  width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:transparent;
+  display:grid;place-items:center;cursor:pointer;color:var(--ink-700);transition:all .15s ease;
+}
+.icon-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-50)}
+.lang{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lang button{
+  padding:0 11px;height:40px;border:0;background:transparent;font-size:13px;font-weight:700;
+  color:var(--ink-500);cursor:pointer;transition:all .15s ease;
+}
+.lang button[aria-pressed="true"]{background:var(--brand);color:#fff}
+.burger{display:none}
+#mobnav{display:none}
+
+/* ── Fil d'Ariane ─────────────────────────────────────────── */
+.crumb{display:flex;align-items:center;gap:9px;font-size:13px;flex-wrap:wrap;color:var(--on-brand-soft)}
+.crumb a{color:var(--on-brand-soft);text-decoration:none}
+.crumb a:hover{color:#fff;text-decoration:underline}
+.crumb span[aria-current]{color:#fff;font-weight:600}
+
+/* ── Hero de page interne ─────────────────────────────────── */
+.pagehero{background:linear-gradient(140deg,var(--brand) 0%,var(--brand-deep) 100%);color:var(--on-brand);padding-block:56px 64px}
+.pagehero .h1{color:#fff}
+
+/* ── Formulaires ──────────────────────────────────────────── */
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:14px;font-weight:700;color:var(--ink)}
+.field .req{color:var(--accent);margin-left:2px}
+.field .hint{font-size:12.5px;color:var(--ink-500)}
+.input,.select,.textarea{
+  width:100%;min-height:48px;padding:12px 14px;border:1.5px solid var(--line);
+  border-radius:var(--r-field);background:var(--card);color:var(--ink);font-size:15px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.input::placeholder,.textarea::placeholder{color:var(--ink-400)}
+.input:focus,.select:focus,.textarea:focus{
+  outline:none;border-color:var(--brand-600);box-shadow:0 0 0 3px rgba(30,91,198,.15);
+}
+.textarea{min-height:132px;resize:vertical;line-height:1.6}
+.field.invalid .input,.field.invalid .textarea,.field.invalid .select{border-color:var(--err)}
+.err-msg{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--err)}
+.check{display:flex;gap:11px;align-items:flex-start;font-size:14px;color:var(--ink-700);line-height:1.5}
+.check input{width:19px;height:19px;margin:2px 0 0;accent-color:var(--brand);flex:none;cursor:pointer}
+.counter{font-size:12px;color:var(--ink-400);font-variant-numeric:tabular-nums}
+.counter.over{color:var(--err);font-weight:700}
+
+/* ── Notice / états ───────────────────────────────────────── */
+.notice{display:flex;gap:13px;padding:16px 18px;border-radius:12px;border:1px solid;align-items:flex-start}
+.notice.ok{background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 32%,transparent);color:var(--ok)}
+.notice.info{background:var(--info-bg);border-color:color-mix(in srgb,var(--info) 30%,transparent);color:var(--info)}
+.notice.warn{background:var(--warn-bg);border-color:color-mix(in srgb,var(--warn) 32%,transparent);color:var(--warn)}
+.notice.err{background:var(--err-bg);border-color:color-mix(in srgb,var(--err) 32%,transparent);color:var(--err)}
+.notice p{color:var(--ink-700)}
+.notice strong{color:var(--ink)}
+.notice svg{flex:none;margin-top:2px}
+
+/* État vide  -  démonstration du principe P1 */
+.empty{
+  border:1.5px dashed var(--line);border-radius:var(--r-card);padding:44px 28px;text-align:center;
+  background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+.empty .ic{
+  width:56px;height:56px;border-radius:14px;background:var(--brand-100);color:var(--brand);
+  display:grid;place-items:center;
+}
+/* Squelette de chargement  -  jamais « Loading… » */
+@keyframes shim{0%{background-position:-420px 0}100%{background-position:420px 0}}
+.skel{
+  border-radius:7px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--line-soft) 50%,var(--surface-2) 75%);
+  background-size:840px 100%;animation:shim 1.35s linear infinite;
+}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+
+/* ── Statistiques ─────────────────────────────────────────── */
+.stat{display:flex;flex-direction:column;gap:5px}
+.stat .v{
+  font-family:var(--f-display);font-weight:700;font-size:clamp(40px,4.4vw,56px);line-height:1;
+  font-variant-numeric:tabular-nums;color:#fff;display:flex;align-items:flex-start;gap:2px;
+}
+.stat .v sup{font-size:.44em;color:#FF8B98;font-family:var(--f-ui);font-weight:800;margin-top:.35em}
+.stat .k{font-size:13.5px;font-weight:600;color:var(--on-brand-soft);letter-spacing:.02em}
+.stat.dark .v{color:var(--ink)}
+.stat.dark .v sup{color:var(--accent)}
+.stat.dark .k{color:var(--ink-500)}
+
+/* ── Tableaux ─────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-card);background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+thead th{
+  text-align:left;padding:13px 16px;font-size:12px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-500);background:var(--surface);
+  border-bottom:1px solid var(--line);white-space:nowrap;
+}
+tbody td{padding:14px 16px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface)}
+
+/* ── Accordéon ────────────────────────────────────────────── */
+.acc{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.acc+.acc{margin-top:12px}
+.acc summary{
+  padding:18px 20px;cursor:pointer;font-weight:700;font-size:15.5px;display:flex;
+  align-items:center;justify-content:space-between;gap:16px;list-style:none;
+}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::after{
+  content:"";width:11px;height:11px;flex:none;border-right:2.2px solid var(--brand);
+  border-bottom:2.2px solid var(--brand);transform:rotate(45deg) translateY(-3px);transition:transform .2s ease;
+}
+.acc[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.acc summary:hover{background:var(--brand-50)}
+.acc .acc-body{padding:0 20px 20px;color:var(--ink-700);font-size:15px;line-height:1.65}
+
+/* ── Avant / après ────────────────────────────────────────── */
+.ba{position:relative;border-radius:var(--r-card);overflow:hidden;border:1px solid var(--line)}
+.ba-imgs{position:relative;aspect-ratio:16/9}
+.ba-imgs>*{position:absolute;inset:0}
+.ba-after{clip-path:inset(0 0 0 var(--pos,50%))}
+.ba-range{
+  position:absolute;left:0;right:0;bottom:16px;width:calc(100% - 32px);margin-inline:16px;
+  appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.45);cursor:ew-resize;z-index:3;
+}
+.ba-range::-webkit-slider-thumb{
+  appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;
+  border:3px solid var(--accent);cursor:grab;box-shadow:var(--sh-2);
+}
+.ba-range::-moz-range-thumb{
+  width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:grab;
+}
+.ba-tag{
+  position:absolute;top:14px;z-index:2;padding:5px 12px;border-radius:var(--r-pill);
+  font-size:11.5px;font-weight:800;letter-spacing:.1em;background:rgba(10,20,36,.72);color:#fff;
+}
+
+/* ── Filtres ──────────────────────────────────────────────── */
+.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.chip{
+  padding:9px 16px;border-radius:var(--r-pill);border:1.5px solid var(--line);background:transparent;
+  font-size:14px;font-weight:600;color:var(--ink-700);cursor:pointer;transition:all .15s ease;min-height:42px;
+}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ── Pied de page ─────────────────────────────────────────── */
+.site-ft{background:var(--brand-deep);color:var(--on-brand-soft);padding-block:72px 0}
+.ft-grid{display:grid;grid-template-columns:1.7fr 1fr 1fr 1.35fr;gap:44px}
+.ft-h{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#fff;margin:0 0 18px}
+.ft-list{list-style:none;display:flex;flex-direction:column;gap:11px}
+.ft-list a{color:var(--on-brand-soft);text-decoration:none;font-size:14.5px;transition:color .15s ease}
+.ft-list a:hover{color:#fff;text-decoration:underline}
+.ft-bar{
+  margin-top:56px;border-top:1px solid var(--on-brand-line);padding-block:24px;
+  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13.5px;
+}
+.ft-bar a{color:var(--on-brand-soft);text-decoration:none}
+.ft-bar a:hover{color:#fff;text-decoration:underline}
+.soc{display:flex;gap:9px}
+.soc a{
+  width:38px;height:38px;border-radius:9px;border:1px solid var(--on-brand-line);
+  display:grid;place-items:center;color:var(--on-brand-soft);transition:all .16s ease;
+}
+.soc a:hover{background:#fff;color:var(--brand);border-color:#fff}
+
+/* ── Flottants ────────────────────────────────────────────── */
+.wa{
+  position:fixed;right:20px;bottom:20px;z-index:90;display:flex;align-items:center;gap:10px;
+  background:#25D366;color:#062d14;border:0;border-radius:var(--r-pill);padding:13px 19px;
+  font-weight:800;font-size:14.5px;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.24);
+  text-decoration:none;transition:transform .16s ease;
+}
+.wa:hover{transform:translateY(-2px)}
+.wa-close{
+  position:absolute;top:-7px;right:-7px;width:23px;height:23px;border-radius:50%;
+  background:var(--ink);color:#fff;border:2px solid var(--ground);display:grid;place-items:center;
+  cursor:pointer;font-size:13px;line-height:1;padding:0;
+}
+.cookiebar{
+  position:fixed;left:16px;right:16px;bottom:16px;z-index:95;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-3);
+  padding:22px;max-width:660px;margin-inline:auto;
+}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:200;
+  background:var(--ink);color:#fff;padding:14px 22px;border-radius:var(--r-pill);
+  font-weight:600;font-size:14.5px;box-shadow:var(--sh-3);display:flex;align-items:center;gap:10px;
+}
+
+/* ── Animation d'apparition ───────────────────────────────── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  *{scroll-behavior:auto!important}
+}
+
+/* ═══ ADMINISTRATION  -  univers dense, même marque ══════════ */
+.adm{display:grid;grid-template-columns:250px 1fr;min-height:100vh;background:var(--surface)}
+.adm-side{background:var(--brand-deep);color:var(--on-brand-soft);padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+.adm-brand{display:flex;align-items:center;gap:10px;padding:8px 10px 20px;text-decoration:none}
+.adm-brand .mk{width:34px;height:34px;border-radius:8px;background:linear-gradient(140deg,var(--brand-600),var(--brand));display:grid;place-items:center;color:#fff;flex:none}
+.adm-brand .nm{font-family:var(--f-display);font-weight:700;font-size:15px;color:#fff;line-height:1.15}
+.adm-brand .tg{font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--on-brand-soft)}
+.adm-grp{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.38);padding:16px 10px 7px}
+.adm-nav{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:8px;color:var(--on-brand-soft);text-decoration:none;font-size:14px;font-weight:600;transition:all .14s ease;border:0;background:transparent;width:100%;text-align:left;cursor:pointer}
+.adm-nav:hover{background:rgba(255,255,255,.07);color:#fff}
+.adm-nav[aria-current="page"]{background:var(--brand);color:#fff}
+.adm-nav .cnt{margin-left:auto;background:var(--accent);color:#fff;border-radius:var(--r-pill);padding:2px 8px;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.adm-nav svg{flex:none;opacity:.9}
+.adm-main{display:flex;flex-direction:column;min-width:0}
+.adm-top{background:var(--card);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.adm-body{padding:28px;display:flex;flex-direction:column;gap:24px;flex:1}
+.adm-h{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.15;letter-spacing:-.01em;margin:0}
+.adm-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
+.adm-card-h{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:7px}
+.kpi .lb{font-size:12.5px;font-weight:700;color:var(--ink-500);letter-spacing:.02em}
+.kpi .vl{font-size:32px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)}
+.kpi .ft{font-size:12.5px;color:var(--ink-500)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--brand-100);color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.langtab{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.langtab button{padding:7px 14px;border:0;background:transparent;font-size:13px;font-weight:700;color:var(--ink-500);cursor:pointer}
+.langtab button[aria-pressed="true"]{background:var(--brand);color:#fff}
+.chk-row{display:flex;align-items:flex-start;gap:13px;padding:15px 0;border-bottom:1px solid var(--line-soft)}
+.chk-row:last-child{border-bottom:0}
+.chk-ic{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff}
+.chk-ic.pass{background:var(--ok)}.chk-ic.fail{background:var(--err)}.chk-ic.warn{background:var(--warn)}
+.tl{position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding-bottom:20px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-24px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--brand);border:2px solid var(--card)}
+
+/* ── Adaptations ──────────────────────────────────────────── */
+@media(max-width:1180px){
+  .mainnav a{padding:9px 8px;font-size:13.5px}
+}
+@media(max-width:1024px){
+  :root{--sec:72px;--gut:20px}
+  .burger{display:grid}
+  .mainnav,.hd-tools .lang{display:none}
+  .split{grid-template-columns:1fr;gap:36px}
+  .c4{grid-template-columns:repeat(2,1fr)}
+  .ft-grid{grid-template-columns:1fr 1fr;gap:36px}
+  .adm{grid-template-columns:1fr}
+  .adm-side{flex-direction:row;overflow-x:auto;padding:10px;gap:6px;align-items:center}
+  .adm-side .adm-grp,.adm-brand .txt{display:none}
+  .adm-nav{width:auto;white-space:nowrap;padding:9px 13px}
+  .adm-body{padding:20px}
+  .adm-top{padding:12px 20px}
+}
+@media(max-width:760px){
+  :root{--sec:64px}
+  .c2,.c3,.c4{grid-template-columns:1fr}
+  .ft-grid{grid-template-columns:1fr;gap:32px}
+  .hd-in{height:66px}
+  .card-pad{padding:20px}
+  .wa span{display:none}
+  .wa{padding:14px;border-radius:50%}
+  .row.actions{flex-direction:column;align-items:stretch}
+  .row.actions .btn{width:100%}
+  .site-hd .btn,.adm-top .btn{width:auto}
+  .brandmark .tg{display:none}
+  .brandmark .nm{font-size:15.5px}
+  .hd-in{gap:12px}
+  .adm-body{padding:16px}
+  .kpi .vl{font-size:26px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+
+<div id="chrome"></div>
+<main id="main"></main>
+<div id="chrome-ft"></div>
+<div id="floats"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   1. ICÔNES  -  un seul jeu linéaire, trait 1.75
+   ═══════════════════════════════════════════════════════════ */
+const I = (p,s=20,sw=1.75)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const IC = {
+  arrow:(s)=>I('<path d="M5 12h14M13 6l6 6-6 6"/>',s),
+  arrowUp:(s)=>I('<path d="M7 17 17 7M9 7h8v8"/>',s),
+  check:(s)=>I('<path d="M20 6 9 17l-5-5"/>',s),
+  x:(s)=>I('<path d="M18 6 6 18M6 6l12 12"/>',s),
+  wrench:(s)=>I('<path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/><path d="m14.7 6.3-2.1-2.1a4 4 0 0 1 5.6 0l1.6 1.6a4 4 0 0 1 0 5.6"/>',s),
+  install:(s)=>I('<path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/>',s),
+  grad:(s)=>I('<path d="m22 9-10-5L2 9l10 5z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>',s),
+  box:(s)=>I('<path d="M21 8v8a2 2 0 0 1-1 1.7l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.7l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',s),
+  weld:(s)=>I('<path d="M15 3h6v6M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',s),
+  bolt:(s)=>I('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',s),
+  shield:(s)=>I('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',s),
+  target:(s)=>I('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',s),
+  globe:(s)=>I('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/>',s),
+  gear:(s)=>I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',s),
+  mail:(s)=>I('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',s),
+  phone:(s)=>I('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',s),
+  pin:(s)=>I('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',s),
+  clock:(s)=>I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',s),
+  cal:(s)=>I('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',s),
+  users:(s)=>I('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>',s),
+  quote:(s)=>I('<path d="M9 11H5a1 1 0 0 1-1-1V7a3 3 0 0 1 3-3M20 11h-4a1 1 0 0 1-1-1V7a3 3 0 0 1 3-3"/><path d="M9 11v3a5 5 0 0 1-5 5M20 11v3a5 5 0 0 1-5 5"/>',s),
+  play:(s)=>I('<circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z" fill="currentColor"/>',s),
+  doc:(s)=>I('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 11h2"/>',s),
+  search:(s)=>I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',s),
+  menu:(s)=>I('<path d="M3 6h18M3 12h18M3 18h18"/>',s),
+  sun:(s)=>I('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',s),
+  moon:(s)=>I('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',s),
+  alert:(s)=>I('<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',s),
+  info:(s)=>I('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',s),
+  edit:(s)=>I('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>',s),
+  trash:(s)=>I('<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',s),
+  eye:(s)=>I('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',s),
+  layers:(s)=>I('<path d="m12 2 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/>',s),
+  grid:(s)=>I('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',s),
+  img:(s)=>I('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',s),
+  hist:(s)=>I('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',s),
+  logout:(s)=>I('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',s),
+  lock:(s)=>I('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',s),
+  filter:(s)=>I('<path d="M22 3H2l8 9.5V19l4 2v-8.5z"/>',s),
+  save:(s)=>I('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',s),
+  inbox:(s)=>I('<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z"/>',s),
+  wa:(s)=>I('<path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20.5l1.8-5.3A8.4 8.4 0 1 1 21 11.5z"/><path d="M8.5 9.5c0 3 2.5 5.5 5.5 5.5"/>',s),
+  li:(s)=>I('<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>',s),
+  fb:(s)=>I('<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',s),
+  yt:(s)=>I('<path d="M22.5 7a2.8 2.8 0 0 0-1.9-2C18.9 4.5 12 4.5 12 4.5s-6.9 0-8.6.5A2.8 2.8 0 0 0 1.5 7 29 29 0 0 0 1 12a29 29 0 0 0 .5 5 2.8 2.8 0 0 0 1.9 2c1.7.5 8.6.5 8.6.5s6.9 0 8.6-.5a2.8 2.8 0 0 0 1.9-2 29 29 0 0 0 .5-5 29 29 0 0 0-.5-5z"/><path d="m10 15 5-3-5-3z" fill="currentColor"/>',s),
+};
+
+/* ═══════════════════════════════════════════════════════════
+   2. DONNÉES  -  simule le CMS. Aucun placeholder, aucun zéro.
+      Chaque section se rend À PARTIR de ces données (P1).
+   ═══════════════════════════════════════════════════════════ */
+const TODAY = new Date('2026-08-25');
+
+const DB = {
+  site:{
+    name:"Africa Ingénierie",            // P3  -  graphie unique, une seule source
+    baseline:"Notre engagement est d'offrir des services d'ingénierie de haute précision afin de valoriser l'expertise africaine, d'innover localement et d'accompagner les industries vers un niveau d'excellence durable.",
+    address:{l1:"La Verdure, Tranche I, Lot 01, Parcelle L",l2:"Ouèdo, Abomey-Calavi",country:"Bénin"},
+    phone:"+229 01 42 54 54 95", phoneRaw:"+22901425454 95".replace(/\s/g,''),
+    email:"contact@africaingenieries.com",
+    whatsapp:"22901425454 95".replace(/\s/g,''),
+    hours:[["Lundi – Vendredi","07h30 – 17h30"],["Samedi","08h00 – 13h00"]],
+    reply:"Réponse sous 24 h ouvrées",
+    navigation:{home:"Accueil",expertises:"Expertises",realisations:"Réalisations",formations:"Formations & événements",produits:"Produits",about:"À propos",contact:"Contact"},
+    languages:{fr:true,en:true,default:"fr"},
+    legal:{
+      editor:"Le présent site est édité par Africa Ingénierie, entreprise d'ingénierie industrielle dont le siège est situé à Ouèdo, Abomey-Calavi, Bénin.",
+      hosting:"Le site est hébergé sur un serveur privé virtuel opéré par OVH. Les coordonnées complètes de l'hébergeur sont disponibles sur demande.",
+      property:"L'ensemble des contenus présents sur ce site  -  textes, photographies, schémas et marques  -  est protégé. Toute reproduction sans autorisation écrite préalable est interdite.",
+      data:"Les données transmises via le formulaire de contact sont utilisées uniquement pour traiter votre demande. Elles ne sont ni cédées ni vendues à des tiers.",
+      cookies:"Le site n'utilise que les cookies strictement nécessaires à son fonctionnement, sauf accord explicite de votre part via le bandeau de consentement.",
+      rights:"Vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Toute demande peut être adressée par email à l'adresse de contact du site."
+    },
+    cookieTitle:"Votre choix sur les cookies",
+    cookieText:"Nous utilisons les cookies strictement nécessaires au fonctionnement du site. Les cookies de mesure d'audience ne sont déposés qu'avec votre accord.",
+    seo:{title:"Africa Ingénierie  -  Ingénierie industrielle en Afrique",description:"Africa Ingénierie accompagne les industries africaines en maintenance, installation, formation, fourniture d'équipements et fabrication métallique."},
+    // P1 : une entrée sans URL n'est jamais rendue
+    socials:[{k:"li",name:"LinkedIn",url:"#/contact"},{k:"fb",name:"Facebook",url:"#/contact"},{k:"yt",name:"YouTube",url:""}]
+  },
+
+  // Chiffres  -  une seule source pour tout le site (P3).
+  // `v:null` ou 0 → la statistique n'est jamais affichée (P1).
+  stats:[
+    {v:28,suf:"ans",k:"D'expérience industrielle"},
+    {v:6,suf:"",k:"Domaines d'expertise"},
+    {v:4,suf:"",k:"Pays d'intervention"},
+    {v:null,suf:"%",k:"Gain de productivité"}   // ← non renseigné : masqué
+  ],
+
+  domains:[
+    {slug:"maintenance-industrielle",icon:"wrench",title:"Maintenance industrielle",
+     short:"Maintenance préventive, corrective, prédictive et conditionnelle pour améliorer la disponibilité et la durée de vie de vos équipements.",
+     body:"Nos équipes interviennent sur l'ensemble du cycle de vie de vos équipements industriels. Nous construisons avec vous un plan de maintenance adapté à votre outil de production, à vos contraintes d'exploitation et à la disponibilité réelle des pièces sur le marché local.",
+     points:[["Diagnostic et audit d'installation","État des lieux complet, relevé des points critiques et hiérarchisation des interventions."],["Plan de maintenance préventive","Calendrier d'intervention, gammes opératoires et suivi documenté."],["Maintenance corrective","Intervention rapide sur panne, avec analyse des causes racines."],["Maintenance conditionnelle","Suivi vibratoire, thermographie et analyse d'huile pour anticiper la défaillance."]]},
+    {slug:"installation-mise-en-service",icon:"install",title:"Installation & Mise en service",
+     short:"Montage, essais, mise en service et optimisation d'équipements, de lignes de production et d'unités complètes.",
+     body:"De la réception des équipements à leur exploitation courante, nous pilotons l'installation et la mise en service, en formant vos équipes à la conduite et à l'entretien de première ligne.",
+     points:[["Étude d'implantation","Analyse des flux, des utilités et des contraintes de génie civil."],["Montage mécanique et raccordements","Assemblage, alignement, raccordement électrique et fluides."],["Essais et réception","Protocole d'essais, réglages et procès-verbal de réception."],["Transfert de compétences","Formation des opérateurs à la conduite et à la maintenance courante."]]},
+    {slug:"formation-optimisation",icon:"grad",title:"Formation en optimisation",
+     short:"Renforcement des compétences en maintenance, transmission mécanique, huilerie, transformation de produit et sécurité industrielle.",
+     body:"Nos formations sont conçues à partir de situations réelles rencontrées sur les sites industriels d'Afrique de l'Ouest. Elles alternent apport théorique et travaux pratiques sur équipement.",
+     points:[["Formations sur site","Intervention dans vos ateliers, sur vos propres équipements."],["Parcours sur mesure","Programme construit à partir d'un diagnostic préalable des compétences."],["Sécurité industrielle","Prévention des risques, consignation, travail en hauteur et espaces confinés."],["Évaluation et suivi","Validation des acquis et accompagnement post-formation."]]},
+    {slug:"fourniture-equipements",icon:"box",title:"Fourniture d'équipements",
+     short:"Approvisionnement en équipements, pièces de rechange, consommables et solutions techniques répondant à vos exigences de fiabilité.",
+     body:"Nous sélectionnons et approvisionnons les équipements et pièces adaptés à votre installation, en tenant compte du délai réel d'acheminement et de la disponibilité des pièces d'usure sur la durée.",
+     points:[["Sourcing technique","Choix du matériel selon vos contraintes de procédé et de budget."],["Pièces de rechange","Constitution et gestion d'un stock critique adapté."],["Logistique d'importation","Suivi des délais, dédouanement et livraison sur site."],["Conseil à l'usage","Recommandations de montage, de réglage et d'entretien."]]},
+    {slug:"soudure-chaudronnerie",icon:"weld",title:"Soudure & Chaudronnerie",
+     short:"Fabrication, réparation, assemblage et maintenance de structures métalliques, tuyauteries et équipements industriels.",
+     body:"Notre atelier et nos équipes mobiles réalisent des ouvrages métalliques sur mesure, de la pièce de rechange à la structure monumentale, selon les normes de qualité et de sécurité applicables.",
+     points:[["Chaudronnerie sur mesure","Cuves, trémies, convoyeurs, charpentes et pièces spéciales."],["Tuyauterie industrielle","Préfabrication, pose et raccordement de réseaux."],["Réparation sur site","Intervention d'urgence pour limiter l'arrêt de production."],["Contrôle qualité","Contrôle visuel et essais adaptés à la criticité de l'ouvrage."]]},
+    {slug:"energie-domotique-securite",icon:"bolt",title:"Énergie, Domotique & Sécurité",
+     short:"Conception et intégration de solutions pour la production, la distribution et la gestion intelligente de l'énergie, l'automatisation et la sécurité.",
+     body:"Nous concevons et intégrons les installations électriques, les automatismes et les dispositifs de sécurité de vos bâtiments et unités de production, avec un souci constant de sobriété énergétique.",
+     points:[["Distribution électrique","Tableaux, protections, mise à la terre et conformité."],["Solaire et secours","Dimensionnement de solutions photovoltaïques et de groupes de secours."],["Automatisation","Supervision, régulation et gestion technique du bâtiment."],["Sécurité incendie et surveillance","Détection, extinction et vidéosurveillance."]]}
+  ],
+
+  realisations:[
+    {slug:"sapin-monumental-ekpe",title:"Sapin monumental en acier  -  Ekpè",client:"SONIMEX",year:2025,
+     sector:"Construction métallique",country:"Bénin",domain:"soudure-chaudronnerie",featured:true,
+     summary:"Conception et fabrication d'un sapin lumineux de 9,5 m en acier GKS, installé à Ekpè pour les fêtes de fin d'année 2025.",
+     context:"SONIMEX souhaitait marquer l'espace urbain d'Ekpè par une œuvre lumineuse durable, réalisée localement, plutôt que par une structure importée temporaire.",
+     solution:"Nous avons conçu la structure en acier GKS, dimensionnée pour résister aux charges de vent de la zone côtière, puis assuré la fabrication en atelier, le transport, le montage sur site et le raccordement de l'éclairage.",
+     results:"L'ouvrage a été livré dans les délais pour l'inauguration de décembre 2025 et démontre la capacité de fabrication métallique locale sur des pièces de grande dimension.",
+     metrics:[["9,5 m","Hauteur de l'ouvrage"],["100 %","Fabrication locale"],["4 sem.","Délai de réalisation"]],
+     ba:{before:"Place d'Ekpè avant installation  -  espace urbain nu",after:"Sapin monumental illuminé, vue de nuit"}},
+    {slug:"humidification-egrenage-aic",title:"Système d'humidification en égrenage",client:"AIC",year:2009,
+     sector:"Égrenage du coton",country:"Bénin",domain:"installation-mise-en-service",featured:true,
+     summary:"Conception et installation d'un système d'humidification sur mesure ayant amélioré le taux d'humidité et la qualité de la fibre en sortie d'égrenage.",
+     context:"L'usine subissait une perte de qualité de fibre liée à un taux d'humidité insuffisant au moment de l'égrenage, avec un impact direct sur le classement commercial du coton.",
+     solution:"Nous avons dimensionné et installé un système d'humidification adapté à la ligne existante, avec régulation du débit et points d'injection répartis sur le circuit.",
+     results:"Amélioration mesurable du taux d'humidité en sortie et stabilisation de la qualité de fibre sur la campagne.",
+     metrics:[["2009","Année de mise en service"]],
+     ba:{before:"Ligne d'égrenage avant installation du circuit d'humidification",after:"Circuit d'humidification installé et en fonctionnement"}},
+    {slug:"humidification-ketou-ndali",title:"Systèmes d'humidification  -  Kétou & N'dali",client:"Usines d'égrenage",year:2012,
+     sector:"Égrenage du coton",country:"Bénin",domain:"maintenance-industrielle",featured:true,
+     summary:"Déploiement de systèmes d'humidification sur deux sites d'égrenage, avec adaptation aux contraintes propres à chaque installation.",
+     context:"Après le retour d'expérience du site AIC, deux autres usines ont souhaité équiper leurs lignes, avec des configurations de bâtiment et de débit différentes.",
+     solution:"Étude d'adaptation site par site, fabrication des circuits, installation et réglage en conditions de production.",
+     results:"Les deux installations ont été mises en service sans arrêt prolongé de la production.",
+     metrics:[["2","Sites équipés"]],
+     ba:{before:"Installation de Kétou avant intervention",after:"Circuit d'humidification en service à Kétou"}},
+    {slug:"formations-wacip",title:"Formations internationales  -  WACIP",client:"WACIP",year:2011,
+     sector:"Formation",country:"Mali, Bénin",domain:"formation-optimisation",featured:false,
+     summary:"Animation de sessions de formation technique destinées aux opérateurs et techniciens de la filière coton, au Mali et au Bénin.",
+     context:"Le programme WACIP visait à renforcer les compétences techniques de la filière coton en Afrique de l'Ouest.",
+     solution:"Conception des supports, animation des sessions sur équipement et évaluation des acquis, en français.",
+     results:"Sessions conduites sur plusieurs sites, avec des participants issus de la filière régionale.",
+     metrics:[],
+     ba:null}
+  ],
+
+  projets:[
+    {slug:"explorateurs-ingenierie",title:"Les explorateurs de l'ingénierie",status:"ongoing",
+     start:"2026-08-25",client:"Africa Ingénierie",country:"Bénin",domain:"formation-optimisation",
+     summary:"Programme de découverte des métiers de l'ingénierie destiné aux élèves scolarisés : ateliers pratiques, expérimentation et échanges avec des professionnels du secteur.",
+     body:"Le programme crée un cadre interactif d'apprentissage où les élèves manipulent, observent et échangent avec des ingénieurs en activité. L'objectif est de rendre concrets des métiers souvent méconnus au moment de l'orientation."},
+    {slug:"soiree-bacheliers-002",title:"Soirée des bacheliers  -  édition 002",status:"planned",
+     start:"2026-10-17",client:"Africa Ingénierie",country:"Bénin",domain:"formation-optimisation",
+     summary:"Deuxième édition de la soirée d'orientation dédiée aux élèves de Première et Terminale et aux nouveaux bacheliers.",
+     body:"Après une première édition consacrée à la découverte des métiers d'avenir, cette deuxième édition élargit le format avec des tables rondes par filière et un espace de rencontre avec des écoles d'ingénieurs."}
+  ],
+
+  formations:[
+    {slug:"maintenance-preventive",theme:"maintenance",title:"Maintenance préventive des équipements industriels",
+     duration:"21 h  -  3 jours",format:"Sur site",
+     short:"Construire et appliquer un plan de maintenance préventive adapté à son outil de production.",
+     audience:"Techniciens de maintenance, chefs d'équipe, responsables d'atelier.",
+     prereq:"Expérience pratique en atelier industriel. Aucun prérequis théorique.",
+     objectives:["Identifier les équipements critiques d'une ligne de production","Construire une gamme de maintenance préventive","Planifier et documenter les interventions","Mesurer la disponibilité des équipements"],
+     sessions:[{start:"2026-09-14",loc:"Abomey-Calavi",seats:8},{start:"2026-11-09",loc:"Cotonou",seats:12}]},
+    {slug:"transmission-mecanique",theme:"maintenance",title:"Transmission mécanique et engrenages",
+     duration:"14 h  -  2 jours",format:"Sur site",
+     short:"Comprendre, régler et entretenir les organes de transmission d'une installation industrielle.",
+     audience:"Mécaniciens, techniciens de maintenance.",
+     prereq:"Bases en mécanique générale.",
+     objectives:["Identifier les organes de transmission et leurs modes de défaillance","Réaliser un alignement d'arbres","Sélectionner et appliquer la lubrification adaptée","Diagnostiquer une usure anormale"],
+     sessions:[{start:"2026-10-05",loc:"Abomey-Calavi",seats:10}]},
+    {slug:"securite-industrielle",theme:"securite",title:"Sécurité industrielle et prévention des risques",
+     duration:"14 h  -  2 jours",format:"Sur site ou hybride",
+     short:"Mettre en place les pratiques de sécurité essentielles sur un site de production.",
+     audience:"Ensemble du personnel d'exploitation et d'encadrement.",
+     prereq:"Aucun.",
+     objectives:["Identifier les risques majeurs d'un site industriel","Appliquer une procédure de consignation","Intervenir en hauteur et en espace confiné en sécurité","Réagir face à un départ de feu"],
+     sessions:[{start:"2026-09-28",loc:"Cotonou",seats:15}]}
+  ],
+
+  produits:[
+    {slug:"pieces-rechange-egrenage",cat:"Pièces de rechange",title:"Pièces de rechange  -  lignes d'égrenage",
+     short:"Scies, brosses, grilles et pièces d'usure pour lignes d'égrenage du coton.",avail:"Sur commande  -  délai 4 à 6 semaines",
+     desc:"Nous approvisionnons les pièces d'usure des lignes d'égrenage auprès de fabricants qualifiés, avec vérification des cotes et des matières avant expédition.",
+     specs:[["Compatibilité","Lignes d'égrenage à scies, principaux constructeurs"],["Contrôle","Vérification dimensionnelle avant expédition"],["Délai indicatif","4 à 6 semaines selon référence"]]},
+    {slug:"equipements-humidification",cat:"Équipements de procédé",title:"Systèmes d'humidification",
+     short:"Circuits d'humidification sur mesure pour lignes d'égrenage et de conditionnement.",avail:"Étude sur mesure",
+     desc:"Systèmes conçus et dimensionnés pour votre ligne : points d'injection, régulation du débit et pilotage adaptés à votre configuration de bâtiment.",
+     specs:[["Conception","Sur mesure, après relevé sur site"],["Pilotage","Régulation manuelle ou automatisée"],["Installation","Assurée par nos équipes"]]},
+    {slug:"structures-metalliques",cat:"Construction métallique",title:"Ouvrages métalliques sur mesure",
+     short:"Cuves, trémies, convoyeurs, charpentes et pièces spéciales fabriqués en atelier.",avail:"Sur devis",
+     desc:"Fabrication d'ouvrages métalliques à partir de vos plans ou de notre étude, avec contrôle qualité adapté à la criticité de la pièce.",
+     specs:[["Matières","Acier de construction, inox sur demande"],["Capacité","Pièces de grande dimension (jusqu'à 10 m)"],["Livraison","Transport et montage sur site inclus"]]},
+    {slug:"tableaux-electriques",cat:"Énergie",title:"Tableaux électriques industriels",
+     short:"Tableaux de distribution et armoires de commande assemblés et câblés selon vos schémas.",avail:"Sur devis",
+     desc:"Assemblage et câblage d'armoires de distribution et de commande, avec repérage complet et dossier technique remis à la livraison.",
+     specs:[["Assemblage","Selon vos schémas ou notre étude"],["Documentation","Dossier technique et repérage fournis"],["Essais","Contrôle avant livraison"]]}
+  ],
+
+  evenements:[
+    {slug:"explorateurs-2026",title:"Les explorateurs de l'ingénierie  -  session de rentrée",
+     start:"2026-09-12",type:"Atelier",loc:{name:"Siège Africa Ingénierie",city:"Abomey-Calavi",country:"Bénin"},
+     summary:"Une journée d'ateliers pratiques pour faire découvrir les métiers de l'ingénierie industrielle aux élèves de Première et Terminale.",
+     body:"Au programme : démonstrations en atelier de chaudronnerie, initiation à la lecture de plan, échanges avec des ingénieurs de terrain et présentation des parcours de formation."},
+    {slug:"soiree-bacheliers-002",title:"Soirée des bacheliers  -  édition 002",
+     start:"2026-10-17",type:"Rencontre",loc:{name:"À confirmer",city:"Cotonou",country:"Bénin"},
+     summary:"Rendez-vous d'orientation dédié aux nouveaux bacheliers : tables rondes par filière et rencontre avec des écoles d'ingénieurs.",
+     body:"La deuxième édition élargit le format avec des tables rondes thématiques et un espace dédié aux échanges avec les établissements de formation."},
+    {slug:"soiree-bacheliers-001",title:"Soirée des bacheliers  -  édition 001",
+     start:"2025-09-20",type:"Rencontre",loc:{name:"Abomey-Calavi",city:"Abomey-Calavi",country:"Bénin"},
+     summary:"Première édition de la soirée d'orientation organisée dans le cadre de l'engagement d'Africa Ingénierie en faveur de l'orientation scolaire.",
+     body:"Une première édition consacrée à la découverte des métiers d'avenir et à l'orientation des élèves de Première et Terminale."}
+  ],
+
+  temoignages:[
+    {quote:"Africa Ingénierie est la référence dans ses domaines d'intervention.",
+     name:"Bruno ANANI",role:"Client",company:"",date:"2026-08-13",consent:true}
+  ],
+
+  // Volontairement vide  -  l'audit a établi qu'aucune fiche d'équipe
+  // n'existe sur le site actuel. Démontre l'état vide (P1).
+  equipe:[],
+
+  partenaires:[
+    {name:"SONIMEX",url:"#/realisations/sapin-monumental-ekpe"},
+    {name:"AIC",url:"#/realisations/humidification-egrenage-aic"},
+    {name:"WACIP",url:"#/realisations/formations-wacip"},
+    {name:"Filière coton Bénin",url:""}   // sans URL → rendu non cliquable, jamais de lien mort
+  ],
+
+  dirigeant:{
+    name:"Arnaud DEGLA", role:"Directeur Général",
+    // Titre du message : champ DISTINCT du corps (corrige le titre fusionné)
+    messageTitle:"L'industrialisation durable, moteur de la croissance du Bénin et de l'Afrique",
+    lead:"À l'image des grandes économies qui ont bâti leur prospérité sur une industrie forte et compétitive, l'industrialisation constitue l'un des leviers essentiels de la croissance économique et du développement durable du Bénin et de l'Afrique.",
+    body:["Cette ambition ne pourra devenir pleinement réalité que grâce à une prise de conscience et à une mobilisation collectives. Nous devons renforcer notre capacité à nous approprier l'ingénierie industrielle, à maîtriser nos outils de production et à valoriser durablement nos ressources.","Notre continent dispose d'importantes ressources minières, agricoles et animales. Notre défi est désormais de développer les compétences, les technologies et les infrastructures nécessaires pour les transformer localement en produits à plus forte valeur ajoutée, créer des emplois qualifiés et bâtir des industries africaines performantes.","Africa Ingénierie est née de cette conviction, d'une véritable passion pour l'industrie et de 28 années d'expérience dans des domaines clés : ingénierie des procédés, mécanique, maintenance industrielle et automatisation."]
+  },
+
+  piliers:[
+    {icon:"target",title:"Innovation technique",text:"Répondre à des défis complexes par une ingénierie avancée, conçue pour les contraintes réelles d'exploitation."},
+    {icon:"globe",title:"Expertise locale",text:"Une connaissance approfondie des écosystèmes industriels africains : ressources, logistique, maintenance."},
+    {icon:"layers",title:"Production industrielle",text:"La maîtrise de la chaîne de valeur technique, de l'étude à la mise en service et à l'entretien."}
+  ]
+};
+
+/* Catégories et thèmes  -  libellés lisibles, source unique */
+const CATS = {realisation:"Réalisation",formation:"Formation",maintenance:"Maintenance",innovation:"Innovation",leadership:"Leadership"};
+const THEMES = {maintenance:"Maintenance industrielle",securite:"Sécurité industrielle",leadership:"Leadership industriel",innovation:"Innovation frugale"};
+const STATUS = {planned:["Planifié","warn"],ongoing:["En cours","info"],done:["Achevé","ok"]};
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   3. ÉTAT + OUTILS
+   ═══════════════════════════════════════════════════════════ */
+try{
+  const stored=JSON.parse(localStorage.getItem('ai-site-settings')||'null');
+  if(stored?.site) DB.site={...DB.site,...stored.site,address:{...DB.site.address,...stored.site.address},navigation:{...DB.site.navigation,...stored.site.navigation},languages:{...DB.site.languages,...stored.site.languages},legal:{...DB.site.legal,...stored.site.legal},seo:{...DB.site.seo,...stored.site.seo}};
+}catch(e){}
+try{
+  const published=JSON.parse(localStorage.getItem('ai-published-content')||'null');
+  if(Array.isArray(published?.products)) published.products.forEach(saved=>{
+    const current=DB.produits.find(p=>p.slug===saved.slug);
+    if(current) Object.assign(current,saved);
+    else DB.produits.push(saved);
+  });
+}catch(e){}
+const S = { empty:false, adminSection:'dashboard', formLang:'fr' };
+
+const esc = (s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MONTHS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const fmtDate=(iso)=>{const d=new Date(iso);return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`};
+const fmtShort=(iso)=>{const d=new Date(iso);return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`};
+const isFuture=(iso)=>new Date(iso)>=TODAY;
+
+/* Accès aux données  -  le mode « données absentes » vide tout,
+   pour éprouver en direct le principe P1 (état vide). */
+function D(key){ return S.empty ? (Array.isArray(DB[key])?[]:DB[key]) : DB[key]; }
+
+/* Plaque blueprint  -  remplace une photo. Décrit toujours le visuel attendu. */
+function plate(label,ratio="ratio-43",icon="img",cls=""){
+  return `<div class="plate ${ratio} ${cls}" role="img" aria-label="${esc(label)}">
+    <div class="plate-lbl">${IC[icon](26)}${esc(label)}</div></div>`;
+}
+function crumb(items){
+  return `<nav class="crumb" aria-label="Fil d'Ariane">`+items.map((it,i)=>
+    i===items.length-1 ? `<span aria-current="page">${esc(it[0])}</span>`
+    : `<a href="${it[1]}">${esc(it[0])}</a><span aria-hidden="true">›</span>`).join('')+`</nav>`;
+}
+function pageHero(eyebrow,title,intro,crumbs){
+  return `<section class="pagehero bp"><div class="wrap stack g16">
+    ${crumbs?crumb(crumbs):''}
+    <p class="eyebrow on-brand" style="margin:6px 0 0">${esc(eyebrow)}</p>
+    <h1 class="h1">${esc(title)}</h1>
+    ${intro?`<p class="lead measure" style="color:var(--on-brand-soft)">${esc(intro)}</p>`:''}
+  </div></section>`;
+}
+function emptyState(title,text,ctaLabel,ctaHref,icon="inbox"){
+  return `<div class="empty">
+    <div class="ic">${IC[icon](26)}</div>
+    <div class="stack g8"><h3 class="h3">${esc(title)}</h3>
+    <p class="body measure" style="margin-inline:auto">${esc(text)}</p></div>
+    ${ctaLabel?`<a class="btn btn-outline btn-sm" href="${ctaHref}">${esc(ctaLabel)}</a>`:''}</div>`;
+}
+function sectionHead(eyebrow,title,intro,link){
+  return `<div class="between" style="align-items:flex-end;margin-bottom:40px">
+    <div class="stack" style="max-width:640px">
+      <p class="eyebrow">${esc(eyebrow)}</p>
+      <h2 class="h2">${esc(title)}</h2>
+      ${intro?`<p class="lead" style="margin-top:14px">${esc(intro)}</p>`:''}
+    </div>
+    ${link?`<a class="tlink" href="${link[1]}">${esc(link[0])} ${IC.arrow(17)}</a>`:''}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   4. NAVIGATION  -  source unique en-tête + pied de page (P3)
+      Chaque entrée a une URL réelle (P2) : jamais href="#"
+   ═══════════════════════════════════════════════════════════ */
+function siteNav(){
+  const n=DB.site.navigation||{};
+  return [[n.home||"Accueil","#/"],[n.expertises||"Expertises","#/expertises"],[n.realisations||"Réalisations","#/realisations"],
+    [n.formations||"Formations & événements","#/formations"],[n.produits||"Produits","#/produits"],[n.about||"À propos","#/a-propos"]];
+}
+
+function header(route){
+  const cur=(h)=> (h==="#/" ? route==="/" : route.startsWith(h.slice(1))) ? ' aria-current="page"' : '';
+  return `<header class="site-hd"><div class="wrap hd-in">
+    <a class="brandmark" href="#/" aria-label="${esc(DB.site.name)}  -  accueil">
+      <span class="mk">${IC.gear(22)}</span>
+      <span><span class="nm">${esc(DB.site.name)}</span><br><span class="tg">Ingénierie industrielle</span></span>
+    </a>
+    <nav class="mainnav" aria-label="Navigation principale">
+      ${siteNav().map(([l,h])=>`<a href="${h}"${cur(h)}>${esc(l)}</a>`).join('')}
+    </nav>
+    <div class="hd-tools">
+      <div class="lang" role="group" aria-label="Langue">
+        <button type="button" aria-pressed="true">FR</button>
+        <button type="button" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn btn-brand btn-sm" href="#/contact">${esc(DB.site.navigation?.contact||"Contact")}</a>
+      <button class="icon-btn burger" type="button" id="burger" aria-label="Ouvrir le menu" aria-expanded="false">${IC.menu(20)}</button>
+    </div>
+  </div>
+  <div id="mobnav" style="border-top:1px solid var(--line-soft);background:var(--ground)">
+    <div class="wrap stack g8" style="padding:18px 0 24px">
+      <div class="lang" role="group" aria-label="Langue" style="display:flex;align-self:flex-start;margin-bottom:6px">
+        <button type="button" aria-pressed="true">FR</button>
+        <button type="button" aria-pressed="false">EN</button>
+      </div>
+      ${siteNav().map(([l,h])=>`<a href="${h}" style="padding:13px 4px;font-weight:600;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line-soft)">${esc(l)}</a>`).join('')}
+      <a class="btn btn-brand" href="#/contact" style="margin-top:14px">${esc(DB.site.navigation?.contact||"Contact")}</a>
+    </div>
+  </div></header>`;
+}
+
+function footer(){
+  const s=DB.site;
+  const socials=s.socials.filter(x=>x.url);            // P1 : sans URL → non rendu
+  const doms=DB.domains.slice(0,6);
+  return `<footer class="site-ft"><div class="wrap">
+    <div class="ft-grid">
+      <div class="stack g20">
+        <a class="brandmark" href="#/" style="color:#fff">
+          <span class="mk" style="background:rgba(255,255,255,.12)">${IC.gear(22)}</span>
+          <span><span class="nm" style="color:#fff">${esc(DB.site.name)}</span><br>
+          <span class="tg">Ingénierie industrielle</span></span>
+        </a>
+        <p style="font-size:14.5px;line-height:1.65;max-width:38ch;margin-top:16px">${esc(s.baseline)}</p>
+        ${socials.length?`<div class="soc" style="margin-top:18px">${socials.map(x=>
+          `<a href="${x.url}" aria-label="${esc(x.name)}">${IC[x.k](17)}</a>`).join('')}</div>`:''}
+      </div>
+      <div><h3 class="ft-h">Navigation</h3><ul class="ft-list">
+        ${siteNav().map(([l,h])=>`<li><a href="${h}">${esc(l)}</a></li>`).join('')}
+        <li><a href="#/contact">${esc(DB.site.navigation?.contact||"Contact")}</a></li></ul></div>
+      <div><h3 class="ft-h">Domaines</h3><ul class="ft-list">
+        ${doms.map(d=>`<li><a href="#/expertises/${d.slug}">${esc(d.title)}</a></li>`).join('')}</ul></div>
+      <div><h3 class="ft-h">Nous joindre</h3><ul class="ft-list">
+        <li style="display:flex;gap:10px">${IC.pin(17)}<span>${esc(s.address.l1)}<br>${esc(s.address.l2)}, ${esc(s.address.country)}</span></li>
+        <li style="display:flex;gap:10px">${IC.phone(17)}<a href="tel:${s.phoneRaw}">${esc(s.phone)}</a></li>
+        <li style="display:flex;gap:10px">${IC.mail(17)}<a href="mailto:${s.email}">${esc(s.email)}</a></li>
+        <li style="display:flex;gap:10px">${IC.wa(17)}<a href="#/contact">WhatsApp</a></li>
+      </ul></div>
+    </div>
+    <div class="ft-bar">
+        <span>© <span class="num">${new Date().getFullYear()}</span> ${esc(DB.site.name)}. Tous droits réservés.</span>
+      <span class="row" style="gap:20px">
+        <a href="#/mentions-legales">Mentions légales</a>
+        <a href="#/confidentialite">Politique de confidentialité</a>
+        <a href="#/confidentialite">Cookies</a>
+      </span>
+    </div>
+  </div></footer>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   5. COMPOSANTS DE CONTENU
+   ═══════════════════════════════════════════════════════════ */
+function statsBlock(dark=false){
+  // P1 : une valeur nulle, vide ou égale à 0 n'est jamais rendue.
+  const list=(S.empty?[]:DB.stats).filter(s=>s.v!==null&&s.v!==undefined&&s.v!==0&&s.v!=='');
+  if(!list.length) return '';            // aucune valeur réelle → section absente
+  return `<div class="grid c4">${list.map(s=>`<div class="stat${dark?'':''}">
+    <span class="v"><span data-count="${s.v}">${s.v}</span>${s.suf?`<sup>${esc(s.suf)}</sup>`:''}</span>
+    <span class="k">${esc(s.k)}</span></div>`).join('')}</div>`;
+}
+function domainCard(d){
+  return `<a class="card ruled card-pad stack g16" href="#/expertises/${d.slug}">
+    <span style="width:52px;height:52px;border-radius:13px;background:var(--brand-100);color:var(--brand);display:grid;place-items:center">${IC[d.icon](25)}</span>
+    <h3 class="h3">${esc(d.title)}</h3>
+    <p class="body" style="flex:1">${esc(d.short)}</p>
+    <span class="tlink" style="pointer-events:none">Découvrir ${IC.arrow(16)}</span></a>`;
+}
+function realCard(r){
+  return `<a class="card ruled" href="#/realisations/${r.slug}">
+    ${plate(`Photo de réalisation  -  ${r.title}`,'ratio-43')}
+    <div class="card-pad stack g12" style="flex:1">
+      <div class="row" style="gap:8px"><span class="pill">${esc(r.sector)}</span><span class="pill outline num">${r.year}</span></div>
+      <h3 class="h3">${esc(r.title)}</h3>
+      <p class="body" style="flex:1">${esc(r.summary)}</p>
+      <span class="tlink" style="pointer-events:none">Voir la réalisation ${IC.arrow(16)}</span>
+    </div></a>`;
+}
+function projCard(p){
+  const [lbl,tone]=STATUS[p.status];
+  return `<a class="card ruled" href="#/projets/${p.slug}">
+    ${plate(`Photo de projet  -  ${p.title}`,'ratio-169')}
+    <div class="card-pad stack g12" style="flex:1">
+      <span class="pill ${tone}"><span class="dot"></span>${esc(lbl)}</span>
+      <h3 class="h3">${esc(p.title)}</h3>
+      <p class="body" style="flex:1">${esc(p.summary)}</p>
+      <span class="tlink" style="pointer-events:none">Détail du projet ${IC.arrow(16)}</span>
+    </div></a>`;
+}
+function formCard(f){
+  const next=f.sessions.filter(s=>isFuture(s.start)).sort((a,b)=>a.start<b.start?-1:1)[0];
+  return `<a class="card ruled card-pad stack g12" href="#/formations/${f.slug}">
+    <span class="pill">${esc(THEMES[f.theme]||f.theme)}</span>
+    <h3 class="h3">${esc(f.title)}</h3>
+    <p class="body" style="flex:1">${esc(f.short)}</p>
+    <div class="stack g8" style="border-top:1px solid var(--line-soft);padding-top:14px">
+      <span class="small row" style="gap:8px">${IC.clock(15)} ${esc(f.duration)}</span>
+      ${next?`<span class="small row" style="gap:8px;color:var(--brand-600);font-weight:600">${IC.cal(15)} Prochaine session : ${fmtDate(next.start)}</span>`
+            :`<span class="small row" style="gap:8px">${IC.cal(15)} Prochaine session à programmer</span>`}
+    </div></a>`;
+}
+function prodCard(p){
+  return `<a class="card ruled" href="#/produits/${p.slug}">
+    ${plate(`Photo produit  -  ${p.title}`,'ratio-43')}
+    <div class="card-pad stack g10" style="flex:1">
+      <span class="pill neutral">${esc(p.cat)}</span>
+      <h3 class="h3" style="margin-top:4px">${esc(p.title)}</h3>
+      <p class="body" style="flex:1">${esc(p.short)}</p>
+      <span class="small" style="color:var(--ink-500)">${esc(p.avail)}</span>
+    </div></a>`;
+}
+function newsCard(a){
+  return `<a class="card ruled" href="#/actualites/${a.slug}">
+    ${plate(`Illustration  -  ${a.title}`,'ratio-169')}
+    <div class="card-pad stack g10" style="flex:1">
+      <div class="row" style="gap:10px">
+        <span class="pill">${esc(CATS[a.cat]||a.cat)}</span>
+        <time class="small num" datetime="${a.date}">${fmtDate(a.date)}</time>
+      </div>
+      <h3 class="h3">${esc(a.title)}</h3>
+      <p class="body" style="flex:1">${esc(a.excerpt)}</p>
+      <span class="tlink" style="pointer-events:none">Lire l'article ${IC.arrow(16)}</span>
+    </div></a>`;
+}
+function evtCard(e,past=false){
+  return `<a class="card ruled card-pad stack g14" href="#/evenements/${e.slug}" ${past?'style="opacity:.72"':''}>
+    <div class="row" style="gap:10px">
+      <span class="pill ${past?'neutral':'red'}">${esc(e.type)}</span>
+      <time class="small num" datetime="${e.start}">${fmtDate(e.start)}</time>
+    </div>
+    <h3 class="h3">${esc(e.title)}</h3>
+    <p class="body" style="flex:1">${esc(e.summary)}</p>
+    <span class="small row" style="gap:8px">${IC.pin(15)} ${esc(e.loc.city)}, ${esc(e.loc.country)}</span></a>`;
+}
+function beforeAfter(ba,label){
+  if(!ba) return '';
+  return `<figure class="ba" style="margin:0">
+    <div class="ba-imgs">
+      ${plate(ba.before,'','img')}
+      <div class="ba-after" style="position:absolute;inset:0">${plate(ba.after,'','img')}</div>
+      <span class="ba-tag" style="left:14px">AVANT</span>
+      <span class="ba-tag" style="right:14px">APRÈS</span>
+      <input class="ba-range" type="range" min="0" max="100" value="50"
+        aria-label="Comparer avant et après  -  utilisez les flèches du clavier"
+        oninput="this.closest('.ba').querySelector('.ba-after').style.setProperty('--pos',this.value+'%')">
+    </div>
+    <figcaption class="small" style="padding:14px 16px;border-top:1px solid var(--line)">${esc(label)}</figcaption>
+  </figure>`;
+}
+function ctaBand(title,text,btn,href){
+  return `<section class="sec brand bp"><div class="wrap stack g24" style="text-align:center;align-items:center">
+    <p class="eyebrow on-brand" style="justify-content:center">Prêt à collaborer ?</p>
+    <h2 class="h2" style="color:#fff;max-width:20ch">${esc(title)}</h2>
+    <p class="lead measure" style="color:var(--on-brand-soft)">${esc(text)}</p>
+    <div class="row actions" style="justify-content:center;margin-top:8px">
+      <a class="btn btn-primary" href="${href}">${esc(btn)} ${IC.arrow(17)}</a>
+      <a class="btn btn-ghost-light" href="#/contact">${IC.wa(17)} Écrire sur WhatsApp</a>
+    </div></div></section>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   6. PAGES PUBLIQUES
+   ═══════════════════════════════════════════════════════════ */
+const V = {};
+
+V.home = ()=>{
+  const doms=D('domains'), reals=D('realisations').filter(r=>r.featured),
+        temo=D('temoignages').filter(t=>t.consent),
+        parts=D('partenaires'), forms=D('formations'), dg=DB.dirigeant,
+        upcoming=D('evenements').filter(e=>isFuture(e.start)).sort((a,b)=>a.start<b.start?-1:1),
+        nextEvt=upcoming[0], stats=statsBlock();
+
+  return `
+  <!-- ── Hero ─────────────────────────────────────────── -->
+  <section style="background:var(--ground);padding-block:72px 0;overflow:hidden">
+    <div class="wrap">
+      <div class="split" style="align-items:center;gap:56px">
+        <div class="stack g24 reveal">
+          <p class="eyebrow">L'excellence industrielle au service du développement africain</p>
+          <h1 class="d1">Des solutions d'ingénierie <span class="serif-it" style="color:var(--brand)">fiables</span> pour une industrie africaine performante.</h1>
+          <p class="lead measure">Maintenance, installation, formation et équipements industriels  -  conçus pour les contraintes réelles d'exploitation en Afrique de l'Ouest.</p>
+          <div class="row actions" style="margin-top:8px">
+            <a class="btn btn-primary" href="#/contact">Demander un diagnostic ${IC.arrow(17)}</a>
+            <a class="btn btn-outline" href="#/expertises">Découvrir nos expertises</a>
+          </div>
+          ${stats?`<div class="grid c3" style="margin-top:40px;padding-top:32px;border-top:1px solid var(--line);gap:20px">
+            ${(DB.stats.filter(s=>s.v).slice(0,3)).map(s=>`<div class="stat dark">
+              <span class="v" style="font-size:clamp(30px,3.2vw,40px)"><span data-count="${s.v}">${s.v}</span>${s.suf?`<sup>${esc(s.suf)}</sup>`:''}</span>
+              <span class="k">${esc(s.k)}</span></div>`).join('')}</div>`:''}
+        </div>
+        <div class="stack g20 reveal">
+          ${plate("Photo de terrain  -  intervention de maintenance sur ligne de production",'ratio-43','wrench','')}
+          ${nextEvt?`<a class="card card-pad-sm ruled row nowrap" href="#/evenements/${nextEvt.slug}" style="gap:14px;align-items:center">
+            <span style="width:46px;height:46px;border-radius:11px;background:var(--accent-50);color:var(--accent-700);display:grid;place-items:center;flex:none">${IC.cal(21)}</span>
+            <span class="stack g4" style="flex:1;min-width:0">
+              <span class="tiny" style="font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-700)">Prochain événement</span>
+              <span class="h4" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nextEvt.title)}</span>
+              <span class="small num">${fmtDate(nextEvt.start)}</span></span>
+            ${IC.arrow(18)}</a>`:''}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Bande de confiance ───────────────────────────── -->
+  ${parts.length>=2?`<section class="sec-sm" style="padding-block:52px"><div class="wrap">
+    <p class="tiny" style="text-align:center;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:26px">Ils nous font confiance</p>
+    <div class="row" style="justify-content:center;gap:14px">
+      ${parts.map(p=>{
+        const inner=`<span style="font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.02em">${esc(p.name)}</span>`;
+        return p.url
+          ? `<a href="${p.url}" class="card card-pad-sm" style="padding:14px 26px;color:var(--ink-500);text-decoration:none">${inner}</a>`
+          : `<span class="card card-pad-sm" style="padding:14px 26px;color:var(--ink-400)">${inner}</span>`;
+      }).join('')}
+    </div></div></section>`:''}
+
+  <!-- ── Qui sommes-nous ──────────────────────────────── -->
+  <section class="sec tint"><div class="wrap"><div class="split">
+    <div class="stack g20 reveal">
+      <p class="eyebrow">Qui sommes-nous</p>
+      <h2 class="h2">Une ingénierie conçue en Afrique, pour les réalités africaines.</h2>
+      <p class="lead">Africa Ingénierie accompagne les unités de production dans la maintenance, la modernisation et l'optimisation de leurs équipements  -  en tenant compte des ressources locales, des contraintes logistiques et de la maîtrise des coûts.</p>
+      <a class="tlink" href="#/a-propos" style="margin-top:6px">En savoir plus sur l'entreprise ${IC.arrow(17)}</a>
+    </div>
+    <div class="grid" style="gap:16px" class="reveal">
+      ${DB.piliers.map(p=>`<div class="card card-pad row" style="gap:16px;align-items:flex-start">
+        <span style="width:44px;height:44px;border-radius:11px;background:var(--brand-100);color:var(--brand);display:grid;place-items:center;flex:none">${IC[p.icon](21)}</span>
+        <span class="stack g4"><span class="h4">${esc(p.title)}</span><span class="small">${esc(p.text)}</span></span>
+      </div>`).join('')}
+    </div>
+  </div></div></section>
+
+  <!-- ── Expertises ───────────────────────────────────── -->
+  <section class="sec"><div class="wrap">
+    ${sectionHead("Nos expertises","Six domaines, une même exigence technique.",
+      "Des solutions fiables pour optimiser vos opérations industrielles, de l'étude à la mise en service.",
+      ["Tous nos domaines","#/expertises"])}
+    ${doms.length
+      ? `<div class="grid c3 reveal">${doms.map(domainCard).join('')}</div>`
+      : emptyState("Domaines en cours de publication","Les domaines d'expertise seront publiés depuis le tableau de bord.","Nous contacter","#/contact","layers")}
+  </div></section>
+
+  <!-- ── Produits & équipements ─────────────────────── -->
+  <section class="sec tint"><div class="wrap">
+    ${sectionHead("Produits & équipements","Des solutions concrètes pour vos installations.",
+      "Équipements, pièces de rechange et solutions sélectionnés pour leur fiabilité et leur disponibilité.",
+      ["Voir tous les produits","#/produits"])}
+    ${D('produits').length
+      ? `<div class="grid c3 reveal">${D('produits').slice(0,3).map(prodCard).join('')}</div>`
+      : emptyState("Catalogue en cours de constitution","Les produits seront publiés depuis le tableau de bord.","Demander un devis","#/contact","box")}
+  </div></section>
+
+  <!-- ── Chiffres (masqué si aucune valeur réelle) ────── -->
+  ${stats?`<section class="sec brand bp"><div class="wrap">
+    <div class="between" style="align-items:flex-end;margin-bottom:44px">
+      <div class="stack"><p class="eyebrow on-brand">En chiffres</p>
+      <h2 class="h2" style="color:#fff">Une expérience mesurable.</h2></div>
+    </div>${stats}</div></section>`:''}
+
+  <!-- ── Réalisations ─────────────────────────────────── -->
+  <section class="sec"><div class="wrap">
+    ${sectionHead("Nos réalisations","La preuve par le terrain.",
+      "Des interventions documentées, avec leur contexte, la solution mise en œuvre et le résultat obtenu.",
+      ["Toutes les réalisations","#/realisations"])}
+    ${reals.length
+      ? `<div class="grid c3 reveal">${reals.map(realCard).join('')}</div>`
+      : emptyState("Aucune réalisation publiée","Les études de cas sont publiées au fil des chantiers livrés.","Discuter d'un projet","#/contact","layers")}
+  </div></section>
+
+  <!-- ── Formations & événements ─────────────────────── -->
+  <section class="sec tint"><div class="wrap">
+    ${sectionHead("Formations & événements","Développer les compétences et les échanges qui font progresser vos installations.",
+      "Des programmes pratiques et des rendez-vous professionnels pour relier les savoirs techniques aux situations réelles de production.",
+      ["Voir le calendrier","#/formations"])}
+    ${forms.length
+      ? `<div class="grid c3 reveal">${forms.slice(0,3).map(formCard).join('')}</div>`
+      : emptyState("Catalogue en préparation","Les prochains programmes seront publiés depuis l'espace d'administration.","Nous contacter","#/contact","grad")}
+    <div class="stack g20" style="margin-top:48px">
+      <div class="between" style="align-items:flex-end"><div class="stack g8"><p class="eyebrow">Rendez-vous à venir</p><h3 class="h3">Partager les pratiques, faire avancer les projets.</h3></div><a class="tlink" href="#/evenements">Voir les événements ${IC.arrow(16)}</a></div>
+      ${upcoming.length?`<div class="grid c3">${upcoming.slice(0,3).map(e=>evtCard(e)).join('')}</div>`:emptyState("Événements en préparation","Les prochains rendez-vous seront publiés depuis le tableau de bord.","Nous contacter","#/contact","cal")}
+    </div>
+  </div></section>
+
+  <!-- ── Mot du dirigeant ─────────────────────────────── -->
+  <section class="sec tint"><div class="wrap"><div class="split" style="gap:56px">
+    <div class="reveal">${plate("Portrait  -  Arnaud DEGLA, Directeur Général",'ratio-32','users')}</div>
+    <div class="stack g20 reveal">
+      <p class="eyebrow">Leadership</p>
+      <!-- Titre du message : élément distinct, jamais fusionné au corps -->
+      <h2 class="h2">${esc(dg.messageTitle)}</h2>
+      <p class="lead">${esc(dg.lead)}</p>
+      <p class="body">${esc(dg.body[0])}</p>
+      <div class="row" style="gap:14px;margin-top:12px;padding-top:22px;border-top:1px solid var(--line)">
+        <span class="stack g4">
+          <span class="h4">${esc(dg.name)}</span>
+          <span class="small">${esc(dg.role)}</span>
+        </span>
+        <a class="tlink" href="#/a-propos" style="margin-left:auto">Lire le message complet ${IC.arrow(16)}</a>
+      </div>
+    </div>
+  </div></div></section>
+
+  <!-- ── Témoignages (absent si aucun témoignage consenti) ── -->
+  ${temo.length?`<section class="sec"><div class="wrap">
+    ${sectionHead("Témoignages","La parole à nos clients.","")}
+    <div class="grid c${Math.min(temo.length,3)}">
+      ${temo.map(t=>`<figure class="card card-pad stack g18" style="margin:0">
+        <span style="color:var(--brand-100)">${IC.quote(30)}</span>
+        <blockquote class="serif-it" style="font-size:21px;line-height:1.45;color:var(--ink);margin:0">« ${esc(t.quote)} »</blockquote>
+        <figcaption class="row" style="gap:12px;margin-top:auto;padding-top:18px;border-top:1px solid var(--line-soft)">
+          <span class="avatar">${esc(t.name.charAt(0))}</span>
+          <span class="stack g4"><span class="h4">${esc(t.name)}</span>
+          <span class="tiny num">${esc(t.role)}${t.company?' · '+esc(t.company):''}  -  ${fmtDate(t.date)}</span></span>
+        </figcaption></figure>`).join('')}
+    </div></div></section>`:''}
+
+  ${ctaBand("Parlons de la solution la plus utile à votre activité.",
+    "Décrivez-nous votre installation et vos contraintes : nous revenons vers vous sous 24 h ouvrées avec une première lecture technique.",
+    "Parler à un ingénieur","#/contact")}`;
+};
+
+V.about = ()=>{
+  const dg=DB.dirigeant, eq=D('equipe'), stats=statsBlock();
+  return `
+  ${pageHero("Qui sommes-nous","Une entreprise d'ingénierie née d'une conviction industrielle.",
+    "Africa Ingénierie conçoit, installe et entretient des solutions techniques adaptées aux réalités du marché africain.",
+    [["Accueil","#/"],["À propos"]])}
+
+  <section class="sec"><div class="wrap"><div class="split">
+    <div class="stack g20">
+      <p class="eyebrow">Notre identité</p>
+      <h2 class="h2">Concevoir, produire et accompagner  -  localement.</h2>
+      <p class="lead">Nous sommes spécialisés dans la conception, la production et la commercialisation de solutions techniques et industrielles innovantes, adaptées aux réalités du marché africain.</p>
+      <p class="body">Notre approche conjugue innovation, expertise locale et standards internationaux, pour des solutions durables et réellement exploitables dans la durée : disponibilité des pièces, contraintes logistiques et maîtrise des coûts font partie de l'étude, pas de l'après-coup.</p>
+    </div>
+    <div>${plate("Photo d'équipe  -  atelier de chaudronnerie",'ratio-43','users')}</div>
+  </div></div></section>
+
+  <section class="sec tint"><div class="wrap">
+    ${sectionHead("Nos piliers","Trois fondations, une même méthode.","")}
+    <div class="grid c3">${DB.piliers.map(p=>`<div class="card card-pad stack g16">
+      <span style="width:52px;height:52px;border-radius:13px;background:var(--brand-100);color:var(--brand);display:grid;place-items:center">${IC[p.icon](25)}</span>
+      <h3 class="h3">${esc(p.title)}</h3><p class="body">${esc(p.text)}</p></div>`).join('')}</div>
+  </div></section>
+
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px">
+    <div>${plate("Portrait  -  Arnaud DEGLA, Directeur Général",'ratio-32','users')}</div>
+    <div class="stack g18">
+      <p class="eyebrow">Le mot du dirigeant</p>
+      <h2 class="h2">${esc(dg.messageTitle)}</h2>
+      <p class="lead">${esc(dg.lead)}</p>
+      ${dg.body.map(p=>`<p class="body">${esc(p)}</p>`).join('')}
+      <div class="row" style="gap:14px;margin-top:10px;padding-top:20px;border-top:1px solid var(--line)">
+        <span class="avatar" style="width:44px;height:44px">AD</span>
+        <span class="stack g4"><span class="h4">${esc(dg.name)}</span><span class="small">${esc(dg.role)}</span></span>
+      </div>
+    </div>
+  </div></div></section>
+
+  ${stats?`<section class="sec brand bp"><div class="wrap">
+    <div class="stack" style="margin-bottom:44px"><p class="eyebrow on-brand">En chiffres</p>
+    <h2 class="h2" style="color:#fff">Ce que nous pouvons démontrer.</h2></div>${stats}</div></section>`:''}
+
+  <section class="sec"><div class="wrap">
+    ${sectionHead("Équipe dirigeante","Les femmes et les hommes derrière l'entreprise.","")}
+    ${eq.length
+      ? `<div class="grid c4">${eq.map(m=>`<div class="card">${plate(`Portrait  -  ${m.name}`,'ratio-11','users')}
+          <div class="card-pad-sm stack g4"><span class="h4">${esc(m.name)}</span><span class="small">${esc(m.role)}</span></div></div>`).join('')}</div>`
+      : emptyState("Fiches de direction en cours de préparation",
+          "Les fiches des membres de la direction seront publiées depuis le tableau de bord. En attendant, aucune section incomplète n'est affichée au public.",
+          "Nous contacter","#/contact","users")}
+  </div></section>
+
+  ${ctaBand("Construisons ensemble l'avenir technique de l'Afrique.",
+    "Un projet, un besoin de diagnostic ou une question technique : notre équipe vous répond.",
+    "Nous écrire","#/contact")}`;
+};
+</script>
+<script>
+/* Filtres  -  état réel, en paramètre de vue (indexable en production) */
+S.f = {real:'all',form:'all',prod:'all',news:'all',proj:'all'};
+function setFilter(k,v){ S.f[k]=v; render(); }
+
+function filterBar(key,opts,current){
+  return `<div class="filters" role="group" aria-label="Filtrer">
+    <span class="small row" style="gap:7px;color:var(--ink-500);margin-right:4px">${IC.filter(15)} Filtrer</span>
+    <button class="chip" aria-pressed="${current==='all'}" onclick="setFilter('${key}','all')">Tout</button>
+    ${opts.map(([v,l])=>`<button class="chip" aria-pressed="${current===v}" onclick="setFilter('${key}','${v}')">${esc(l)}</button>`).join('')}
+  </div>`;
+}
+function notFound(kind,href,label){
+  return emptyState("Aucun résultat pour ce filtre",
+    `Aucun ${kind} ne correspond au filtre sélectionné. Essayez un autre filtre ou consultez l'ensemble.`,
+    label,href,"search");
+}
+
+/* ── EXPERTISES ────────────────────────────────────────── */
+V.expertises = ()=>{
+  const doms=D('domains');
+  return `${pageHero("Nos expertises","Six domaines d'activité, une même exigence.",
+    "Nous intervenons sur l'ensemble du cycle de vie de vos équipements industriels  -  de l'étude à l'entretien courant.",
+    [["Accueil","#/"],["Expertises"]])}
+  <section class="sec"><div class="wrap">
+    ${doms.length
+      ? `<div class="grid c3">${doms.map(domainCard).join('')}</div>`
+      : emptyState("Domaines en cours de publication","Les domaines d'expertise sont administrés depuis le tableau de bord.","Nous contacter","#/contact","layers")}
+  </div></section>
+  <section class="sec tint"><div class="wrap"><div class="grid c3">
+    ${[["target","Diagnostic d'abord","Nous commençons par un relevé sur site : aucune recommandation sans état des lieux."],
+       ["globe","Expertise africaine","Des solutions dimensionnées pour la disponibilité réelle des pièces et de l'énergie."],
+       ["shield","Sécurité intégrée","Chaque intervention intègre les règles de consignation et de prévention des risques."]]
+      .map(([i,t,x])=>`<div class="stack g14">
+        <span style="width:48px;height:48px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--brand);display:grid;place-items:center">${IC[i](23)}</span>
+        <h3 class="h3">${esc(t)}</h3><p class="body">${esc(x)}</p></div>`).join('')}
+  </div></div></section>
+  ${ctaBand("Un besoin qui traverse plusieurs domaines ?","Décrivez votre installation : nous identifions les expertises à mobiliser.","Demander un diagnostic","#/contact")}`;
+};
+
+V.expertiseDetail = (slug)=>{
+  const d=DB.domains.find(x=>x.slug===slug);
+  if(!d) return V.e404();
+  const reals=D('realisations').filter(r=>r.domain===slug);
+  const forms=D('formations').filter(f=>DB.domains.find(dd=>dd.slug===slug) && f.theme && slug.includes(f.theme.slice(0,5)));
+  return `${pageHero("Domaine d'expertise",d.title,d.short,
+    [["Accueil","#/"],["Expertises","#/expertises"],[d.title]])}
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="stack g20">
+      <p class="body" style="font-size:17px">${esc(d.body)}</p>
+      <h2 class="h3" style="margin-top:20px">Ce que nous couvrons</h2>
+      <div class="stack g12">${d.points.map(([t,x])=>`<div class="row" style="gap:14px;align-items:flex-start">
+        <span style="width:26px;height:26px;border-radius:50%;background:var(--brand-100);color:var(--brand);display:grid;place-items:center;flex:none;margin-top:2px">${IC.check(15)}</span>
+        <span class="stack g4"><span class="h4">${esc(t)}</span><span class="small">${esc(x)}</span></span></div>`).join('')}</div>
+    </div>
+    <aside class="stack g20">
+      ${plate(`Photo d'intervention  -  ${d.title}`,'ratio-43',d.icon)}
+      <div class="card card-pad stack g14">
+        <h3 class="h4">Discuter d'un projet en ${esc(d.title.toLowerCase())}</h3>
+        <p class="small">Un premier échange technique de 30 minutes, sans engagement.</p>
+        <a class="btn btn-primary btn-block" href="#/contact">Demander un diagnostic ${IC.arrow(16)}</a>
+      </div>
+    </aside>
+  </div></div></section>
+  ${reals.length?`<section class="sec tint"><div class="wrap">
+    ${sectionHead("Réalisations liées",`Ce domaine en application.`,"",["Toutes les réalisations","#/realisations"])}
+    <div class="grid c3">${reals.map(realCard).join('')}</div></div></section>`:''}
+  ${forms.length?`<section class="sec"><div class="wrap">
+    ${sectionHead("Formations liées","Monter en compétence sur ce domaine.","",["Catalogue complet","#/formations"])}
+    <div class="grid c3">${forms.map(formCard).join('')}</div></div></section>`:''}
+  <section class="sec-sm"><div class="wrap"><div class="grid c3">
+    ${DB.domains.filter(x=>x.slug!==slug).slice(0,3).map(domainCard).join('')}
+  </div></div></section>`;
+};
+
+/* ── RÉALISATIONS ──────────────────────────────────────── */
+V.realisations = ()=>{
+  const all=D('realisations');
+  const sectors=[...new Set(DB.realisations.map(r=>r.sector))].map(s=>[s,s]);
+  const list = S.f.real==='all'?all:all.filter(r=>r.sector===S.f.real);
+  return `${pageHero("Nos réalisations","Des transformations industrielles documentées.",
+    "Chaque étude de cas présente le contexte, la solution mise en œuvre et le résultat obtenu.",
+    [["Accueil","#/"],["Réalisations"]])}
+  <section class="sec"><div class="wrap stack g32">
+    ${filterBar('real',sectors,S.f.real)}
+    ${all.length===0
+      ? emptyState("Aucune réalisation publiée","Les études de cas sont publiées au fil des chantiers livrés.","Discuter d'un projet","#/contact","layers")
+      : list.length
+        ? `<div class="grid c3">${list.map(realCard).join('')}</div>`
+        : notFound("projet","#/realisations","Voir toutes les réalisations")}
+  </div></section>
+  ${ctaBand("Un projet similaire ?","Parlons de votre installation et des résultats que vous visez.","Nous écrire","#/contact")}`;
+};
+
+V.realisationDetail = (slug)=>{
+  const r=DB.realisations.find(x=>x.slug===slug);
+  if(!r) return V.e404();
+  const dom=DB.domains.find(d=>d.slug===r.domain);
+  const similar=DB.realisations.filter(x=>x.sector===r.sector&&x.slug!==slug).slice(0,3);
+  return `${pageHero("Réalisation",r.title,r.summary,
+    [["Accueil","#/"],["Réalisations","#/realisations"],[r.title]])}
+  <section class="sec-sm" style="border-bottom:1px solid var(--line)"><div class="wrap">
+    <div class="grid c4" style="gap:24px">
+      ${[["Client",r.client],["Année",String(r.year)],["Secteur",r.sector],["Pays",r.country]]
+        .map(([k,v])=>`<div class="stack g4"><span class="tiny" style="font-weight:800;letter-spacing:.1em;text-transform:uppercase">${esc(k)}</span>
+        <span class="h4 num">${esc(v)}</span></div>`).join('')}
+    </div></div></section>
+  ${r.ba?`<section class="sec"><div class="wrap">${beforeAfter(r.ba,`${r.title}  -  comparatif avant et après intervention. Faites glisser le curseur (flèches du clavier acceptées).`)}</div></section>`:''}
+  <section class="${r.ba?'sec tint':'sec'}"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="stack g24">
+      <div class="stack g12"><h2 class="h3">Contexte et problématique</h2><p class="body">${esc(r.context)}</p></div>
+      <div class="stack g12"><h2 class="h3">Solution mise en œuvre</h2><p class="body">${esc(r.solution)}</p></div>
+      <div class="stack g12"><h2 class="h3">Résultats</h2><p class="body">${esc(r.results)}</p></div>
+    </div>
+    <aside class="stack g20">
+      ${r.metrics.length?`<div class="card card-pad stack g18">
+        <h3 class="h4">Résultats chiffrés</h3>
+        <div class="stack g16">${r.metrics.map(([v,k])=>`<div class="stat dark">
+          <span class="v" style="font-size:32px">${esc(v)}</span><span class="k">${esc(k)}</span></div>`).join('')}</div>
+      </div>`:''}
+      ${dom?`<a class="card card-pad-sm ruled row nowrap" href="#/expertises/${dom.slug}" style="gap:13px;align-items:center">
+        <span style="width:42px;height:42px;border-radius:11px;background:var(--brand-100);color:var(--brand);display:grid;place-items:center;flex:none">${IC[dom.icon](20)}</span>
+        <span class="stack g4" style="flex:1"><span class="tiny" style="font-weight:800;letter-spacing:.09em;text-transform:uppercase">Domaine</span>
+        <span class="h4">${esc(dom.title)}</span></span>${IC.arrow(17)}</a>`:''}
+      <div class="card card-pad stack g12">
+        <h3 class="h4">Un projet similaire ?</h3>
+        <p class="small">Nous étudions votre installation et revenons vers vous sous 24 h ouvrées.</p>
+        <a class="btn btn-primary btn-block" href="#/contact">Parlons-en ${IC.arrow(16)}</a>
+      </div>
+    </aside>
+  </div></div></section>
+  ${similar.length?`<section class="sec"><div class="wrap">
+    ${sectionHead("Réalisations similaires",`Autres interventions  -  ${r.sector.toLowerCase()}.`,"")}
+    <div class="grid c3">${similar.map(realCard).join('')}</div></div></section>`:''}`;
+};
+
+/* ── PROJETS ───────────────────────────────────────────── */
+V.projets = ()=>{
+  const all=D('projets');
+  const list=S.f.proj==='all'?all:all.filter(p=>p.status===S.f.proj);
+  return `${pageHero("Nos projets","Ce sur quoi nous travaillons en ce moment.",
+    "Les projets en cours et planifiés. Les interventions achevées et documentées sont présentées dans les réalisations.",
+    [["Accueil","#/"],["Projets"]])}
+  <section class="sec"><div class="wrap stack g32">
+    ${filterBar('proj',[["planned","Planifié"],["ongoing","En cours"],["done","Achevé"]],S.f.proj)}
+    ${all.length===0
+      ? emptyState("Aucun projet publié","Les projets en cours seront publiés depuis le tableau de bord.","Nous contacter","#/contact","grid")
+      : list.length
+        ? `<div class="grid c2">${list.map(projCard).join('')}</div>`
+        : notFound("projet","#/projets","Voir tous les projets")}
+  </div></section>
+  ${ctaBand("Vous portez un projet industriel ?","Du cadrage à la mise en service, nous intervenons à l'étape où vous en avez besoin.","Nous écrire","#/contact")}`;
+};
+
+V.projetDetail = (slug)=>{
+  const p=DB.projets.find(x=>x.slug===slug); if(!p) return V.e404();
+  const [lbl,tone]=STATUS[p.status]; const dom=DB.domains.find(d=>d.slug===p.domain);
+  return `${pageHero("Projet",p.title,p.summary,[["Accueil","#/"],["Projets","#/projets"],[p.title]])}
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="stack g20">
+      ${plate(`Photo de projet  -  ${p.title}`,'ratio-169','grid')}
+      <p class="body" style="font-size:17px;margin-top:12px">${esc(p.body)}</p>
+    </div>
+    <aside class="stack g20">
+      <div class="card card-pad stack g16">
+        <span class="pill ${tone}" style="align-self:flex-start"><span class="dot"></span>${esc(lbl)}</span>
+        <div class="stack g14">
+          ${[["Démarrage",fmtDate(p.start)],["Porteur",p.client],["Pays",p.country]].map(([k,v])=>
+            `<div class="stack g4" style="padding-bottom:12px;border-bottom:1px solid var(--line-soft)">
+            <span class="tiny" style="font-weight:800;letter-spacing:.09em;text-transform:uppercase">${esc(k)}</span>
+            <span class="h4 num">${esc(v)}</span></div>`).join('')}
+        </div>
+        ${dom?`<a class="tlink" href="#/expertises/${dom.slug}">${esc(dom.title)} ${IC.arrow(16)}</a>`:''}
+      </div>
+      <div class="card card-pad stack g12">
+        <h3 class="h4">Participer ou en savoir plus</h3>
+        <p class="small">Écrivez-nous pour être associé à ce projet ou en suivre l'avancement.</p>
+        <a class="btn btn-primary btn-block" href="#/contact">Nous contacter ${IC.arrow(16)}</a>
+      </div>
+    </aside>
+  </div></div></section>`;
+};
+
+/* ── FORMATIONS ────────────────────────────────────────── */
+V.formations = ()=>{
+  const all=D('formations');
+  const themes=[...new Set(DB.formations.map(f=>f.theme))].map(t=>[t,THEMES[t]||t]);
+  const list=S.f.form==='all'?all:all.filter(f=>f.theme===S.f.form);
+  const sessions=all.flatMap(f=>f.sessions.filter(s=>isFuture(s.start)).map(s=>({...s,f})))
+                    .sort((a,b)=>a.start<b.start?-1:1);
+  return `${pageHero("Formations & événements","Renforcer les compétences de vos équipes.",
+    "Des formations construites à partir de situations réelles rencontrées sur les sites industriels d'Afrique de l'Ouest.",
+    [["Accueil","#/"],["Formations"]])}
+  <section class="sec"><div class="wrap stack g32">
+    ${filterBar('form',themes,S.f.form)}
+    ${all.length===0
+      ? emptyState("Catalogue en cours de publication","Les formations sont administrées depuis le tableau de bord.","Nous contacter","#/contact","grad")
+      : list.length
+        ? `<div class="grid c3">${list.map(formCard).join('')}</div>`
+        : notFound("programme","#/formations","Voir tout le catalogue")}
+  </div></section>
+  <section class="sec tint"><div class="wrap">
+    ${sectionHead("Prochaines sessions","Les dates ouvertes aux inscriptions.","")}
+    ${sessions.length?`<div class="tbl-wrap"><table>
+      <caption class="sr-only" style="position:absolute;left:-9999px">Prochaines sessions de formation</caption>
+      <thead><tr><th>Date</th><th>Formation</th><th>Lieu</th><th>Places</th><th></th></tr></thead>
+      <tbody>${sessions.map(s=>`<tr>
+        <td class="num" style="font-weight:700;white-space:nowrap">${fmtDate(s.start)}</td>
+        <td>${esc(s.f.title)}</td><td>${esc(s.loc)}</td>
+        <td class="num">${s.seats} places</td>
+        <td style="text-align:right"><a class="btn btn-outline btn-sm" href="#/contact">S'inscrire</a></td>
+      </tr>`).join('')}</tbody></table></div>`
+      : emptyState("Prochaines sessions en préparation",
+          "Aucune date n'est ouverte pour le moment. Écrivez-nous pour être informé de la prochaine session ou demander une formation sur site.",
+          "Demander une session","#/contact","cal")}
+  </div></section>
+  <section class="sec tint"><div class="wrap">
+    ${sectionHead("Événements à venir","Des rendez-vous pour apprendre et faire réseau.","Découvrez les prochaines rencontres, ateliers et sessions ouvertes.",["Voir tous les événements","#/evenements"])}
+    ${D('evenements').length?`<div class="grid c3">${D('evenements').slice(0,3).map(e=>evtCard(e)).join('')}</div>`:emptyState("Événements en préparation","Les prochains rendez-vous seront publiés depuis le tableau de bord.","Nous contacter","#/contact","cal")}
+  </div></section>`;
+};
+
+V.formationDetail = (slug)=>{
+  const f=DB.formations.find(x=>x.slug===slug); if(!f) return V.e404();
+  const next=f.sessions.filter(s=>isFuture(s.start)).sort((a,b)=>a.start<b.start?-1:1);
+  return `${pageHero("Formation",f.title,f.short,[["Accueil","#/"],["Formations","#/formations"],[f.title]])}
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="stack g24">
+      <div class="stack g12"><h2 class="h3">Objectifs pédagogiques</h2>
+        <ul class="stack g10" style="list-style:none">${f.objectives.map(o=>`<li class="row" style="gap:12px;align-items:flex-start">
+          <span style="color:var(--brand);flex:none;margin-top:3px">${IC.check(17)}</span><span class="body">${esc(o)}</span></li>`).join('')}</ul></div>
+      <div class="stack g12"><h2 class="h3">Public visé</h2><p class="body">${esc(f.audience)}</p></div>
+      <div class="stack g12"><h2 class="h3">Prérequis</h2><p class="body">${esc(f.prereq)}</p></div>
+      <div class="stack g12"><h2 class="h3">Sessions</h2>
+        ${next.length?`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Lieu</th><th>Places</th><th></th></tr></thead>
+          <tbody>${next.map(s=>`<tr><td class="num" style="font-weight:700">${fmtDate(s.start)}</td><td>${esc(s.loc)}</td>
+          <td class="num">${s.seats}</td><td style="text-align:right"><a class="btn btn-outline btn-sm" href="#/contact">S'inscrire</a></td></tr>`).join('')}</tbody></table></div>`
+        : emptyState("Aucune session programmée","Cette formation est disponible sur demande, en session dédiée dans vos locaux.","Demander une session","#/contact","cal")}
+      </div>
+    </div>
+    <aside class="stack g20">
+      <div class="card card-pad stack g14">
+        <span class="pill" style="align-self:flex-start">${esc(THEMES[f.theme]||f.theme)}</span>
+        ${[["Durée",f.duration],["Format",f.format]].map(([k,v])=>`<div class="stack g4" style="padding-bottom:12px;border-bottom:1px solid var(--line-soft)">
+          <span class="tiny" style="font-weight:800;letter-spacing:.09em;text-transform:uppercase">${esc(k)}</span><span class="h4">${esc(v)}</span></div>`).join('')}
+        <a class="btn btn-primary btn-block" href="#/contact">Se renseigner ${IC.arrow(16)}</a>
+      </div>
+    </aside>
+  </div></div></section>`;
+};
+
+/* ── PRODUITS ──────────────────────────────────────────── */
+V.produits = ()=>{
+  const all=D('produits');
+  const cats=[...new Set(DB.produits.map(p=>p.cat))].map(c=>[c,c]);
+  const list=S.f.prod==='all'?all:all.filter(p=>p.cat===S.f.prod);
+  return `${pageHero("Nos produits & équipements","Fournir le bon matériel, avec le bon conseil.",
+    "Équipements, pièces de rechange et ouvrages sur mesure, sélectionnés pour leur fiabilité et la disponibilité des pièces d'usure.",
+    [["Accueil","#/"],["Produits"]])}
+  <section class="sec"><div class="wrap stack g32">
+    ${filterBar('prod',cats,S.f.prod)}
+    ${all.length===0
+      ? emptyState("Catalogue en cours de constitution","Les produits sont administrés depuis le tableau de bord.","Demander un devis","#/contact","box")
+      : list.length
+        ? `<div class="grid c4">${list.map(prodCard).join('')}</div>`
+        : notFound("produit","#/produits","Voir tout le catalogue")}
+  </div></section>
+  <section class="sec tint"><div class="wrap">
+    <div class="notice info" style="max-width:760px;margin-inline:auto">${IC.info(19)}
+      <div class="stack g4"><strong>Pas de vente en ligne</strong>
+      <p class="small">Nos équipements font l'objet d'une étude préalable et d'un devis nominatif. Aucun paiement n'est réalisé sur ce site.</p></div></div>
+  </div></section>
+  ${ctaBand("Besoin d'un équipement précis ?","Décrivez votre installation : nous vous proposons la référence adaptée et son délai réel.","Demander un devis","#/contact")}`;
+};
+
+V.produitDetail = (slug)=>{
+  const p=DB.produits.find(x=>x.slug===slug); if(!p) return V.e404();
+  return `${pageHero("Produit",p.title,p.short,[["Accueil","#/"],["Produits","#/produits"],[p.title]])}
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="stack g20">
+      ${plate(`Photo produit  -  ${p.title}`,'ratio-43','box')}
+      <p class="body" style="font-size:17px">${esc(p.desc)}</p>
+      <h2 class="h3" style="margin-top:12px">Caractéristiques</h2>
+      <div class="tbl-wrap"><table><tbody>${p.specs.map(([k,v])=>
+        `<tr><th scope="row" style="text-align:left;padding:14px 16px;font-weight:700;width:40%">${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</tbody></table></div>
+    </div>
+    <aside class="stack g20">
+      <div class="card card-pad stack g14">
+        <span class="pill neutral" style="align-self:flex-start">${esc(p.cat)}</span>
+        <div class="stack g4"><span class="tiny" style="font-weight:800;letter-spacing:.09em;text-transform:uppercase">Disponibilité</span>
+        <span class="h4">${esc(p.avail)}</span></div>
+        <a class="btn btn-primary btn-block" href="#/contact">Demander un devis ${IC.arrow(16)}</a>
+        <p class="tiny" style="text-align:center">Réponse sous 24 h ouvrées</p>
+      </div>
+    </aside>
+  </div></div></section>`;
+};
+
+/* ── ÉVÉNEMENTS ────────────────────────────────────────── */
+V.evenements = ()=>{
+  const all=D('evenements');
+  const up=all.filter(e=>isFuture(e.start)).sort((a,b)=>a.start<b.start?-1:1);
+  const past=all.filter(e=>!isFuture(e.start)).sort((a,b)=>a.start<b.start?1:-1);
+  return `${pageHero("Événements","Nos rendez-vous, ateliers et rencontres.",
+    "Africa Ingénierie organise et participe à des événements dédiés à l'orientation, à la formation et à la filière industrielle.",
+    [["Accueil","#/"],["Événements"]])}
+  <section class="sec"><div class="wrap stack g32">
+    <h2 class="h2">À venir</h2>
+    ${up.length
+      ? `<div class="grid c3">${up.map(e=>evtCard(e)).join('')}</div>`
+      : emptyState("Aucun événement programmé",
+          "Le calendrier des prochains rendez-vous est en préparation. Écrivez-nous pour être informé.",
+          "Être informé","#/contact","cal")}
+  </div></section>
+  ${past.length?`<section class="sec tint"><div class="wrap stack g24">
+    <details class="acc" open><summary>Événements passés (${past.length})</summary>
+      <div class="acc-body"><div class="grid c3" style="margin-top:8px">${past.map(e=>evtCard(e,true)).join('')}</div></div>
+    </details></div></section>`:''}`;
+};
+
+V.evenementDetail = (slug)=>{
+  const e=DB.evenements.find(x=>x.slug===slug); if(!e) return V.e404();
+  const fut=isFuture(e.start);
+  return `${pageHero(fut?"Événement à venir":"Événement passé",e.title,e.summary,
+    [["Accueil","#/"],["Événements","#/evenements"],[e.title]])}
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="stack g20">
+      ${plate(`Visuel de l'événement  -  ${e.title}`,'ratio-169','cal')}
+      <p class="body" style="font-size:17px">${esc(e.body)}</p>
+    </div>
+    <aside class="stack g20"><div class="card card-pad stack g16">
+      <span class="pill ${fut?'red':'neutral'}" style="align-self:flex-start">${esc(e.type)}</span>
+      ${[["Date",fmtDate(e.start)],["Lieu",e.loc.name],["Ville",`${e.loc.city}, ${e.loc.country}`]].map(([k,v])=>
+        `<div class="stack g4" style="padding-bottom:12px;border-bottom:1px solid var(--line-soft)">
+        <span class="tiny" style="font-weight:800;letter-spacing:.09em;text-transform:uppercase">${esc(k)}</span>
+        <span class="h4 num">${esc(v)}</span></div>`).join('')}
+      ${fut?`<button class="btn btn-primary btn-block" type="button" onclick="toast('Fichier calendrier .ics téléchargé')">${IC.cal(16)} Ajouter au calendrier</button>
+      <p class="tiny" style="text-align:center">Participation libre  -  aucune billetterie</p>`
+      :`<a class="btn btn-outline btn-block" href="#/evenements">Voir les prochains événements</a>`}
+    </div></aside>
+  </div></div></section>`;
+};
+
+/* ── ACTUALITÉS ────────────────────────────────────────── */
+V.actualites = ()=>{
+  const all=D('actualites').slice().sort((a,b)=>a.date<b.date?1:-1);
+  const cats=[...new Set(DB.actualites.map(a=>a.cat))].map(c=>[c,CATS[c]||c]);
+  const list=S.f.news==='all'?all:all.filter(a=>a.cat===S.f.news);
+  return `${pageHero("Actualités","Innovations, projets et formations.",
+    "Suivez l'évolution de nos activités et les opportunités de formation proposées par nos équipes.",
+    [["Accueil","#/"],["Actualités"]])}
+  <section class="sec"><div class="wrap stack g32">
+    ${filterBar('news',cats,S.f.news)}
+    ${all.length===0
+      ? emptyState("Aucune actualité publiée","Les articles sont rédigés et publiés depuis le tableau de bord.","Nous contacter","#/contact","doc")
+      : list.length
+        ? `<div class="grid c3">${list.map(newsCard).join('')}</div>
+           <nav class="row" style="justify-content:center;gap:8px;margin-top:16px" aria-label="Pagination">
+             <span class="chip" aria-current="page" aria-pressed="true">1</span>
+             <span class="small" style="margin-left:8px">${list.length} article${list.length>1?'s':''}</span></nav>`
+        : notFound("article","#/actualites","Voir toutes les actualités")}
+  </div></section>`;
+};
+
+V.actualiteDetail = (slug)=>{
+  const a=DB.actualites.find(x=>x.slug===slug); if(!a) return V.e404();
+  const rel=DB.actualites.filter(x=>x.slug!==slug).slice(0,3);
+  return `${pageHero(CATS[a.cat]||a.cat,a.title,"",[["Accueil","#/"],["Actualités","#/actualites"],[a.title]])}
+  <section class="sec"><div class="wrap" style="max-width:760px">
+    <div class="row" style="gap:14px;padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:32px">
+      <span class="pill">${esc(CATS[a.cat]||a.cat)}</span>
+      <time class="small num" datetime="${a.date}">${fmtDate(a.date)}</time>
+      <span class="small">· ${esc(a.author)}</span>
+    </div>
+    ${plate(`Illustration  -  ${a.title}`,'ratio-169','img')}
+    <div class="stack g18" style="margin-top:32px">
+      <p class="lead">${esc(a.excerpt)}</p>
+      ${a.body.split('\n\n').map(p=>`<p class="body" style="font-size:17px">${esc(p)}</p>`).join('')}
+    </div>
+  </div></section>
+  <section class="sec tint"><div class="wrap">
+    ${sectionHead("À lire également","Autres publications.","",["Toutes les actualités","#/actualites"])}
+    <div class="grid c3">${rel.map(newsCard).join('')}</div></div></section>`;
+};
+
+/* ── CONTACT ───────────────────────────────────────────── */
+V.contact = ()=>{
+  const s=DB.site, socials=s.socials.filter(x=>x.url);
+  return `${pageHero("Contact","Parlons de votre installation.",
+    "Décrivez votre besoin : un ingénieur vous répond sous 24 h ouvrées.",[["Accueil","#/"],["Contact"]])}
+  <section class="sec"><div class="wrap"><div class="split" style="gap:56px;align-items:start">
+    <div class="card card-pad" style="padding:34px">
+      <form id="cform" novalidate class="stack g20">
+        <div class="stack g6"><h2 class="h3">Formulaire de contact</h2>
+        <p class="small">Les champs marqués <span style="color:var(--accent)">*</span> sont obligatoires.</p></div>
+        <div id="form-alert"></div>
+        <div class="grid c2" style="gap:18px">
+          <div class="field"><label for="f-nom">Nom complet<span class="req">*</span></label>
+            <input class="input" id="f-nom" name="nom" required autocomplete="name" placeholder="Votre nom et prénom"></div>
+          <div class="field"><label for="f-mail">Adresse email<span class="req">*</span></label>
+            <input class="input" id="f-mail" name="email" type="email" required autocomplete="email" placeholder="vous@entreprise.com"></div>
+          <div class="field"><label for="f-tel">Téléphone</label>
+            <input class="input" id="f-tel" name="tel" type="tel" autocomplete="tel" placeholder="+229 ..."></div>
+          <div class="field"><label for="f-soc">Société</label>
+            <input class="input" id="f-soc" name="societe" autocomplete="organization" placeholder="Nom de votre entreprise"></div>
+        </div>
+        <div class="field"><label for="f-besoin">Votre besoin<span class="req">*</span></label>
+          <select class="select" id="f-besoin" name="besoin" required>
+            <option value="">Sélectionnez un besoin…</option>
+            <option>Diagnostic industriel</option><option>Formation</option><option>Maintenance</option>
+            <option>Installation / Mise en service</option><option>Fourniture d'équipements</option><option>Autre</option>
+          </select></div>
+        <div class="field"><label for="f-msg">Votre message<span class="req">*</span></label>
+          <textarea class="textarea" id="f-msg" name="message" required maxlength="3000"
+            placeholder="Décrivez votre installation, votre problématique et le résultat attendu." aria-describedby="f-msg-h"></textarea>
+          <div class="between"><span class="hint" id="f-msg-h">20 caractères minimum.</span>
+          <span class="counter" id="f-msg-c">0 / 3000</span></div></div>
+        <label class="check"><input type="checkbox" id="f-rgpd" required>
+          <span>J'accepte que mes données soient utilisées pour traiter ma demande, conformément à la
+          <a href="#/confidentialite">politique de confidentialité</a>.<span class="req">*</span></span></label>
+        <button class="btn btn-primary" type="submit">Envoyer ma demande ${IC.arrow(17)}</button>
+      </form>
+    </div>
+    <aside class="stack g20">
+      <div class="card card-pad stack g18">
+        <h2 class="h3">Nous joindre directement</h2>
+        <div class="stack g16">
+          <div class="row" style="gap:13px;align-items:flex-start">
+            <span style="color:var(--brand);flex:none;margin-top:2px">${IC.pin(19)}</span>
+            <span class="stack g4"><span class="h4">Adresse</span>
+            <span class="small">${esc(s.address.l1)}<br>${esc(s.address.l2)}<br>${esc(s.address.country)}</span></span></div>
+          <div class="row" style="gap:13px;align-items:flex-start">
+            <span style="color:var(--brand);flex:none;margin-top:2px">${IC.phone(19)}</span>
+            <span class="stack g4"><span class="h4">Téléphone</span>
+            <a class="small num" href="tel:${s.phoneRaw}" style="color:var(--brand-600);font-weight:600">${esc(s.phone)}</a></span></div>
+          <div class="row" style="gap:13px;align-items:flex-start">
+            <span style="color:var(--brand);flex:none;margin-top:2px">${IC.mail(19)}</span>
+            <span class="stack g4"><span class="h4">Email</span>
+            <a class="small" href="mailto:${s.email}" style="color:var(--brand-600);font-weight:600">${esc(s.email)}</a></span></div>
+          <div class="row" style="gap:13px;align-items:flex-start">
+            <span style="color:var(--brand);flex:none;margin-top:2px">${IC.clock(19)}</span>
+            <span class="stack g4"><span class="h4">Horaires</span>
+            ${s.hours.map(([d,h])=>`<span class="small num">${esc(d)} : ${esc(h)}</span>`).join('')}
+            <span class="tiny" style="color:var(--ok);font-weight:700;margin-top:4px">${esc(s.reply)}</span></span></div>
+        </div>
+        <a class="btn btn-brand btn-block" href="https://wa.me/${s.whatsapp}" target="_blank" rel="noopener">${IC.wa(17)} Écrire sur WhatsApp</a>
+        ${socials.length?`<div class="stack g10" style="padding-top:16px;border-top:1px solid var(--line-soft)">
+          <span class="tiny" style="font-weight:800;letter-spacing:.1em;text-transform:uppercase">Nous suivre</span>
+          <div class="soc">${socials.map(x=>`<a href="${x.url}" aria-label="${esc(x.name)}"
+            style="border-color:var(--line);color:var(--ink-500)">${IC[x.k](17)}</a>`).join('')}</div></div>`:''}
+      </div>
+      <div class="card" style="overflow:hidden">
+        <div id="mapbox">${plate("Carte de localisation  -  Ouèdo, Abomey-Calavi",'ratio-43','pin')}</div>
+        <div class="card-pad-sm stack g10">
+          <p class="tiny">La carte est chargée uniquement après votre accord, afin de n'envoyer aucune donnée à un service tiers sans consentement.</p>
+          <button class="btn btn-outline btn-sm" type="button" onclick="loadMap()">Afficher la carte</button>
+        </div>
+      </div>
+    </aside>
+  </div></div></section>`;
+};
+
+/* ── PAGES LÉGALES ─────────────────────────────────────── */
+const legalSections=[
+  ["editeur","Éditeur du site","editor"],
+  ["hebergement","Hébergement","hosting"],
+  ["propriete","Propriété intellectuelle","property"],
+  ["donnees","Données personnelles","data"],
+  ["cookies","Cookies","cookies"],
+  ["droits","Vos droits","rights"]
+];
+V.legal = (kind)=>{
+  const isPriv = kind==='confidentialite';
+  const title = isPriv?"Politique de confidentialité":"Mentions légales";
+  const legal=DB.site.legal||{};
+  const secs = (isPriv?legalSections.slice(3):legalSections.slice(0,3)).map(([id,t,key])=>[id,t,legal[key]||""]);
+  return `${pageHero("Informations légales",title,"",[["Accueil","#/"],[title]])}
+  <section class="sec"><div class="wrap"><div class="split" style="grid-template-columns:240px 1fr;gap:56px;align-items:start">
+    <nav class="stack g8" aria-label="Sommaire" style="position:sticky;top:100px">
+      <span class="tiny" style="font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Sommaire</span>
+      ${secs.map(([id,t])=>`<a href="#/${kind}" onclick="document.getElementById('${id}')?.scrollIntoView({behavior:'smooth'});return false"
+        class="small" style="text-decoration:none;padding:7px 0;color:var(--ink-700);border-bottom:1px solid var(--line-soft)">${esc(t)}</a>`).join('')}
+    </nav>
+    <div class="stack g32" style="max-width:68ch">
+      <div class="notice info">${IC.info(19)}<div class="stack g4">
+        <strong>Document à compléter par le client</strong>
+        <p class="small">Ce gabarit présente la mise en forme. Le contenu juridique définitif est rédigé et fourni par Africa Ingénierie, puis saisi depuis le tableau de bord.</p></div></div>
+      ${secs.map(([id,t,x])=>`<div class="stack g12" id="${id}"><h2 class="h3">${esc(t)}</h2><p class="body" style="font-size:17px">${esc(x)}</p></div>`).join('')}
+      <p class="small" style="padding-top:20px;border-top:1px solid var(--line)">Dernière mise à jour : <span class="num">${fmtDate('2026-08-25')}</span></p>
+    </div>
+  </div></div></section>`;
+};
+
+/* ── 404 ───────────────────────────────────────────────── */
+V.e404 = ()=>`
+  <section class="sec" style="padding-block:120px"><div class="wrap stack g24" style="text-align:center;align-items:center">
+    <span class="d1" style="color:var(--brand-100);font-size:clamp(80px,14vw,150px);line-height:1">404</span>
+    <h1 class="h1" style="margin-top:-14px">Cette page n'existe pas.</h1>
+    <p class="lead measure">Le lien est peut-être erroné ou la page a été déplacée. Voici les rubriques les plus consultées.</p>
+    <div class="row actions" style="justify-content:center;margin-top:8px">
+      <a class="btn btn-primary" href="#/">Retour à l'accueil ${IC.arrow(17)}</a>
+      <a class="btn btn-outline" href="#/contact">Nous contacter</a></div>
+    <div class="grid c4" style="margin-top:48px;width:100%;text-align:left">
+      ${[["Expertises","#/expertises","layers"],["Réalisations","#/realisations","grid"],
+         ["Formations & événements","#/formations","grad"],["Produits","#/produits","box"]].map(([l,h,i])=>
+        `<a class="card card-pad-sm ruled row" href="${h}" style="gap:12px;align-items:center">
+          <span style="width:38px;height:38px;border-radius:10px;background:var(--brand-100);color:var(--brand);display:grid;place-items:center;flex:none">${IC[i](18)}</span>
+          <span class="h4">${esc(l)}</span></a>`).join('')}
+    </div>
+  </div></section>`;
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   7. ADMINISTRATION  -  univers dense, même marque
+   ═══════════════════════════════════════════════════════════ */
+const ADM_NAV=[
+  ["Pilotage",[["dashboard","Tableau de bord","grid",null],["controle","Contrôle avant publication","shield",null]]],
+  ["Contenus publics",[
+    ["accueil","Page de garde","grid",null],["apropos","À propos","users",null],
+    ["expertises","Expertises","layers",6],["projets","Projets","target",2],
+    ["contenus","Réalisations","layers",4],["formations","Formations","grad",3],
+    ["evenements","Événements","cal",3],
+    ["produits","Produits","box",3], ["contact","Contact","mail",null]
+  ]],
+  ["Preuves & médias",[
+    ["equipe","Équipe dirigeante","users",null],["partenaires","Partenaires","globe",4],
+    ["temoignages","Témoignages","quote",1],["medias","Médiathèque","img",null]
+  ]],
+  ["Configuration",[
+    ["reglages","Réglages généraux","gear",null],["utilisateurs","Utilisateurs & rôles","lock",6],
+    ["historique","Historique","hist",null],["api-evenements","API Événements","doc",null]
+  ]]
+];
+function admShell(section,title,sub,body,actions){
+  return `<div class="adm">
+    <aside class="adm-side">
+      <a class="adm-brand" href="#/admin/dashboard">
+        <span class="mk">${IC.gear(19)}</span>
+        <span class="txt"><span class="nm">Africa Ingénierie</span><br><span class="tg">Administration</span></span>
+      </a>
+      ${ADM_NAV.map(([grp,items])=>`<div class="adm-grp">${esc(grp)}</div>`+
+        items.map(([k,l,i,c])=>`<a class="adm-nav" href="#/admin/${k}" ${section===k?'aria-current="page"':''}>
+          ${IC[i](17)}<span>${esc(l)}</span>${c?`<span class="cnt num">${c}</span>`:''}</a>`).join('')).join('')}
+      <div style="margin-top:auto;padding-top:16px">
+        <a class="adm-nav" href="#/">${IC.eye(17)}<span>Voir le site</span></a>
+        <a class="adm-nav" href="#/admin/login">${IC.logout(17)}<span>Déconnexion</span></a>
+      </div>
+    </aside>
+    <div class="adm-main">
+      <header class="adm-top">
+        <div class="stack g4" style="flex:1;min-width:180px">
+          <h1 class="adm-h">${esc(title)}</h1>
+          ${sub?`<p class="small">${esc(sub)}</p>`:''}
+        </div>
+        ${actions||''}
+        <div class="row" style="gap:10px;padding-left:14px;border-left:1px solid var(--line)">
+          <span class="avatar">AD</span>
+          <span class="stack g4" style="line-height:1.2"><span style="font-size:13.5px;font-weight:700">Arnaud DEGLA</span>
+          <span class="tiny">Administrateur</span></span>
+        </div>
+      </header>
+      <div class="adm-body">${body}</div>
+    </div></div>`;
+}
+
+const ADM={};
+
+/* ── Modules administrables  -  un écran de gestion par contenu ── */
+const ADMIN_MODULES={
+  accueil:{title:"Page de garde",sub:"Sections visibles sur l'accueil public",kind:"sections",items:[
+    ["Hero d'accueil","Bannière principale"],["Bandeau de confiance","Partenaires"],["Six expertises","Bloc de services"],
+    ["Réalisations mises en avant","Preuve"],["Appel à l'action final","Conversion"]]},
+  apropos:{title:"À propos",sub:"Identité, vision, valeurs et direction",kind:"sections",items:[
+    ["Hero À propos","Bannière interne"],["Notre identité","Présentation"],["Vision et positionnement","Institutionnel"],
+    ["Nos valeurs","Piliers"],["Mot du directeur","Leadership"],["Équipe dirigeante","Équipe"]]},
+  motpdg:{title:"Mot du PDG",sub:"Texte, portrait et vidéo optionnelle",kind:"motpdg"},
+  quiSommesNous:{title:"Qui sommes-nous",sub:"Présentation, vision et valeurs",kind:"quisommesnous"},
+  expertises:{title:"Expertises",sub:"6 domaines  -  titres, textes, médias et traductions",kind:"expertises"},
+  projets:{title:"Projets",sub:"Projets planifiés ou en cours",kind:"projets"},
+  contenus:{title:"Réalisations",sub:"Études de cas publiées ou en préparation",kind:"realisations"},
+  formations:{title:"Formations",sub:"Catalogue de programmes et sessions",kind:"formations"},
+  evenements:{title:"Événements",sub:"Dates, lieux, programmes et inscriptions",kind:"evenements"},
+  produits:{title:"Produits",sub:"Équipements, pièces de rechange et solutions",kind:"produits"},
+  contact:{title:"Contact",sub:"Coordonnées, formulaire et messages",kind:"contact"},
+  equipe:{title:"Équipe dirigeante",sub:"Fiches des membres de la direction",kind:"equipe"},
+  partenaires:{title:"Partenaires",sub:"Logos et collaborations publiées",kind:"partenaires"},
+  temoignages:{title:"Témoignages",sub:"Citations authentifiées et consenties",kind:"temoignages"}
+};
+
+function adminModuleRows(kind){
+  if(kind==='sections') return [["Hero d'accueil","Bannière principale",true,"Publié","25.08.2026"],["Bandeau de confiance","Partenaires",true,"Publié","25.08.2026"],["Six expertises","Bloc de services",true,"Publié","25.08.2026"],["Réalisations mises en avant","Preuve",true,"Publié","25.08.2026"],["Formations & événements","Contenus liés",true,"Publié","25.08.2026"],["Produits","Catalogue produit",true,"Publié","25.08.2026"],["Chiffres clés","Preuve chiffrée",true,"Publié","25.08.2026"],["Appel à l'action final","Conversion",true,"Publié","25.08.2026"]];
+  if(kind==='motpdg') return [["Message du PDG","Texte institutionnel + portrait",true,"Publié","26.08.2026"]];
+  if(kind==='quisommesnous') return [["Présentation de l'entreprise","Texte de présentation",true,"Publié","26.08.2026"],["Vision","Positionnement et ambition",true,"Publié","26.08.2026"],["Valeurs","Piliers de l'entreprise",true,"Publié","26.08.2026"]];
+  if(kind==='expertises') return D('domains').map(d=>[d.title,"Expertise",true,"Publié","26.08.2026"]);
+  if(kind==='projets') return D('projets').map(p=>[p.title,"Projet",true,p.status==='planned'?"Planifié":"En cours","26.08.2026"]);
+  if(kind==='realisations') return D('realisations').map((r,i)=>[r.title,"Réalisation",i!==3,i===3?"Brouillon":"Publié",i===0?"26.08.2026":"12.06.2026"]);
+  if(kind==='formations') return D('formations').map((f,i)=>[f.title,"Formation",true,i===2?"Brouillon":"Publié",i===0?"26.08.2026":"20.08.2026"]);
+  if(kind==='evenements') return D('evenements').map((e,i)=>[e.title,"Événement",true,i===2?"Archivé":"Publié",i===0?"26.08.2026":"18.08.2026"]);
+  if(kind==='produits') return D('produits').map((p,i)=>[p.title,"Produit",true,i===2?"Brouillon":"Publié",i===0?"26.08.2026":"19.08.2026",`${p.cat} · ${p.avail}`,p.slug]);
+  if(kind==='contact') return [["Coordonnées et formulaire","Réglages de contact",true,"Publié","26.08.2026"]];
+  if(kind==='equipe') return D('equipe').map(x=>[x.name||"Fiche dirigeant","Équipe",true,"Brouillon","26.08.2026"]);
+  if(kind==='partenaires') return D('partenaires').map(p=>[p.name,"Partenaire",!!p.url,p.url?"Publié":"Brouillon","26.08.2026"]);
+  if(kind==='temoignages') return D('temoignages').map(t=>[t.name,"Témoignage",!!t.consent,t.consent?"Publié":"À valider","26.08.2026"]);
+  return [];
+}
+
+const ADMIN_FIELD_MAP={
+  sections:["Ordre d’affichage","Libellé","Titre FR / EN","Texte d’introduction","CTA et destination","Chiffres clés","Visibilité"],
+  expertises:["Slug et titre FR / EN","Accroche courte","Description détaillée","4 axes de service","Icône / image et texte alternatif","SEO : titre, description, partage"],
+  projets:["Titre et slug","Statut et date de démarrage","Client, pays et domaine","Résumé public","Description détaillée","SEO et visibilité"],
+  realisations:["Titre, client, année, secteur et pays","Domaine lié","Résumé public","Contexte / solution / résultats","Indicateurs de résultat","Visuels avant-après et textes alternatifs","SEO et mise en avant"],
+  formations:["Thème, titre et slug","Durée et format","Résumé public","Public visé et prérequis","Objectifs pédagogiques","Sessions : date, lieu, places","SEO et publication"],
+  evenements:["Titre et type","Date et lieu","Résumé et programme","Statut de publication","Lien calendrier / API descriptive","Aucun paiement ni billetterie"],
+  produits:["Référence, catégorie et slug","Titre FR / EN","Accroche courte","Disponibilité et délai","Description détaillée","Caractéristiques techniques","Visuel et texte alternatif","SEO et publication"],
+  motpdg:["Titre du message FR / EN","Chapeau","Texte complet","Portrait","Vidéo optionnelle","SEO et publication"],
+  quisommesnous:["Présentation","Vision","Valeurs et piliers","Image et texte alternatif","SEO et publication"],
+  sectionsApropos:["Hero À propos","Identité","Vision","Valeurs","Mot du PDG","Équipe dirigeante"],
+  contact:["Adresse et téléphone","E-mail et WhatsApp","Horaires","Délai de réponse","Champs du formulaire","Message de confirmation","SEO et mentions"],
+  equipe:["Nom et fonction","Biographie","Portrait et texte alternatif","Réseaux professionnels","Ordre d’affichage"],
+  partenaires:["Nom","Logo et texte alternatif","URL externe facultative","Ordre d’affichage","Visibilité"],
+  temoignages:["Citation","Nom, rôle et entreprise","Date","Consentement de publication","Portrait facultatif"],
+  medias:["Fichier","Type","Texte alternatif obligatoire","Légende","Dossier et usage"],
+  reglages:["Logo et favicon","Nom et baseline","Coordonnées du pied de page","Réseaux sociaux sans liens morts","Navigation et langue","Mentions légales et confidentialité","SEO global et redirections"]
+};
+function adminFieldSpec(kind){
+  const fields=ADMIN_FIELD_MAP[kind]||ADMIN_FIELD_MAP.sections;
+  const link=kind==='produits'?`<p class="tiny" style="color:var(--brand-700)"><strong>Chaînage public :</strong> ces champs alimentent le filtre de catégorie, les cartes du catalogue, la fiche détaillée <code>/produits/:slug</code>, la disponibilité, les caractéristiques, le CTA et les métadonnées SEO.</p>`:'';
+  return `<div class="notice info" style="margin-bottom:18px">${IC.shield(19)}<div class="stack g6"><strong>Ce module contrôle les éléments visibles suivants</strong><div class="row" style="gap:7px">${fields.map(f=>`<span class="pill neutral">${esc(f)}</span>`).join('')}</div><p class="tiny">La publication est bloquée si les champs obligatoires, le texte alternatif ou la traduction active sont incomplets.</p>${link}</div></div>`;
+}
+
+function adminModulePage(section){
+  const cfg=ADMIN_MODULES[section]||ADMIN_MODULES.accueil;
+  const rows=adminModuleRows(cfg.kind);
+  const stateMap={Publié:["ok","Publié"],Brouillon:["neutral","Brouillon"],"À valider":["warn","À valider"],Planifié:["info","Planifié"],"En cours":["info","En cours"],Archivé:["neutral","Archivé"]};
+  const body=adminFieldSpec(section==='apropos'?'sectionsApropos':cfg.kind)+(rows.length?`<div class="adm-card">
+    <div class="adm-card-h"><div class="row" style="gap:10px;flex:1"><div style="position:relative;flex:1;max-width:360px"><span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-400)">${IC.search(17)}</span><input class="input" style="padding-left:40px" placeholder="Rechercher…" aria-label="Rechercher dans ${esc(cfg.title)}"></div><select class="select" style="width:auto;min-width:150px" aria-label="Filtrer par état"><option>Tous les états</option><option>Publié</option><option>Brouillon</option><option>À valider</option></select></div></div>
+    <div class="tbl-wrap" style="border:0"><table><thead><tr><th style="width:36px"><input type="checkbox" aria-label="Tout sélectionner"></th><th>Contenu</th><th>Type</th>${cfg.kind==='produits'?'<th>Catégorie / disponibilité</th>':''}<th>FR / EN</th><th>État</th><th>Modifié</th><th></th></tr></thead><tbody>${rows.map(r=>{const [t,type,en,st,date,extra,slug]=r;const tone=stateMap[st]||["neutral",st];const editHref=cfg.kind==='produits'?`#/admin/edition?kind=produits&slug=${encodeURIComponent(slug||'')}`:'#/admin/edition';const previewHref=cfg.kind==='produits'?`#/produits/${encodeURIComponent(slug||'')}`:'#/';return `<tr><td><input type="checkbox" aria-label="Sélectionner ${esc(t)}"></td><td style="font-weight:600">${esc(t)}</td><td class="small">${esc(type)}</td>${cfg.kind==='produits'?`<td class="small">${esc(extra||' - ')}</td>`:''}<td><span class="row" style="gap:5px"><span class="pill ok" style="padding:2px 7px;font-size:10.5px">FR</span>${en?'<span class="pill ok" style="padding:2px 7px;font-size:10.5px">EN</span>':'<span class="pill warn" style="padding:2px 7px;font-size:10.5px">EN !</span>'}</span></td><td><span class="pill ${tone[0]}">${esc(tone[1])}</span></td><td class="small num">${esc(date)}</td><td><span class="row" style="gap:6px;justify-content:flex-end"><a class="icon-btn" style="width:34px;height:34px" href="${editHref}" aria-label="Modifier ${esc(t)}">${IC.edit(15)}</a><a class="icon-btn" style="width:34px;height:34px" href="${previewHref}" aria-label="Prévisualiser ${esc(t)}">${IC.eye(15)}</a><button class="icon-btn" style="width:34px;height:34px" type="button" aria-label="Supprimer ${esc(t)}" onclick="toast('Confirmation requise avant suppression')">${IC.trash(15)}</button></span></td></tr>`}).join('')}</tbody></table></div></div>`:`<div class="adm-card"><div class="empty-adm"><span class="empty-ic">${IC.layers(24)}</span><h2 class="h3">Aucun contenu publié</h2><p class="small">Créez la première fiche depuis le bouton ci-dessous. Tant qu'elle n'est pas complète, aucune section vide ne sera affichée au public.</p></div></div>`);
+  return admShell(section,cfg.title,cfg.sub,body,`<a class="btn btn-primary btn-sm" href="#/admin/editor">${IC.edit(15)} Nouveau contenu</a>`);
+}
+
+Object.keys(ADMIN_MODULES).forEach(k=>{ ADM[k]=()=>adminModulePage(k); });
+
+/* ── Éditeur universel : la fiche expose les champs publics ── */
+ADM.__editorDraft=()=>admShell('Éditeur de contenu','Créer ou modifier une fiche sans intervention technique',`
+  <div class="notice info">${IC.info(19)}<div class="stack g6"><strong>Prévisualisation avant publication</strong><p class="small">Les champs ci-dessous correspondent aux contenus affichés sur le site public. En production, Payload CMS enregistrera chaque version et appliquera les droits du rôle connecté.</p></div></div>
+  <form class="stack g24" style="margin-top:20px" onsubmit="event.preventDefault();toast('Brouillon enregistré  -  publication soumise au contrôle')">
+    <div class="grid c2">
+      <div class="adm-card card-pad stack g16"><h2 class="h3">Identification</h2><div class="field"><label for="edit-module">Module public</label><select class="select" id="edit-module"><option>Produits</option><option>Expertises</option><option>Réalisations</option><option>Formations</option><option>Événements</option><option>Projets</option><option>Mot du PDG</option><option>Qui sommes-nous</option><option>À propos</option><option>Contact</option></select></div><div class="field"><label for="edit-slug">Slug / URL</label><input class="input" id="edit-slug" value="nouvelle-fiche" required></div><div class="field"><label for="edit-status">Statut</label><select class="select" id="edit-status"><option>Brouillon</option><option>À valider</option><option>Publié</option></select></div></div>
+      <div class="adm-card card-pad stack g16"><h2 class="h3">Publication bilingue</h2><div class="field"><label for="edit-title-fr">Titre français</label><input class="input" id="edit-title-fr" placeholder="Titre affiché au public" required></div><div class="field"><label for="edit-title-en">Titre anglais</label><input class="input" id="edit-title-en" placeholder="English title"></div><div class="row" style="align-items:flex-start;gap:10px"><input id="edit-published" type="checkbox"><label for="edit-published">Afficher sur le site public après validation</label></div></div>
+    </div>
+    <div class="adm-card card-pad stack g16"><h2 class="h3">Contenu affiché</h2><div class="grid c2"><div class="field"><label for="edit-short">Accroche courte</label><textarea class="textarea" id="edit-short" placeholder="Résumé utilisé dans les cartes et les aperçus"></textarea></div><div class="field"><label for="edit-body">Description détaillée</label><textarea class="textarea" id="edit-body" placeholder="Texte principal de la page"></textarea></div></div><div class="field"><label for="edit-points">Points, caractéristiques ou objectifs</label><textarea class="textarea" id="edit-points" placeholder="Un élément par ligne : caractéristiques produit, axes d’expertise, objectifs de formation…"></textarea></div></div>
+    <div class="adm-card card-pad stack g16"><h2 class="h3">Média et informations spécifiques</h2><div class="grid c3"><div class="field"><label for="edit-category">Catégorie / thème</label><input class="input" id="edit-category" placeholder="Ex. Énergie, Maintenance"></div><div class="field"><label for="edit-availability">Disponibilité / date / statut</label><input class="input" id="edit-availability" placeholder="Ex. Sur devis ou 18 septembre 2026"></div><div class="field"><label for="edit-media">Image principale</label><input class="input" id="edit-media" type="text" placeholder="Nom du média dans la médiathèque"></div></div><div class="field"><label for="edit-alt">Texte alternatif obligatoire</label><input class="input" id="edit-alt" placeholder="Décrire l’image pour l’accessibilité" required></div><p class="tiny">Pour un produit : catégorie, disponibilité, description, caractéristiques et média alimentent directement la page publique Produit. Pour un événement, aucun champ de paiement ou de billetterie n’est autorisé.</p></div>
+    <div class="adm-card card-pad stack g16"><h2 class="h3">Référencement naturel</h2><div class="grid c2"><div class="field"><label for="edit-seo-title">Titre SEO</label><input class="input" id="edit-seo-title" maxlength="60" placeholder="Titre unique de la page"></div><div class="field"><label for="edit-og">Image Open Graph</label><input class="input" id="edit-og" placeholder="Média de partage social"></div></div><div class="field"><label for="edit-seo-description">Description SEO</label><textarea class="textarea" id="edit-seo-description" maxlength="160" placeholder="Description unique, claire et utile dans les résultats de recherche"></textarea></div></div>
+    <div class="between"><a class="btn btn-outline" href="#/admin/dashboard">Annuler</a><div class="row"><button class="btn btn-outline" type="button" onclick="toast('Brouillon enregistré')">Enregistrer le brouillon</button><button class="btn btn-primary" type="submit">Soumettre à publication</button></div></div>
+  </form>`,'');
+
+ADM.utilisateurs=()=>admShell('utilisateurs',"Utilisateurs & rôles","6 comptes prévus  -  2 par rôle conformément au cahier des charges",`
+  <div class="notice info">${IC.lock(19)}<div class="stack g6"><strong>Accès protégé et traçable</strong><p class="small">Chaque action éditoriale est enregistrée dans l'historique. Les droits d'un rôle ne peuvent pas dépasser son périmètre.</p></div></div>
+  <div class="adm-card"><div class="adm-card-h"><div class="stack g4"><h2 class="h3">Comptes administrateurs</h2><p class="small">Les comptes sont gérés uniquement par un Administrateur.</p></div><button class="btn btn-primary btn-sm" type="button" onclick="toast('Invitation envoyée')">+ Inviter un utilisateur</button></div><div class="tbl-wrap" style="border:0"><table><thead><tr><th>Utilisateur</th><th>Rôle</th><th>État</th><th>Dernière connexion</th><th></th></tr></thead><tbody>${[["Arnaud DEGLA","Administrateur","Actif","Aujourd'hui"],["Nathalie ADJOVI","Administrateur","Actif","Hier"],["Équipe éditoriale","Publicateur","Actif","26.08.2026"],["Koffi ADJOVI","Publicateur","Actif","25.08.2026"],["Fatou DIALLO","Éditeur","Actif","24.08.2026"],["Ibrahim TRAORÉ","Éditeur","Invitation en attente"," - "]].map(([n,r,s,d])=>`<tr><td><span class="row" style="gap:10px"><span class="avatar">${esc(n.charAt(0))}</span><span style="font-weight:600">${esc(n)}</span></span></td><td><span class="pill ${r==='Administrateur'?'red':r==='Publicateur'?'info':'neutral'}">${esc(r)}</span></td><td class="small">${esc(s)}</td><td class="small num">${esc(d)}</td><td style="text-align:right"><button class="btn btn-outline btn-sm" type="button" onclick="toast('Modification du compte')">Gérer</button></td></tr>`).join('')}</tbody></table></div></div>
+  <div class="grid c3"><div class="adm-card stack g10"><span class="h4">Administrateur</span><p class="small">Réglages globaux, comptes, contenus, publication et historique.</p></div><div class="adm-card stack g10"><span class="h4">Publicateur</span><p class="small">Création, modification et publication directe des contenus.</p></div><div class="adm-card stack g10"><span class="h4">Éditeur</span><p class="small">Création de brouillons et soumission à validation.</p></div></div>`);
+
+ADM['api-evenements']=()=>admShell('api-evenements',"API Événements","Contrat de données descriptives  -  sans paiement ni billetterie",`
+  <div class="notice info">${IC.doc(19)}<div class="stack g6"><strong>Documentation OpenAPI disponible</strong><p class="small">Cette API expose uniquement les événements publiés pour une intégration future. Aucun champ de paiement ou de billetterie n'est prévu.</p></div></div>
+  <div class="adm-card stack g18"><h2 class="h3">Routes documentées</h2><div class="stack g12"><div class="row" style="gap:14px;padding:14px;border:1px solid var(--line);border-radius:9px"><span class="pill ok">GET</span><code>/api/events</code><span class="small" style="margin-left:auto">Liste des événements publiés</span></div><div class="row" style="gap:14px;padding:14px;border:1px solid var(--line);border-radius:9px"><span class="pill ok">GET</span><code>/api/events/:slug</code><span class="small" style="margin-left:auto">Détail d'un événement</span></div><div class="row" style="gap:14px;padding:14px;border:1px solid var(--line);border-radius:9px"><span class="pill ok">GET</span><code>/api/events/:slug/calendar</code><span class="small" style="margin-left:auto">Export au format ICS</span></div></div><button class="btn btn-outline btn-sm" type="button" onclick="toast('Documentation OpenAPI téléchargée')">${IC.doc(15)} Télécharger OpenAPI</button></div>`);
+
+ADM.login=()=>`<div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(140deg,var(--brand) 0%,var(--brand-deep) 100%)" class="bp">
+  <div class="card" style="width:min(100%,430px);padding:38px">
+    <div class="stack g24">
+      <div class="brandmark" style="gap:12px">
+        <span class="mk">${IC.gear(22)}</span>
+        <span><span class="nm">Africa Ingénierie</span><br><span class="tg">Administration</span></span></div>
+      <div class="stack g6"><h1 class="h3">Connexion à l'espace d'administration</h1>
+      <p class="small">Accès réservé aux membres de l'équipe éditoriale.</p></div>
+      <form class="stack g18" onsubmit="event.preventDefault();location.hash='#/admin/dashboard'">
+        <div class="field"><label for="l-mail">Adresse email</label>
+          <input class="input" id="l-mail" type="email" autocomplete="username" placeholder="prenom.nom@africaingenieries.com" required></div>
+        <div class="field"><label for="l-pwd">Mot de passe</label>
+          <input class="input" id="l-pwd" type="password" autocomplete="current-password" placeholder="••••••••••" required></div>
+        <div class="between"><label class="check"><input type="checkbox"><span>Se souvenir de moi</span></label>
+          <a class="small" href="#/admin/login">Mot de passe oublié ?</a></div>
+        <button class="btn btn-primary btn-block" type="submit">${IC.lock(16)} Se connecter</button>
+      </form>
+      <p class="tiny" style="text-align:center;padding-top:16px;border-top:1px solid var(--line-soft)">
+        Connexion protégée. 5 tentatives maximum avant verrouillage temporaire du compte.</p>
+    </div></div></div>`;
+
+ADM.dashboard=()=>{
+  const kpis=[["Contenus publiés","24","+3 ce mois-ci"],["Messages non lus","3","dont 1 depuis 48 h"],
+              ["Brouillons en attente","2","soumis par un éditeur"],["Traductions manquantes","5","fiches sans version EN"]];
+  return admShell('dashboard',"Tableau de bord","Vue d'ensemble de la plateforme  -  mardi 25 août 2026",`
+    <div class="grid c4">${kpis.map(([l,v,f])=>`<div class="kpi">
+      <span class="lb">${esc(l)}</span><span class="vl num">${esc(v)}</span><span class="ft">${esc(f)}</span></div>`).join('')}</div>
+
+    <div class="notice warn">${IC.alert(19)}<div class="stack g6">
+      <strong>2 vérifications à traiter avant la prochaine publication</strong>
+      <p class="small">Le contrôle avant publication signale une statistique non renseignée et une fiche sans traduction anglaise.</p>
+      <a class="tlink" href="#/admin/controle" style="font-size:14px">Ouvrir le contrôle ${IC.arrow(15)}</a></div></div>
+
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:24px">
+      <div class="adm-card">
+        <div class="adm-card-h"><h2 class="h3">Contenus récemment modifiés</h2>
+          <a class="tlink" style="font-size:14px" href="#/admin/contenus">Tout voir ${IC.arrow(15)}</a></div>
+        <div class="tbl-wrap" style="border:0">
+          <table><thead><tr><th>Contenu</th><th>Module</th><th>État</th><th>Modifié par</th><th>Date</th></tr></thead>
+          <tbody>${[
+            ["Sapin monumental en acier  -  Ekpè","Réalisations","published","Arnaud DEGLA","25.08.2026"],
+            ["Les explorateurs de l'ingénierie","Projets","published","Arnaud DEGLA","24.08.2026"],
+            ["Maintenance préventive","Formations","draft","Équipe éditoriale","22.08.2026"],
+            ["Systèmes d'humidification","Produits","published","Arnaud DEGLA","19.08.2026"],
+            ["Sécurité industrielle","Formations","review","Équipe éditoriale","18.08.2026"]
+          ].map(([t,m,st,u,d])=>{
+            const map={published:["Publié","ok"],draft:["Brouillon","neutral"],review:["À valider","warn"]};
+            const [lb,tone]=map[st];
+            return `<tr><td style="font-weight:600">${esc(t)}</td><td class="small">${esc(m)}</td>
+            <td><span class="pill ${tone}">${esc(lb)}</span></td><td class="small">${esc(u)}</td>
+            <td class="small num">${esc(d)}</td></tr>`}).join('')}</tbody></table></div>
+      </div>
+      <div class="stack g24">
+        <div class="adm-card"><div class="adm-card-h"><h2 class="h3">Derniers messages</h2>
+          <a class="tlink" style="font-size:14px" href="#/admin/messages">Voir ${IC.arrow(15)}</a></div>
+          <div class="stack g14">${[
+            ["Koffi ADJOVI","Diagnostic industriel","Il y a 4 h",true],
+            ["SODECO","Maintenance","Hier",true],
+            ["Ibrahim TRAORÉ","Formation","23.08.2026",false]
+          ].map(([n,b,t,unread])=>`<div class="row" style="gap:12px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid var(--line-soft)">
+            <span class="avatar">${esc(n.charAt(0))}</span>
+            <span class="stack g4" style="flex:1;min-width:0">
+              <span class="row" style="gap:8px"><span style="font-size:14px;font-weight:700">${esc(n)}</span>
+              ${unread?'<span class="pill red" style="padding:2px 8px;font-size:10.5px">Nouveau</span>':''}</span>
+              <span class="tiny">${esc(b)} · ${esc(t)}</span></span></div>`).join('')}</div></div>
+        <div class="adm-card"><h2 class="h3" style="margin-bottom:16px">Raccourcis</h2>
+          <div class="stack g10">${[["Ajouter un produit","box","#/admin/produits"],["Ajouter une réalisation","layers","#/admin/contenus"],
+            ["Modifier les réglages","gear","#/admin/reglages"]].map(([l,i,h])=>
+            `<a class="row" href="${h}" style="gap:11px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:600">
+            <span style="color:var(--brand)">${IC[i](17)}</span>${esc(l)}<span style="margin-left:auto;color:var(--ink-400)">${IC.arrow(15)}</span></a>`).join('')}</div></div>
+      </div>
+    </div>`);
+};
+
+ADM.controle=()=>{
+  const checks=[
+    ["pass","Métadonnées uniques","Les 14 pages publiées ont un titre et une description uniques.",""],
+    ["fail","Statistique non renseignée","La statistique « Gain de productivité » n'a pas de valeur. Elle n'est pas affichée sur le site, mais reste à compléter ou à supprimer.","Compléter la valeur"],
+    ["pass","Sections « à venir »","2 événements futurs programmés. Aucun contenu passé n'est affiché sous un intitulé « à venir ».",""],
+    ["pass","Textes alternatifs","Les 18 médias publiés portent un texte alternatif.",""],
+    ["pass","Pages légales","Mentions légales et politique de confidentialité renseignées et liées au pied de page.",""],
+    ["pass","Liens internes","Aucun lien mort détecté sur les 14 pages publiées.",""],
+    ["warn","Traductions manquantes","5 fiches n'ont pas de version anglaise. Elles n'apparaissent pas dans la navigation anglaise.","Voir les fiches"],
+    ["pass","Témoignages","Le témoignage publié porte l'accord explicite de son auteur.",""],
+    ["pass","Médias hébergés","Aucun média ne pointe vers un service externe.",""]
+  ];
+  const fails=checks.filter(c=>c[0]==='fail').length, warns=checks.filter(c=>c[0]==='warn').length;
+  return admShell('controle',"Contrôle avant publication",
+    "Vérifications automatiques exécutées sur l'ensemble du site publié",
+    `<div class="grid c3">
+      <div class="kpi"><span class="lb">Vérifications réussies</span>
+        <span class="vl num" style="color:var(--ok)">${checks.length-fails-warns}/${checks.length}</span></div>
+      <div class="kpi"><span class="lb">À corriger</span>
+        <span class="vl num" style="color:var(--err)">${fails}</span><span class="ft">bloque la publication</span></div>
+      <div class="kpi"><span class="lb">Avertissements</span>
+        <span class="vl num" style="color:var(--warn)">${warns}</span><span class="ft">n'empêche pas la publication</span></div>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-h"><div class="stack g4"><h2 class="h3">Détail des vérifications</h2>
+        <p class="small">Ces contrôles reprennent les défauts relevés lors de l'audit de l'ancien site. Ils s'exécutent à chaque publication.</p></div>
+        <button class="btn btn-outline btn-sm" type="button" onclick="toast('Contrôle relancé  -  9 vérifications exécutées')">Relancer le contrôle</button></div>
+      <div>${checks.map(([st,t,x,act])=>`<div class="chk-row">
+        <span class="chk-ic ${st==='pass'?'pass':st==='fail'?'fail':'warn'}">${st==='pass'?IC.check(14):st==='fail'?IC.x(14):IC.alert(14)}</span>
+        <span class="stack g4" style="flex:1"><span class="h4">${esc(t)}</span><span class="small">${esc(x)}</span></span>
+        ${act?`<a class="btn btn-outline btn-sm" href="#/admin/edition">${esc(act)}</a>`:''}</div>`).join('')}</div>
+    </div>`,
+    `<button class="btn btn-primary btn-sm" type="button" onclick="toast('Publication bloquée : 1 vérification à corriger')">
+      ${IC.check(15)} Publier les modifications</button>`);
+};
+
+ADM.contenus=()=>{
+  const rows=DB.realisations.map((r,i)=>[r.title,r.sector,String(r.year),i===2?'draft':'published',i===0?'25.08.2026':'12.06.2026',i%3!==2]);
+  return admShell('contenus',"Réalisations","4 contenus  -  3 publiés, 1 brouillon",
+    `<div class="adm-card">
+      <div class="adm-card-h">
+        <div class="row" style="gap:10px;flex:1">
+          <div style="position:relative;flex:1;max-width:320px">
+            <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-400)">${IC.search(17)}</span>
+            <input class="input" style="padding-left:40px" placeholder="Rechercher une réalisation…" aria-label="Rechercher">
+          </div>
+          <select class="select" style="width:auto;min-width:150px" aria-label="Filtrer par état">
+            <option>Tous les états</option><option>Publié</option><option>Brouillon</option><option>À valider</option></select>
+        </div>
+      </div>
+      <div class="tbl-wrap" style="border:0">
+        <table><thead><tr>
+          <th style="width:36px"><input type="checkbox" aria-label="Tout sélectionner"></th>
+          <th>Titre</th><th>Secteur</th><th>Année</th><th>État</th><th>FR / EN</th><th>Modifié</th><th></th></tr></thead>
+        <tbody>${rows.map(([t,s,y,st,d,en])=>{
+          const map={published:["Publié","ok"],draft:["Brouillon","neutral"]};const[lb,tone]=map[st];
+          return `<tr><td><input type="checkbox" aria-label="Sélectionner ${esc(t)}"></td>
+          <td style="font-weight:600">${esc(t)}</td><td class="small">${esc(s)}</td><td class="num">${esc(y)}</td>
+          <td><span class="pill ${tone}">${esc(lb)}</span></td>
+          <td><span class="row" style="gap:5px"><span class="pill ok" style="padding:2px 7px;font-size:10.5px">FR</span>
+            ${en?'<span class="pill ok" style="padding:2px 7px;font-size:10.5px">EN</span>':'<span class="pill warn" style="padding:2px 7px;font-size:10.5px">EN ✕</span>'}</span></td>
+          <td class="small num">${esc(d)}</td>
+          <td><span class="row" style="gap:6px;justify-content:flex-end">
+            <a class="icon-btn" style="width:34px;height:34px" href="#/admin/edition" aria-label="Modifier ${esc(t)}">${IC.edit(15)}</a>
+            <a class="icon-btn" style="width:34px;height:34px" href="#/realisations" aria-label="Prévisualiser ${esc(t)}">${IC.eye(15)}</a>
+            <button class="icon-btn" style="width:34px;height:34px" type="button" aria-label="Supprimer ${esc(t)}"
+              onclick="toast('Confirmation requise avant suppression')">${IC.trash(15)}</button></span></td></tr>`}).join('')}
+        </tbody></table></div>
+    </div>`,
+    `<a class="btn btn-primary btn-sm" href="#/admin/edition">${IC.edit(15)} Nouvelle réalisation</a>`);
+};
+
+ADM.__realisationEdition=()=>{
+  const fr = S.formLang==='fr';
+  return admShell('edition',"Sapin monumental en acier  -  Ekpè","Réalisations · Brouillon · Enregistré automatiquement il y a 2 min",
+    `<div class="grid" style="grid-template-columns:1fr 320px;gap:24px;align-items:start">
+      <div class="stack g24">
+        <div class="adm-card">
+          <div class="adm-card-h"><h2 class="h3">Contenu</h2>
+            <div class="langtab" role="group" aria-label="Langue d'édition">
+              <button type="button" aria-pressed="${fr}" onclick="S.formLang='fr';render()">Français</button>
+              <button type="button" aria-pressed="${!fr}" onclick="S.formLang='en';render()">English</button></div></div>
+          ${!fr?`<div class="notice warn" style="margin-bottom:20px">${IC.alert(18)}<div class="stack g4">
+            <strong>Traduction anglaise incomplète</strong>
+            <p class="small">Tant que les champs obligatoires ne sont pas traduits, cette fiche n'apparaît pas sur la version anglaise du site  -  aucun contenu vide n'est affiché au public.</p></div></div>`:''}
+          <div class="stack g20">
+            <div class="field"><label for="e-t">Titre<span class="req">*</span></label>
+              <input class="input" id="e-t" value="${fr?'Sapin monumental en acier  -  Ekpè':''}" placeholder="${fr?'':'Enter the English title…'}">
+              <div class="between"><span class="hint">Apparaît en titre de page et dans les listes.</span>
+              <span class="counter">${fr?'32':'0'} / 90</span></div></div>
+            <div class="field"><label for="e-s">Résumé<span class="req">*</span></label>
+              <textarea class="textarea" id="e-s" style="min-height:96px" placeholder="${fr?'':'Enter the English summary…'}">${fr?"Conception et fabrication d'un sapin lumineux de 9,5 m en acier GKS, installé à Ekpè pour les fêtes de fin d'année 2025.":''}</textarea>
+              <div class="between"><span class="hint">Doit décrire cette réalisation précisément  -  jamais un texte générique réutilisable.</span>
+              <span class="counter">${fr?'118':'0'} / 200</span></div></div>
+            <div class="grid c2" style="gap:18px">
+              <div class="field"><label for="e-c">Client</label><input class="input" id="e-c" value="SONIMEX"></div>
+              <div class="field"><label for="e-y">Année</label><input class="input num" id="e-y" type="number" value="2025"></div>
+              <div class="field"><label for="e-sec">Secteur</label><select class="select" id="e-sec">
+                <option>Construction métallique</option><option>Égrenage du coton</option><option>Formation</option></select></div>
+              <div class="field"><label for="e-d">Domaine lié</label><select class="select" id="e-d">
+                ${DB.domains.map(d=>`<option ${d.slug==='soudure-chaudronnerie'?'selected':''}>${esc(d.title)}</option>`).join('')}</select></div>
+            </div>
+            <div class="field"><label for="e-b">Contexte et problématique</label>
+              <textarea class="textarea" id="e-b">${fr?"SONIMEX souhaitait marquer l'espace urbain d'Ekpè par une œuvre lumineuse durable, réalisée localement.":''}</textarea></div>
+          </div>
+        </div>
+        <div class="adm-card">
+          <h2 class="h3" style="margin-bottom:18px">Résultats chiffrés</h2>
+          <p class="small" style="margin-bottom:16px">Une valeur laissée vide n'est jamais affichée sur le site public.</p>
+          <div class="stack g12">
+            ${[["9,5 m","Hauteur de l'ouvrage"],["100 %","Fabrication locale"],["4 sem.","Délai de réalisation"]].map(([v,k])=>
+              `<div class="row" style="gap:12px"><input class="input num" style="max-width:120px" value="${esc(v)}" aria-label="Valeur">
+              <input class="input" style="flex:1" value="${esc(k)}" aria-label="Libellé">
+              <button class="icon-btn" type="button" aria-label="Supprimer cette ligne">${IC.trash(15)}</button></div>`).join('')}
+            <button class="btn btn-outline btn-sm" type="button" style="align-self:flex-start">+ Ajouter un résultat</button>
+          </div>
+        </div>
+        <div class="adm-card">
+          <h2 class="h3" style="margin-bottom:18px">Référencement</h2>
+          <div class="stack g18">
+            <div class="field"><label for="e-st">Titre SEO<span class="req">*</span></label>
+              <input class="input" id="e-st" value="${fr?'Sapin monumental en acier 9,5 m  -  Ekpè | Africa Ingénierie':''}">
+              <div class="between"><span class="hint">Doit être unique sur l'ensemble du site.</span>
+              <span class="counter ${fr?'':''}">${fr?'56':'0'} / 60</span></div></div>
+            <div class="field"><label for="e-sd">Description SEO<span class="req">*</span></label>
+              <textarea class="textarea" id="e-sd" style="min-height:76px">${fr?"Conception et fabrication d'un sapin lumineux de 9,5 m en acier GKS pour SONIMEX à Ekpè, Bénin. Réalisation 100 % locale.":''}</textarea>
+              <div class="between"><span class="hint">Unique. 150 à 160 caractères recommandés.</span>
+              <span class="counter">${fr?'129':'0'} / 160</span></div></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stack g20" style="position:sticky;top:88px">
+        <div class="adm-card stack g16">
+          <div class="between"><span class="h4">État</span><span class="pill neutral">Brouillon</span></div>
+          <div class="stack g10">
+            <button class="btn btn-primary btn-block btn-sm" type="button" onclick="toast('Réalisation publiée')">${IC.check(15)} Publier</button>
+            <button class="btn btn-outline btn-block btn-sm" type="button" onclick="toast('Brouillon enregistré')">${IC.save(15)} Enregistrer</button>
+            <a class="btn btn-outline btn-block btn-sm" href="#/realisations/sapin-monumental-ekpe">${IC.eye(15)} Prévisualiser</a>
+          </div>
+          <p class="tiny" style="padding-top:12px;border-top:1px solid var(--line-soft)">
+            Dernière sauvegarde automatique : il y a 2 minutes.</p>
+        </div>
+        <div class="adm-card stack g14">
+          <span class="h4">Image de couverture</span>
+          ${plate("Photo  -  Sapin monumental illuminé",'ratio-43','img')}
+          <div class="field"><label for="e-alt">Texte alternatif<span class="req">*</span></label>
+            <input class="input" id="e-alt" value="Sapin monumental en acier de 9,5 m illuminé à Ekpè">
+            <span class="hint">Obligatoire  -  lu par les lecteurs d'écran.</span></div>
+        </div>
+        <div class="adm-card stack g12">
+          <span class="h4">Historique</span>
+          <div class="tl">${[["Modifié par Arnaud DEGLA","Il y a 2 min"],["Créé par Arnaud DEGLA","24.08.2026"]].map(([t,d])=>
+            `<div class="tl-item stack g4"><span style="font-size:13.5px;font-weight:600">${esc(t)}</span>
+            <span class="tiny num">${esc(d)}</span></div>`).join('')}</div>
+          <a class="tlink" style="font-size:13.5px" href="#/admin/historique">Journal complet ${IC.arrow(14)}</a>
+        </div>
+      </aside>
+    </div>`);
+};
+
+/* Éditeur commun final : tous les liens « Modifier » arrivent ici.
+   Les champs sont volontairement alignés sur les propriétés consommées par
+   les vues publiques, afin d’éviter un admin qui ne ferait que lister. */
+ADM.edition=()=>{const qs=new URLSearchParams(location.hash.split('?')[1]||'');const product=qs.get('kind')==='produits'?D('produits').find(p=>p.slug===qs.get('slug')):null;const edit=product||{};const pv=(key,fallback='')=>esc(edit[key]??fallback);return admShell('edition',product?`Modifier : ${edit.title}`:"Éditeur de contenu","Fiche publique · FR/EN · brouillon avant publication",
+  `<form class="stack g24" onsubmit="saveContentDraft(event)">
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+      <div class="adm-card stack g18"><div class="adm-card-h"><h2 class="h3">Identification publique</h2><span class="pill info">FR / EN</span></div><div class="field"><label for="ed-module">Module</label><select class="select" id="ed-module"><option selected>Produits</option><option>Expertises</option><option>Réalisations</option><option>Formations</option><option>Événements</option><option>Projets</option><option>Mot du PDG</option><option>Qui sommes-nous</option><option>À propos</option><option>Contact</option></select></div><div class="field"><label for="ed-slug">Slug / URL</label><input class="input" id="ed-slug" value="${pv('slug','nouvelle-fiche')}" required></div><div class="field"><label for="ed-title-fr">Titre français</label><input class="input" id="ed-title-fr" value="${pv('title')}" placeholder="Titre affiché au public" required></div><div class="field"><label for="ed-title-en">Titre anglais</label><input class="input" id="ed-title-en" placeholder="English title"></div></div>
+      <div class="adm-card stack g18"><div class="adm-card-h"><h2 class="h3">Publication</h2><span class="pill neutral">Brouillon</span></div><div class="field"><label for="ed-status">État</label><select class="select" id="ed-status"><option selected>Brouillon</option><option>À valider</option><option>Publié</option><option>Archivé</option></select></div><div class="field"><label for="ed-category">Catégorie / thème</label><input class="input" id="ed-category" value="${pv('cat')}" placeholder="Ex. Énergie, Maintenance, Diagnostic"></div><div class="field"><label for="ed-date">Date / disponibilité / lieu</label><input class="input" id="ed-date" value="${pv('avail')}" placeholder="Ex. Sur devis · Cotonou · 18 septembre 2026"></div><label class="check"><input type="checkbox" id="ed-visible"><span>Afficher sur le site public après validation</span></label><p class="tiny">Un contenu non publié, incomplet ou non traduit ne doit jamais générer de bloc vide côté public.</p></div>
+    </div>
+    <div class="adm-card stack g18"><div class="adm-card-h"><h2 class="h3">Contenu affiché sur la page</h2><span class="tiny">Résumé, détail et données spécifiques</span></div><div class="grid c2"><div class="field"><label for="ed-short">Accroche courte</label><textarea class="textarea" id="ed-short" placeholder="Carte, page d’accueil et aperçu">${pv('short')}</textarea></div><div class="field"><label for="ed-body">Description détaillée</label><textarea class="textarea" id="ed-body" placeholder="Contenu principal de la page">${pv('desc')}</textarea></div></div><div class="field"><label for="ed-specs">Caractéristiques / objectifs / axes de service</label><textarea class="textarea" id="ed-specs" placeholder="Pour Produits : une caractéristique par ligne. Pour Formations : objectifs. Pour Expertises : axes de service.">${edit.specs?edit.specs.map(s=>`${s[0]} : ${s[1]}`).join('\n'):''}</textarea></div></div>
+    <div class="adm-card stack g18"><div class="adm-card-h"><h2 class="h3">Média, accessibilité et conversion</h2><span class="tiny">Aucun visuel ne doit être publié sans alternative textuelle</span></div><div class="grid c2"><div class="field"><label for="ed-media">Image / média principal</label><input class="input" id="ed-media" placeholder="Choisir dans la médiathèque"></div><div class="field"><label for="ed-alt">Texte alternatif</label><input class="input" id="ed-alt" placeholder="Description utile pour un lecteur d’écran" required></div><div class="field"><label for="ed-cta">Libellé du CTA</label><input class="input" id="ed-cta" placeholder="Demander un devis, S’inscrire…"></div><div class="field"><label for="ed-cta-url">Destination du CTA</label><input class="input" id="ed-cta-url" placeholder="#/contact ou URL autorisée"></div></div></div>
+    <div class="adm-card stack g18"><div class="adm-card-h"><h2 class="h3">SEO individuel</h2><span class="tiny">Unique par page</span></div><div class="grid c2"><div class="field"><label for="ed-seo-title">Titre SEO</label><input class="input" id="ed-seo-title" maxlength="60" placeholder="Titre unique, 50 à 60 caractères"></div><div class="field"><label for="ed-og">Image Open Graph</label><input class="input" id="ed-og" placeholder="Média de partage social"></div></div><div class="field"><label for="ed-seo-desc">Description SEO</label><textarea class="textarea" id="ed-seo-desc" maxlength="160" placeholder="Description unique, 150 à 160 caractères"></textarea></div></div>
+    <div class="between"><a class="btn btn-outline" href="#/admin/dashboard">Annuler</a><div class="row"><button class="btn btn-outline" type="button" onclick="toast('Brouillon enregistré')">Enregistrer</button><button class="btn btn-primary" type="submit">Soumettre à validation</button></div></div>
+  </form>`);};
+
+ADM.reglages=()=>admShell('reglages',"Réglages généraux",
+  "Tous les éléments transverses du site  -  modifiables sans intervention technique",
+  `<div class="grid" style="grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+    <div class="adm-card stack g20">
+      <h2 class="h3">Identité</h2>
+      <div class="field"><label for="r-n">Nom du site<span class="req">*</span></label>
+        <input class="input" id="r-n" value="Africa Ingénierie">
+        <span class="hint">Graphie officielle unique  -  reprise partout sur le site.</span></div>
+      <div class="grid c2" style="gap:16px">
+        <div class="stack g8"><span class="small" style="font-weight:700">Logo</span>
+          <div class="card" style="padding:16px;display:grid;place-items:center;background:var(--surface)">
+            <span class="brandmark"><span class="mk">${IC.gear(20)}</span>
+            <span><span class="nm" style="font-size:15px">Africa Ingénierie</span></span></span></div>
+          <button class="btn btn-outline btn-sm btn-block" type="button">Remplacer</button></div>
+        <div class="stack g8"><span class="small" style="font-weight:700">Favicon</span>
+          <div class="card" style="padding:16px;display:grid;place-items:center;background:var(--surface)">
+            <span class="mk" style="width:40px;height:40px;border-radius:9px;background:linear-gradient(140deg,var(--brand),var(--brand-deep));display:grid;place-items:center;color:#fff">${IC.gear(20)}</span></div>
+          <button class="btn btn-outline btn-sm btn-block" type="button">Remplacer</button></div>
+      </div>
+      <div class="field"><label for="r-b">Phrase d'engagement</label>
+        <textarea class="textarea" id="r-b" style="min-height:92px">${esc(DB.site.baseline)}</textarea>
+        <span class="hint">Affichée en pied de page sur toutes les pages.</span></div>
+    </div>
+    <div class="adm-card stack g20">
+      <h2 class="h3">Coordonnées</h2>
+      <div class="field"><label for="r-a">Adresse</label>
+        <input class="input" id="r-a" value="${esc(DB.site.address.l1)}"></div>
+      <div class="grid c2" style="gap:16px">
+        <div class="field"><label for="r-v">Ville</label><input class="input" id="r-v" value="Ouèdo, Abomey-Calavi"></div>
+        <div class="field"><label for="r-p">Pays</label><input class="input" id="r-p" value="Bénin"></div>
+      </div>
+      <div class="grid c2" style="gap:16px">
+        <div class="field"><label for="r-t">Téléphone</label><input class="input num" id="r-t" value="${esc(DB.site.phone)}">
+          <span class="hint">Format international.</span></div>
+        <div class="field"><label for="r-w">WhatsApp</label><input class="input num" id="r-w" value="+229 01 42 54 54 95">
+          <span class="hint">Vide = bouton masqué.</span></div>
+      </div>
+      <div class="field"><label for="r-e">Email de contact</label><input class="input" id="r-e" type="email" value="${esc(DB.site.email)}"></div>
+    </div>
+    <div class="adm-card stack g18">
+      <div class="stack g6"><h2 class="h3">Réseaux sociaux</h2>
+        <p class="small">Un réseau sans adresse n'est pas affiché sur le site  -  aucun lien mort n'est jamais publié.</p></div>
+      ${[["LinkedIn","li","https://linkedin.com/company/…"],["Facebook","fb","https://facebook.com/…"],["YouTube","yt",""]].map(([n,k,v])=>
+        `<div class="row" style="gap:12px">
+          <span style="width:40px;height:40px;border-radius:9px;background:var(--surface);color:var(--ink-500);display:grid;place-items:center;flex:none">${IC[k](18)}</span>
+          <div class="field" style="flex:1"><label class="sr-only" style="position:absolute;left:-9999px" for="s-${k}">${esc(n)}</label>
+            <input class="input" id="s-${k}" value="${esc(v)}" placeholder="Adresse ${esc(n)}  -  vide pour masquer"></div>
+          ${v?'<span class="pill ok">Affiché</span>':'<span class="pill neutral">Masqué</span>'}</div>`).join('')}
+    </div>
+    <div class="adm-card stack g18">
+      <div class="stack g6"><h2 class="h3">Chiffres clés</h2>
+        <p class="small">Une valeur vide ou égale à zéro n'est jamais affichée. Si aucune valeur n'est renseignée, la section entière disparaît du site.</p></div>
+      ${DB.stats.map(s=>`<div class="row" style="gap:12px">
+        <input class="input num" style="max-width:96px" value="${s.v??''}" placeholder=" - " aria-label="Valeur ${esc(s.k)}">
+        <input class="input" style="flex:1" value="${esc(s.k)}" aria-label="Libellé">
+        ${s.v?'<span class="pill ok">Affiché</span>':'<span class="pill warn">Non affiché</span>'}</div>`).join('')}
+    </div>
+    <div class="adm-card stack g18">
+      <div class="stack g6"><h2 class="h3">Navigation & langues</h2>
+        <p class="small">Ces libellés pilotent le menu principal, le menu mobile et le pied de page. La version française reste la langue par défaut du prototype.</p></div>
+      <div class="grid c2" style="gap:16px">
+        ${[["home","Accueil"],["expertises","Expertises"],["realisations","Réalisations"],["formations","Formations & événements"],["produits","Produits"],["about","À propos"]].map(([k,label])=>`<div class="field"><label for="nav-${k}">${esc(label)}</label><input class="input" id="nav-${k}" value="${esc(DB.site.navigation?.[k]||label)}"></div>`).join('')}
+      </div>
+      <div class="row" style="gap:16px;align-items:center"><label class="check"><input type="checkbox" checked disabled><span>Français actif et langue par défaut</span></label><label class="check"><input type="checkbox" ${DB.site.languages?.en?'checked':''}><span>Version anglaise active</span></label></div>
+    </div>
+    <div class="adm-card stack g18">
+      <div class="stack g6"><h2 class="h3">Mentions, confidentialité & cookies</h2>
+        <p class="small">Les textes saisis ici sont repris dans les pages légales et le bandeau de consentement public.</p></div>
+      ${[["legal-editor","Éditeur du site","editor"],["legal-hosting","Hébergement","hosting"],["legal-property","Propriété intellectuelle","property"],["legal-data","Données personnelles","data"],["legal-cookies","Cookies","cookies"],["legal-rights","Vos droits","rights"]].map(([id,label,key])=>`<div class="field"><label for="${id}">${esc(label)}</label><textarea class="textarea" id="${id}" style="min-height:72px">${esc(DB.site.legal?.[key]||'')}</textarea></div>`).join('')}
+      <div class="field"><label for="cookie-title">Titre du bandeau cookies</label><input class="input" id="cookie-title" value="${esc(DB.site.cookieTitle||'Votre choix sur les cookies')}"></div>
+      <div class="field"><label for="cookie-text">Texte du bandeau cookies</label><textarea class="textarea" id="cookie-text" style="min-height:72px">${esc(DB.site.cookieText||'')}</textarea></div>
+    </div>
+    <div class="adm-card stack g18">
+      <div class="stack g6"><h2 class="h3">SEO global</h2><p class="small">Valeurs de secours utilisées dans la balise meta description et le titre de la page d’accueil.</p></div>
+      <div class="field"><label for="seo-title">Titre SEO global</label><input class="input" id="seo-title" maxlength="60" value="${esc(DB.site.seo?.title||'')}"></div>
+      <div class="field"><label for="seo-description">Description SEO globale</label><textarea class="textarea" id="seo-description" maxlength="160">${esc(DB.site.seo?.description||'')}</textarea></div>
+      <div class="field"><label for="redirects">Redirections permanentes</label><textarea class="textarea" id="redirects" placeholder="Une redirection par ligne : /ancienne-url → /nouvelle-url"></textarea></div>
+    </div>
+  </div>`,
+  `<button class="btn btn-primary btn-sm" type="button" onclick="saveSiteSettings()">${IC.save(15)} Enregistrer</button>`);
+
+ADM.messages=()=>admShell('messages',"Messages reçus","3 messages non lus sur 27",
+  `<div class="adm-card">
+    <div class="tbl-wrap" style="border:0"><table>
+      <thead><tr><th>Expéditeur</th><th>Besoin</th><th>Société</th><th>Reçu le</th><th>État</th><th></th></tr></thead>
+      <tbody>${[
+        ["Koffi ADJOVI","Diagnostic industriel","SODECO","25.08.2026","new"],
+        ["Fatou DIALLO","Formation","Usine de Kétou","25.08.2026","new"],
+        ["Ibrahim TRAORÉ","Maintenance"," - ","24.08.2026","new"],
+        ["Marc HOUNKPÈ","Installation / Mise en service","BENIN AGRO","22.08.2026","progress"],
+        ["Aïcha BAMBA","Fourniture d'équipements","SOCOTEX","19.08.2026","done"]
+      ].map(([n,b,s,d,st])=>{
+        const map={new:["Nouveau","red"],progress:["En cours","warn"],done:["Répondu","ok"]};const[lb,tone]=map[st];
+        return `<tr><td><span class="row" style="gap:10px"><span class="avatar">${esc(n.charAt(0))}</span>
+        <span style="font-weight:600">${esc(n)}</span></span></td>
+        <td class="small">${esc(b)}</td><td class="small">${esc(s)}</td><td class="small num">${esc(d)}</td>
+        <td><span class="pill ${tone}">${esc(lb)}</span></td>
+        <td style="text-align:right"><button class="btn btn-outline btn-sm" type="button" onclick="toast('Ouverture du message')">Lire</button></td></tr>`}).join('')}
+      </tbody></table></div></div>`);
+
+ADM.medias=()=>admShell('medias',"Médiathèque","18 médias  -  tous avec texte alternatif",
+  `<div class="adm-card">
+    <div class="adm-card-h"><h2 class="h3">Tous les médias</h2>
+      <button class="btn btn-primary btn-sm" type="button" onclick="toast('Sélecteur de fichiers ouvert')">+ Téléverser</button></div>
+    <div class="grid c4" style="gap:16px">
+      ${["Sapin monumental illuminé, Ekpè","Ligne d'égrenage  -  vue d'ensemble","Atelier de chaudronnerie","Portrait  -  Arnaud DEGLA",
+         "Session de formation sur site","Tableau électrique industriel","Circuit d'humidification","Équipe en intervention"].map(l=>
+        `<div class="card" style="overflow:hidden">${plate(l,'ratio-11','img')}
+        <div class="card-pad-sm stack g6"><span class="tiny" style="font-weight:700;color:var(--ink)">${esc(l)}</span>
+        <span class="pill ok" style="align-self:flex-start;padding:2px 8px;font-size:10.5px">${IC.check(11)} Alt renseigné</span></div></div>`).join('')}
+    </div></div>`);
+
+ADM.historique=()=>admShell('historique',"Historique des modifications","Journal en lecture seule  -  non modifiable, y compris par un administrateur",
+  `<div class="adm-card">
+    <div class="adm-card-h"><h2 class="h3">Journal</h2>
+      <div class="row" style="gap:10px">
+        <select class="select" style="width:auto" aria-label="Filtrer par utilisateur"><option>Tous les utilisateurs</option><option>Arnaud DEGLA</option></select>
+        <select class="select" style="width:auto" aria-label="Filtrer par action"><option>Toutes les actions</option><option>Publication</option><option>Modification</option></select></div></div>
+    <div class="tl">${[
+      ["Publication","Sapin monumental en acier  -  Ekpè","Arnaud DEGLA","25.08.2026 · 09:42","ok"],
+      ["Modification","Réglages généraux  -  téléphone","Arnaud DEGLA","24.08.2026 · 16:10","info"],
+      ["Création","Les explorateurs de l'ingénierie","Arnaud DEGLA","24.08.2026 · 11:05","info"],
+      ["Soumission à validation","Maintenance préventive","Équipe éditoriale","22.08.2026 · 14:33","warn"],
+      ["Connexion","Session ouverte","Arnaud DEGLA","22.08.2026 · 08:01","neutral"]
+    ].map(([a,t,u,d,tone])=>`<div class="tl-item">
+      <div class="row" style="gap:10px;margin-bottom:5px"><span class="pill ${tone}">${esc(a)}</span>
+      <span style="font-weight:600;font-size:14.5px">${esc(t)}</span></div>
+      <span class="tiny num">${esc(u)} · ${esc(d)}</span></div>`).join('')}</div>
+  </div>`);
+
+/* ═══════════════════════════════════════════════════════════
+   8. ROUTEUR  -  URL réelle par vue, retour arrière fonctionnel
+   ═══════════════════════════════════════════════════════════ */
+function resolve(path){
+  const p=path.replace(/^#/,'')||'/';
+  const seg=p.split('/').filter(Boolean);
+  if(seg[0]==='admin'){
+    const [section='dashboard',query='']=String(seg[1]||'dashboard').split('?');
+    const params=new URLSearchParams(query);
+    return {admin:true,section,kind:params.get('kind')||'',slug:params.get('slug')||''};
+  }
+  const map={'':'home','a-propos':'about','expertises':'expertises','realisations':'realisations',
+    'projets':'projets','formations':'formations','produits':'produits','evenements':'evenements',
+    'contact':'contact'};
+  if(!seg.length) return {view:'home'};
+  const root=seg[0];
+  if(root==='mentions-legales'||root==='confidentialite') return {view:'legal',kind:root};
+  if(!(root in map)) return {view:'e404'};
+  if(seg[1]){
+    const det={expertises:'expertiseDetail',realisations:'realisationDetail',projets:'projetDetail',
+      formations:'formationDetail',produits:'produitDetail',evenements:'evenementDetail'}[root];
+    return det?{view:det,slug:seg[1]}:{view:'e404'};
+  }
+  return {view:map[root]};
+}
+
+function render(){
+  const path=location.hash.replace(/^#/,'')||'/';
+  const r=resolve(path);
+  const hd=document.getElementById('chrome'), ft=document.getElementById('chrome-ft'),
+        main=document.getElementById('main'), fl=document.getElementById('floats');
+  const seo=DB.site.seo||{};
+  const meta=document.querySelector('meta[name="description"]');
+  if(meta&&seo.description) meta.setAttribute('content',seo.description);
+
+  if(r.admin){
+    hd.innerHTML=''; ft.innerHTML=''; fl.innerHTML='';
+    main.innerHTML=(ADM[r.section]||ADM.dashboard)(r);
+    document.title="Administration  -  Africa Ingénierie";
+  }else{
+    hd.innerHTML=header(path);
+    main.innerHTML=(V[r.view]||V.e404)(r.slug||r.kind);
+    ft.innerHTML=footer();
+    fl.innerHTML=floats();
+    const titles={home:seo.title||"Africa Ingénierie  -  Ingénierie industrielle au Bénin",about:"À propos",
+      expertises:"Nos expertises",realisations:"Nos réalisations",projets:"Nos projets",
+      formations:"Catalogue des formations",produits:"Nos produits",evenements:"Événements",
+      contact:"Contact",e404:"Page introuvable"};
+    document.title=(titles[r.view]||"Africa Ingénierie")+(r.view==='home'?'':"  -  Africa Ingénierie");
+    bindPublic();
+  }
+  window.scrollTo({top:0,behavior:'instant'});
+  observeReveal(); countUp(); bindDemo();
+}
+
+/* ── Éléments flottants ────────────────────────────────── */
+function floats(){
+  const hidden=sessionStorage.getItem('wa-hidden')==='1';
+  const cookieDone=sessionStorage.getItem('cookies')==='1';
+  return `${hidden?'':`<div style="position:relative">
+    <a class="wa" href="https://wa.me/${DB.site.whatsapp}" target="_blank" rel="noopener">
+      ${IC.wa(20)}<span>WhatsApp</span>
+      <button class="wa-close" type="button" aria-label="Masquer le bouton WhatsApp"
+        onclick="event.preventDefault();event.stopPropagation();sessionStorage.setItem('wa-hidden','1');render()">${IC.x(11)}</button>
+    </a></div>`}
+  ${cookieDone?'':`<div class="cookiebar" role="dialog" aria-label="Consentement aux cookies">
+    <div class="stack g16">
+      <div class="stack g6"><strong style="font-size:15.5px">${esc(DB.site.cookieTitle||"Votre choix sur les cookies")}</strong>
+        <p class="small">${esc(DB.site.cookieText||"Nous utilisons les cookies strictement nécessaires au fonctionnement du site. Les cookies de mesure d'audience ne sont déposés qu'avec votre accord.")}
+        <a href="#/confidentialite">En savoir plus</a></p></div>
+      <div class="row" style="gap:10px">
+        <button class="btn btn-brand btn-sm" type="button" onclick="acceptCookies()">Tout accepter</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="acceptCookies()">Tout refuser</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="toast('Panneau de réglage détaillé')">Personnaliser</button>
+      </div></div></div>`}`;
+}
+function acceptCookies(){ sessionStorage.setItem('cookies','1'); render(); toast('Votre choix a été enregistré'); }
+function settingValue(id){ return document.getElementById(id)?.value?.trim()||''; }
+function saveSiteSettings(){
+  DB.site.name=settingValue('r-n')||DB.site.name;
+  DB.site.baseline=settingValue('r-b')||DB.site.baseline;
+  DB.site.address.l1=settingValue('r-a')||DB.site.address.l1;
+  DB.site.address.l2=settingValue('r-v')||DB.site.address.l2;
+  DB.site.address.country=settingValue('r-p')||DB.site.address.country;
+  DB.site.phone=settingValue('r-t')||DB.site.phone;
+  DB.site.phoneRaw=DB.site.phone.replace(/[^0-9+]/g,'');
+  DB.site.whatsapp=settingValue('r-w').replace(/[^0-9]/g,'')||DB.site.whatsapp;
+  DB.site.email=settingValue('r-e')||DB.site.email;
+  DB.site.navigation={...DB.site.navigation,home:settingValue('nav-home'),expertises:settingValue('nav-expertises'),realisations:settingValue('nav-realisations'),formations:settingValue('nav-formations'),produits:settingValue('nav-produits'),about:settingValue('nav-about')};
+  DB.site.languages={...DB.site.languages,en:!!document.querySelector('#nav-about')?.closest('.adm-card')?.querySelectorAll('input[type="checkbox"]')[1]?.checked};
+  DB.site.legal={...DB.site.legal,editor:settingValue('legal-editor'),hosting:settingValue('legal-hosting'),property:settingValue('legal-property'),data:settingValue('legal-data'),cookies:settingValue('legal-cookies'),rights:settingValue('legal-rights')};
+  DB.site.cookieTitle=settingValue('cookie-title')||DB.site.cookieTitle;
+  DB.site.cookieText=settingValue('cookie-text')||DB.site.cookieText;
+  DB.site.seo={...DB.site.seo,title:settingValue('seo-title')||DB.site.seo.title,description:settingValue('seo-description')||DB.site.seo.description};
+  try{localStorage.setItem('ai-site-settings',JSON.stringify({site:DB.site}));}catch(e){}
+  toast('Réglages enregistrés : navigation, légal, cookies et SEO sont à jour');
+}
+function saveContentDraft(event){
+  event.preventDefault();
+  const draft={module:settingValue('ed-module'),slug:settingValue('ed-slug'),titleFr:settingValue('ed-title-fr'),titleEn:settingValue('ed-title-en'),status:settingValue('ed-status'),category:settingValue('ed-category'),date:settingValue('ed-date'),short:settingValue('ed-short'),body:settingValue('ed-body'),specs:settingValue('ed-specs'),media:settingValue('ed-media'),alt:settingValue('ed-alt'),cta:settingValue('ed-cta'),ctaUrl:settingValue('ed-cta-url'),seoTitle:settingValue('ed-seo-title'),og:settingValue('ed-og'),seoDescription:settingValue('ed-seo-desc'),visible:!!document.querySelector('#ed-visible:checked'),updatedAt:new Date().toISOString()};
+  try{localStorage.setItem('ai-content-draft',JSON.stringify(draft));}catch(e){}
+  if(draft.module==='Produits'&&draft.status==='Publié'&&draft.visible&&draft.slug){
+    const specs=draft.specs.split(/\n+/).map(x=>x.split(/\s*:\s*/)).filter(x=>x[0]&&x[1]).map(x=>[x[0],x.slice(1).join(':')]);
+    const product={slug:draft.slug,cat:draft.category,title:draft.titleFr,short:draft.short,avail:draft.date,desc:draft.body,specs,media:draft.media,alt:draft.alt,seoTitle:draft.seoTitle,og:draft.og,seoDescription:draft.seoDescription};
+    const existing=DB.produits.find(p=>p.slug===draft.slug);
+    if(existing) Object.assign(existing,product); else DB.produits.push(product);
+    try{localStorage.setItem('ai-published-content',JSON.stringify({products:DB.produits}));}catch(e){}
+    toast('Produit publié et visible dans le catalogue public');
+    return;
+  }
+  toast(`${draft.module||'Contenu'} enregistré en brouillon  -  validation requise avant publication`);
+}
+function loadMap(){
+  const b=document.getElementById('mapbox'); if(!b) return;
+  b.innerHTML=plate("Carte chargée  -  Ouèdo, Abomey-Calavi, Bénin",'ratio-43','pin');
+  toast('Carte chargée');
+}
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status');
+  t.innerHTML=IC.check(17)+'<span>'+esc(msg)+'</span>'; document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+/* ── Interactions publiques ────────────────────────────── */
+function bindPublic(){
+  const b=document.getElementById('burger'), mn=document.getElementById('mobnav');
+  if(b&&mn){ b.onclick=()=>{ const o=b.getAttribute('aria-expanded')==='true';
+    b.setAttribute('aria-expanded',String(!o)); mn.style.display=o?'none':'block'; }; }
+  document.querySelectorAll('#mobnav a').forEach(a=>a.addEventListener('click',()=>{
+    mn.style.display='none'; b?.setAttribute('aria-expanded','false'); }));
+
+  const f=document.getElementById('cform');
+  if(f){
+    const msg=document.getElementById('f-msg'), cnt=document.getElementById('f-msg-c');
+    msg?.addEventListener('input',()=>{ cnt.textContent=`${msg.value.length} / 3000`;
+      cnt.classList.toggle('over',msg.value.length>3000); });
+    f.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      let ok=true;
+      const checks=[['f-nom',v=>v.trim().length>=2,"Indiquez votre nom (2 caractères minimum)."],
+        ['f-mail',v=>/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v),"Cette adresse email n'est pas valide. Exemple : nom@entreprise.com"],
+        ['f-besoin',v=>!!v,"Sélectionnez le besoin qui correspond à votre demande."],
+        ['f-msg',v=>v.trim().length>=20,"Décrivez votre besoin en 20 caractères minimum."]];
+      checks.forEach(([id,test,err])=>{
+        const el=document.getElementById(id), fld=el.closest('.field');
+        fld.querySelector('.err-msg')?.remove(); fld.classList.remove('invalid');
+        if(!test(el.value)){ ok=false; fld.classList.add('invalid');
+          const p=document.createElement('p'); p.className='err-msg';
+          p.innerHTML=IC.alert(14)+'<span>'+esc(err)+'</span>'; fld.appendChild(p); }
+      });
+      const rg=document.getElementById('f-rgpd');
+      const alert=document.getElementById('form-alert');
+      if(!rg.checked){ ok=false; }
+      if(!ok){
+        alert.innerHTML=`<div class="notice err">${IC.alert(19)}<div class="stack g4">
+          <strong>Votre demande n'a pas pu être envoyée</strong>
+          <p class="small">${rg.checked?'Vérifiez les champs signalés ci-dessous.':'Vous devez accepter la politique de confidentialité pour envoyer votre demande.'}</p></div></div>`;
+        alert.scrollIntoView({behavior:'smooth',block:'center'});
+      }else{
+        alert.innerHTML=`<div class="notice ok">${IC.check(19)}<div class="stack g4">
+          <strong>Votre demande a bien été envoyée</strong>
+          <p class="small">Un accusé de réception vient de vous être adressé par email. Un ingénieur vous répond sous 24 h ouvrées.</p></div></div>`;
+        f.querySelectorAll('.input,.textarea,.select').forEach(i=>i.value=''); rg.checked=false;
+        document.getElementById('f-msg-c').textContent='0 / 3000';
+        alert.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+  }
+}
+function bindTheme(){
+  const btn=document.getElementById('theme-btn'); if(!btn) return;
+  const cur=document.documentElement.getAttribute('data-theme');
+  const dark = cur==='dark' || (!cur && matchMedia('(prefers-color-scheme:dark)').matches);
+  btn.innerHTML = dark?IC.sun(19):IC.moon(19);
+  btn.setAttribute('aria-label', dark?'Activer le thème clair':'Activer le thème sombre');
+  btn.onclick=()=>{ const d=document.documentElement.getAttribute('data-theme');
+    const isDark = d==='dark' || (!d && matchMedia('(prefers-color-scheme:dark)').matches);
+    document.documentElement.setAttribute('data-theme', isDark?'light':'dark');
+    try{localStorage.setItem('ai-theme',isDark?'light':'dark')}catch(e){}
+    bindTheme(); };
+}
+function observeReveal(){
+  const els=document.querySelectorAll('.reveal:not(.in)');
+  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion:reduce)').matches){
+    els.forEach(e=>e.classList.add('in')); return; }
+  const io=new IntersectionObserver((en)=>en.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);} }),{threshold:.12});
+  els.forEach(e=>io.observe(e));
+}
+function countUp(){
+  const els=document.querySelectorAll('[data-count]');
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+    els.forEach(e=>e.textContent=e.dataset.count); return; }
+  els.forEach(e=>{
+    const target=+e.dataset.count;
+    if(!target){e.textContent=e.dataset.count;return;}   // jamais un 0 persistant
+    const io=new IntersectionObserver((en)=>{ en.forEach(x=>{ if(!x.isIntersecting) return; io.unobserve(e);
+      let s=null; const dur=1100;
+      const step=(t)=>{ if(!s)s=t; const p=Math.min((t-s)/dur,1);
+        e.textContent=Math.round(target*(1-Math.pow(1-p,3))); if(p<1)requestAnimationFrame(step); };
+      requestAnimationFrame(step); }); },{threshold:.4});
+    io.observe(e);
+  });
+}
+
+/* ── Panneau de revue de maquette ──────────────────────── */
+function bindDemo(){
+  const ex=document.getElementById('demo-panel');
+  if(ex){ ex.style.left = location.hash.startsWith('#/admin')?'266px':'16px'; return; }
+  const d=document.createElement('div'); d.id='demo-panel';
+  const inAdmin=location.hash.startsWith('#/admin');
+  d.style.cssText='position:fixed;left:'+(inAdmin?'266px':'16px')+';bottom:16px;z-index:99;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh-2);padding:12px 14px;display:flex;gap:12px;align-items:center;font-size:12.5px;max-width:calc(100vw - 32px)';
+  d.innerHTML=`<span style="font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);font-size:10.5px">Revue</span>
+    <label class="check" style="font-size:12.5px;gap:8px;align-items:center;margin:0">
+      <input type="checkbox" id="demo-empty" ${S.empty?'checked':''} style="width:16px;height:16px">
+      <span>Simuler l'absence de données</span></label>`;
+  document.body.appendChild(d);
+  document.getElementById('demo-empty').onchange=(e)=>{ S.empty=e.target.checked; render();
+    toast(S.empty?'Données vidées  -  observez les états vides':'Données rétablies'); };
+}
+
+/* ── Démarrage ─────────────────────────────────────────── */
+window.addEventListener('hashchange',render);
+if(!location.hash) location.hash='#/';
+render();
+</script>
+
+</body>
+</html>

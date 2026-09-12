@@ -1,0 +1,28 @@
+# ══════════════════════════════════════════════════════════════════════════
+#  Confort de DÉVELOPPEMENT  -  chargé automatiquement par Docker Compose.
+#
+#  Ce fichier n'existe que pour le poste du développeur. Il publie quelques
+#  ports SUR LA BOUCLE LOCALE UNIQUEMENT (127.0.0.1) : aucun de ces services
+#  n'est joignable depuis le réseau, même local.
+#
+#  En production, ce fichier n'est jamais chargé :
+#    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ══════════════════════════════════════════════════════════════════════════
+
+services:
+  postgres:
+    ports:
+      # psql / pgAdmin depuis le poste, jamais depuis l'extérieur.
+      - '127.0.0.1:${POSTGRES_DEV_PORT:-5432}:5432'
+
+  minio:
+    ports:
+      - '127.0.0.1:${MINIO_DEV_PORT:-9000}:9000'
+      # Console technique : administrateur / développeur uniquement.
+      - '127.0.0.1:${MINIO_CONSOLE_DEV_PORT:-9001}:9001'
+
+  mailpit:
+    ports:
+      # Interface web de lecture des e-mails de test.
+      - '127.0.0.1:${MAILPIT_UI_DEV_PORT:-8025}:8025'
+      # Le port SMTP 1025 reste interne au réseau mail_net.

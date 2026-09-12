@@ -1,0 +1,265 @@
+/*
+ * Africa Ingénierie  -  habillage du dashboard Payload.
+ *
+ * Le CMS conserve les composants natifs (sécurité, validation, versions,
+ * permissions) ; cette couche ne remplace donc pas le comportement Payload.
+ * Elle aligne uniquement l'interface d'administration sur standalone(1).html:
+ * bleu institutionnel, accent rouge, surfaces sobres et hiérarchie lisible.
+ */
+:root {
+  --ai-admin-brand: #003087;
+  --ai-admin-deep: #001f57;
+  --ai-admin-accent: #e01e37;
+  --ai-admin-ink: #0b1730;
+  --ai-admin-muted: #62708a;
+  --ai-admin-line: #dbe3ef;
+  --ai-admin-surface: #ffffff;
+  --ai-admin-soft: #f4f7fb;
+  --ai-admin-radius: 14px;
+  --ai-admin-shadow: 0 12px 34px rgba(0, 31, 87, 0.08);
+}
+
+html,
+body {
+  background: var(--ai-admin-soft);
+  color: var(--ai-admin-ink);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+a {
+  color: var(--ai-admin-brand);
+}
+
+button,
+input,
+select,
+textarea {
+  border-radius: 10px;
+}
+
+input,
+select,
+textarea {
+  border-color: var(--ai-admin-line) !important;
+  background: var(--ai-admin-surface) !important;
+  color: var(--ai-admin-ink) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--ai-admin-brand) !important;
+  box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.14) !important;
+}
+
+.nav {
+  background: var(--ai-admin-deep) !important;
+  border-right: 0 !important;
+  color: #fff;
+}
+
+.ai-admin-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--ai-admin-deep);
+  letter-spacing: -0.02em;
+}
+
+.ai-admin-logo__mark {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: var(--ai-admin-brand);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(0, 48, 135, 0.22);
+}
+
+.ai-admin-logo__mark svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.ai-admin-logo__copy {
+  display: grid;
+  gap: 2px;
+  line-height: 1.15;
+}
+
+.ai-admin-logo__copy strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+}
+
+.ai-admin-logo__copy small {
+  color: var(--ai-admin-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ai-admin-logo__mark--icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.nav__link,
+.nav a {
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.78) !important;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.nav__link:hover,
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  transform: translateX(2px);
+}
+
+.nav__link.active,
+.nav a[aria-current='page'] {
+  background: var(--ai-admin-brand) !important;
+  color: #fff !important;
+}
+
+.app-header,
+.step-nav,
+.template-default__header {
+  background: var(--ai-admin-surface) !important;
+  border-bottom: 1px solid var(--ai-admin-line) !important;
+}
+
+.dashboard,
+.collection-list,
+.edit-view,
+.account {
+  max-width: 1440px;
+}
+
+.dashboard__wrap,
+.collection-list__wrap,
+.render-fields,
+.form {
+  background: transparent;
+}
+
+.collection-list__table,
+.table,
+.login__form,
+.before-dashboard,
+.after-dashboard {
+  background: var(--ai-admin-surface);
+  border: 1px solid var(--ai-admin-line);
+  border-radius: var(--ai-admin-radius);
+  box-shadow: var(--ai-admin-shadow);
+}
+
+/*
+ * Les tuiles du tableau de bord sont des composants Payload. Le lien
+ * `.card__click.btn` est un calque interactif transparent positionné au-dessus
+ * du titre : il ne doit jamais recevoir le fond ou la bordure d'un bouton,
+ * sinon il recouvre visuellement le contenu de la tuile.
+ */
+.dashboard .dashboard__card,
+.dashboard .card {
+  background: var(--ai-admin-surface) !important;
+  border: 1px solid var(--ai-admin-line) !important;
+  border-radius: var(--ai-admin-radius);
+  color: var(--ai-admin-ink) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dashboard .dashboard__card *,
+.dashboard .card * {
+  color: inherit !important;
+}
+
+.dashboard .dashboard__card:hover,
+.dashboard .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(0, 31, 87, 0.12);
+}
+
+.field-type,
+.render-fields > .field-type,
+.tabs-field__tabs {
+  border-color: var(--ai-admin-line) !important;
+}
+
+.field-label,
+.label,
+.form-label {
+  color: var(--ai-admin-deep) !important;
+  font-weight: 700;
+}
+
+.login .btn,
+button[type='submit'],
+.form-submit button {
+  border: 0 !important;
+  background: var(--ai-admin-brand) !important;
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(0, 48, 135, 0.18);
+}
+
+.login .btn:hover,
+button[type='submit']:hover,
+.form-submit button:hover {
+  background: var(--ai-admin-deep) !important;
+}
+
+.login .btn--style-danger,
+.login .btn--style-error {
+  background: var(--ai-admin-accent) !important;
+}
+
+.table th {
+  background: var(--ai-admin-soft);
+  color: var(--ai-admin-deep);
+  font-weight: 800;
+}
+
+.table tr,
+.table td,
+.table th {
+  border-color: var(--ai-admin-line) !important;
+}
+
+.pill,
+.status {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.toast {
+  border-radius: 12px;
+  box-shadow: var(--ai-admin-shadow);
+}
+
+@media (max-width: 900px) {
+  .nav {
+    box-shadow: 0 10px 24px rgba(0, 31, 87, 0.16);
+  }
+
+  .dashboard,
+  .collection-list,
+  .edit-view,
+  .account {
+    padding-inline: 16px;
+  }
+}

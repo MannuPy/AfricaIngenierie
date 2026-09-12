@@ -1,0 +1,225 @@
+name: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}
+
+# Production Oracle Cloud Free Tier.
+# Ce fichier est autonome : il ne charge ni l’override local, ni les bind
+# mounts du mode développement. Les secrets viennent de .env.oracle, absent
+# du dépôt, ou d’un gestionnaire de secrets injecté par l’hôte.
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: infra/docker/postgres.Dockerfile
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-postgres:17
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_INITDB_ARGS: --data-checksums
+      TZ: ${TZ:-UTC}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [backend_net]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -q']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  minio:
+    build:
+      context: .
+      dockerfile: infra/docker/minio.Dockerfile
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-minio:latest
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks: [backend_net]
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:latest@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    depends_on:
+      minio: { condition: service_healthy }
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
+        mc mb --ignore-existing "local/$${MINIO_BUCKET}"
+        mc anonymous set none "local/$${MINIO_BUCKET}"
+        policy=$$(printf '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetBucketLocation","s3:ListBucket"],"Resource":["arn:aws:s3:::%s"]},{"Effect":"Allow","Action":["s3:GetObject","s3:PutObject","s3:DeleteObject"],"Resource":["arn:aws:s3:::%s/*"]}]}' "$${MINIO_BUCKET}" "$${MINIO_BUCKET}")
+        printf '%s' "$$policy" > /tmp/africa-media-policy.json
+        if ! mc admin policy info local africa-media-app >/dev/null 2>&1; then
+          mc admin policy create local africa-media-app /tmp/africa-media-policy.json
+        fi
+        mc admin user add local "$${MINIO_ACCESS_KEY}" "$${MINIO_SECRET_KEY}" || true
+        mc admin policy attach local africa-media-app --user "$${MINIO_ACCESS_KEY}"
+    networks: [backend_net]
+    restart: 'no'
+
+  cms-migrate:
+    build:
+      context: .
+      dockerfile: infra/docker/cms.Dockerfile
+      target: migrator
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-cms-migrator:latest
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    environment:
+      NODE_ENV: production
+      PORT: '3001'
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET is required}
+      CONTACT_INTERNAL_SECRET: ${CONTACT_INTERNAL_SECRET:?CONTACT_INTERNAL_SECRET is required}
+      CMS_INTERNAL_READ_SECRET: ${CMS_INTERNAL_READ_SECRET:?CMS_INTERNAL_READ_SECRET is required}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [backend_net]
+    restart: 'no'
+
+  cms:
+    build:
+      context: .
+      dockerfile: infra/docker/cms.Dockerfile
+      target: runner
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-cms:latest
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    environment:
+      NODE_ENV: production
+      PORT: '3001'
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET is required}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:?PREVIEW_SECRET is required}
+      REVALIDATION_SECRET: ${REVALIDATION_SECRET:?REVALIDATION_SECRET is required}
+      CONTACT_INTERNAL_SECRET: ${CONTACT_INTERNAL_SECRET:?CONTACT_INTERNAL_SECRET is required}
+      CMS_INTERNAL_READ_SECRET: ${CMS_INTERNAL_READ_SECRET:?CMS_INTERNAL_READ_SECRET is required}
+    depends_on:
+      cms-migrate: { condition: service_completed_successfully }
+      minio: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+    networks: [frontend_net, backend_net]
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL is required}
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-web:latest
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      HOSTNAME: 0.0.0.0
+      CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:?CMS_INTERNAL_URL is required}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL is required}
+      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:?PAYLOAD_PUBLIC_SERVER_URL is required}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:?PREVIEW_SECRET is required}
+      REVALIDATION_SECRET: ${REVALIDATION_SECRET:?REVALIDATION_SECRET is required}
+      CONTACT_INTERNAL_SECRET: ${CONTACT_INTERNAL_SECRET:?CONTACT_INTERNAL_SECRET is required}
+      CMS_INTERNAL_READ_SECRET: ${CMS_INTERNAL_READ_SECRET:?CMS_INTERNAL_READ_SECRET is required}
+    depends_on:
+      cms: { condition: service_healthy }
+    networks: [frontend_net]
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: infra/docker/nginx.Dockerfile
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-nginx:latest
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?PUBLIC_DOMAIN is required}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?ADMIN_DOMAIN is required}
+      TLS_BOOTSTRAP: ${TLS_BOOTSTRAP:-false}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      web: { condition: service_healthy }
+      cms: { condition: service_healthy }
+    networks: [frontend_net]
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --no-check-certificate -O /dev/null https://127.0.0.1/nginx-health']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot:v2.11.0
+    profiles: [ops]
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
+  backup:
+    build:
+      context: .
+      dockerfile: infra/docker/backup.Dockerfile
+    image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-backup:latest
+    profiles: [ops]
+    env_file: ["${PRODUCTION_ENV_FILE:-.env.oracle}"]
+    environment:
+      PGHOST: postgres
+      PGPORT: '5432'
+      PGUSER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      PGDATABASE: ${POSTGRES_DB:?POSTGRES_DB is required}
+      MINIO_ENDPOINT: minio:9000
+      BACKUP_DIR: /backup
+    volumes:
+      - oracle_backups:/backup
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_healthy }
+    networks: [backend_net]
+    command: ['/usr/local/bin/backup-oracle.sh']
+
+networks:
+  frontend_net:
+  backend_net:
+    internal: true
+
+volumes:
+  postgres_data:
+  minio_data:
+  letsencrypt:
+  certbot_www:
+  nginx_logs:
+  oracle_backups:

@@ -1,0 +1,76 @@
+/* ═══════════════════════════════════════════════════════════
+   AFRICA INGÉNIERIE  -  Tokens du système de design
+   Extraits fidèlement de standalone.reference.html (l. 18-44).
+
+   THÈME CLAIR UNIQUEMENT. Les blocs `prefers-color-scheme: dark`
+   et `[data-theme="dark"]` du prototype ne sont pas repris :
+   décision D-04 du registre docs/decisions.md.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Marque */
+  --brand: #003087;
+  --brand-deep: #001f57;
+  --brand-600: #1e5bc6;
+  --brand-100: #e7eef9;
+  --brand-50: #f4f7fc;
+
+  /* Accent action (rare, discipliné) */
+  --accent: #e01e37;
+  --accent-700: #b71528;
+  --accent-50: #fdecee;
+
+  /* Neutres à biais bleu */
+  --ink: #0f1720;
+  --ink-700: #33404d;
+  --ink-500: #5f6b7a;
+  --ink-400: #8a96a5;
+  --line: #d9e0e9;
+  --line-soft: #eaeff5;
+
+  /* Surfaces */
+  --ground: #ffffff;
+  --surface: #f4f7fc;
+  --surface-2: #edf2f9;
+  --card: #ffffff;
+
+  /* Sémantique interface */
+  --ok: #1e8e5a;
+  --warn: #b36a00;
+  --err: #c0243a;
+  --info: #1e5bc6;
+  --ok-bg: #e8f5ef;
+  --warn-bg: #fdf3e3;
+  --err-bg: #fdecee;
+  --info-bg: #e7eef9;
+
+  /* Sur panneau bleu */
+  --on-brand: #ffffff;
+  --on-brand-soft: #b9c9e4;
+  --on-brand-line: rgba(255, 255, 255, 0.16);
+  --on-brand-accent: #ff8b98;
+
+  /* Élévation */
+  --sh-1: 0 1px 2px rgba(0, 31, 87, 0.06);
+  --sh-2: 0 4px 18px rgba(0, 31, 87, 0.08);
+  --sh-3: 0 14px 40px rgba(0, 31, 87, 0.13);
+
+  /* Rayons */
+  --r-btn: 8px;
+  --r-card: 14px;
+  --r-field: 8px;
+  --r-pill: 999px;
+
+  /* Type  -  les familles « Variable » proviennent des paquets
+     @fontsource-variable, auto-hébergés (décision D-09).
+     Le dessin des caractères est identique à celui du prototype ;
+     seule la source de chargement change. */
+  --f-display: 'Playfair Display Variable', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --f-ui: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+
+  /* Rythme */
+  --wrap: 1200px;
+  --gut: 24px;
+  --sec: 96px;
+}

@@ -1,0 +1,355 @@
+# ══════════════════════════════════════════════════════════════════════════
+#  Africa Ingénierie  -  pile de DÉVELOPPEMENT LOCAL
+#
+#  Ce fichier de base n'expose AUCUN port hôte pour PostgreSQL, MinIO ou
+#  Mailpit : seul Nginx est publié. Les ports de confort du développeur sont
+#  ajoutés par docker-compose.override.yml, chargé automatiquement en local
+#  et lié à 127.0.0.1 uniquement.
+#
+#  Utilisation :
+#    cp .env.example .env.local        (puis remplacer les « change-me »)
+#    docker compose --env-file .env.local up -d
+#
+#  Production : docker compose -f docker-compose.yml -f docker-compose.prod.yml
+#  (l'override de développement n'est alors pas chargé).
+# ══════════════════════════════════════════════════════════════════════════
+
+name: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}
+
+# Image de développement UNIQUE, partagée par deps, web et cms.
+#
+# pnpm y est installé à la CONSTRUCTION de l'image. Le télécharger par
+# Corepack au démarrage du conteneur était une dépendance réseau
+# silencieuse : en cas d'échec, `deps` sortait en erreur et web comme cms
+# démarraient sans `node_modules`  -  d'où « next: not found ».
+#
+# pnpm lit son emplacement de store via `npm_config_store_dir`.
+# `PNPM_STORE_DIR` n'est pas une option reconnue.
+x-dev-image: &dev-image
+  build:
+    context: .
+    dockerfile: infra/docker/dev.Dockerfile
+  image: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}-dev
+  environment:
+    npm_config_store_dir: /pnpm-store
+
+x-workspace-volumes: &workspace-volumes
+  # Code source depuis l'hôte…
+  - .:/app
+  # …et dépendances dans des volumes nommés, jamais sur le disque hôte :
+  # cela évite les symlinks pnpm cassés entre Windows et Linux et garde
+  # le dépôt propre.
+  - pnpm_store:/pnpm-store
+  - nm_root:/app/node_modules
+  - nm_web:/app/apps/web/node_modules
+  - nm_cms:/app/apps/cms/node_modules
+  - nm_ui:/app/packages/ui/node_modules
+  - nm_validation:/app/packages/validation/node_modules
+
+services:
+  # ────────────────────────────────────────────────────────────────────
+  #  deps  -  installation unique des dépendances du workspace.
+  #  web et cms attendent sa sortie en succès avant de démarrer.
+  # ────────────────────────────────────────────────────────────────────
+  deps:
+    <<: *dev-image
+    container_name: ai-deps
+    working_dir: /app
+    volumes: *workspace-volumes
+    environment:
+      npm_config_store_dir: /pnpm-store
+      # Après modification d'un package.json, régénérez le lockfile
+      # (`corepack pnpm install --lockfile-only`) plutôt que de relâcher
+      # cette contrainte. En dépannage seulement :
+      #   DEPS_INSTALL_ARGS=--no-frozen-lockfile dans .env.local
+      DEPS_INSTALL_ARGS: ${DEPS_INSTALL_ARGS:---frozen-lockfile}
+    # Le diagnostic est en tête de sortie : en cas d'échec, le log dit
+    # immédiatement quelle version de pnpm a tourné et depuis où.
+    command: >
+      sh -c "echo '[deps] pnpm' $$(pnpm --version) 'store' $$npm_config_store_dir &&
+             pnpm install $$DEPS_INSTALL_ARGS --reporter=append-only &&
+             echo '[deps] dépendances installées'"
+    networks:
+      - frontend_net
+    restart: 'no'
+
+  # ────────────────────────────────────────────────────────────────────
+  #  postgres  -  base de données du CMS. Réseau backend uniquement.
+  # ────────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    container_name: ai-postgres
+    env_file: [.env.local]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # Nécessaire aux extensions pgcrypto/citext prévues par le MPD.
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      TZ: ${TZ:-UTC}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -q']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LIMIT_POSTGRES_CPUS:-1.0}'
+          memory: ${LIMIT_POSTGRES_MEMORY:-768M}
+
+  # ────────────────────────────────────────────────────────────────────
+  #  minio  -  stockage objet des médias. Réseau backend uniquement.
+  # ────────────────────────────────────────────────────────────────────
+  minio:
+    # Digest relevé localement le 28/08/2026 : pas de version flottante.
+    image: minio/minio:latest@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+    container_name: ai-minio
+    env_file: [.env.local]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:${MINIO_CONSOLE_DEV_PORT:-9001}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend_net
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LIMIT_MINIO_CPUS:-0.75}'
+          memory: ${LIMIT_MINIO_MEMORY:-512M}
+
+  # ────────────────────────────────────────────────────────────────────
+  #  minio-init  -  crée le bucket des médias, de façon idempotente.
+  # ────────────────────────────────────────────────────────────────────
+  minio-init:
+    image: minio/mc:latest@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+    container_name: ai-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    env_file: [.env.local]
+    entrypoint: >
+      sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing local/$${MINIO_BUCKET} &&
+      mc anonymous set download local/$${MINIO_BUCKET} &&
+      echo '[minio-init] bucket '$${MINIO_BUCKET}' prêt'
+      "
+    networks:
+      - backend_net
+    restart: 'no'
+
+  # ────────────────────────────────────────────────────────────────────
+  #  mailpit  -  SMTP de test. Remplacé par le SMTP professionnel en prod.
+  # ────────────────────────────────────────────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest@sha256:c96991d9bef73594c246d89ca81411d4e916f03e76a7d2d72fa2ab5dd3c9ce24
+    container_name: ai-mailpit
+    environment:
+      MP_MAX_MESSAGES: '500'
+      MP_SMTP_AUTH_ACCEPT_ANY: '1'
+      MP_SMTP_AUTH_ALLOW_INSECURE: '1'
+      TZ: ${TZ:-UTC}
+    volumes:
+      - mailpit_data:/data
+    networks:
+      - mail_net
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LIMIT_MAILPIT_CPUS:-0.25}'
+          memory: ${LIMIT_MAILPIT_MEMORY:-192M}
+
+  # ────────────────────────────────────────────────────────────────────
+  #  cms  -  Payload CMS hébergé par Next.js. Seul service à toucher
+  #  PostgreSQL, MinIO et le SMTP.
+  # ────────────────────────────────────────────────────────────────────
+  cms:
+    <<: *dev-image
+    container_name: ai-cms
+    working_dir: /app
+    # Le schema vient uniquement des migrations versionnees (`push: false`
+    # dans payload.config.ts). La migration est donc jouee AVANT le serveur :
+    # `payload migrate` est idempotent (les migrations deja appliquees sont
+    # ignorees) et le conteneur echoue bruyamment si la migration echoue.
+    command: >
+      sh -c "pnpm --filter @africa-ingenierie/cms migrate &&
+             pnpm --filter @africa-ingenierie/cms dev"
+    env_file: [.env.local]
+    environment:
+      PORT: '3001'
+      HOSTNAME: 0.0.0.0
+      npm_config_store_dir: /pnpm-store
+    volumes:
+      - .:/app
+      - pnpm_store:/pnpm-store
+      - nm_root:/app/node_modules
+      - nm_web:/app/apps/web/node_modules
+      - nm_cms:/app/apps/cms/node_modules
+      - nm_ui:/app/packages/ui/node_modules
+      - nm_validation:/app/packages/validation/node_modules
+      - next_cms:/app/apps/cms/.next
+    depends_on:
+      deps:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    networks:
+      - frontend_net
+      - backend_net
+      - mail_net
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LIMIT_CMS_CPUS:-1.5}'
+          memory: ${LIMIT_CMS_MEMORY:-1536M}
+
+  # ────────────────────────────────────────────────────────────────────
+  #  web  -  site public Next.js. Ne parle qu'au CMS, jamais à PostgreSQL.
+  # ────────────────────────────────────────────────────────────────────
+  web:
+    <<: *dev-image
+    container_name: ai-web
+    working_dir: /app
+    command: ['pnpm', '--filter', '@africa-ingenierie/web', 'dev']
+    env_file: [.env.local]
+    environment:
+      PORT: '3000'
+      HOSTNAME: 0.0.0.0
+      npm_config_store_dir: /pnpm-store
+    volumes:
+      - .:/app
+      - pnpm_store:/pnpm-store
+      - nm_root:/app/node_modules
+      - nm_web:/app/apps/web/node_modules
+      - nm_cms:/app/apps/cms/node_modules
+      - nm_ui:/app/packages/ui/node_modules
+      - nm_validation:/app/packages/validation/node_modules
+      - next_web:/app/apps/web/.next
+    depends_on:
+      deps:
+        condition: service_completed_successfully
+      cms:
+        condition: service_started
+    networks:
+      - frontend_net
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LIMIT_WEB_CPUS:-1.5}'
+          memory: ${LIMIT_WEB_MEMORY:-1536M}
+
+  # ────────────────────────────────────────────────────────────────────
+  #  nginx  -  unique service publié sur l'hôte.
+  # ────────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:stable-alpine@sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
+    container_name: ai-nginx
+    ports:
+      - '${NGINX_HTTP_PORT:-8080}:8080'
+      - '${NGINX_HTTPS_PORT:-8443}:8443'
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infra/nginx/snippets:/etc/nginx/snippets:ro
+      - ./infra/nginx/certs:/etc/nginx/certs:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      web:
+        condition: service_started
+      cms:
+        condition: service_started
+    networks:
+      - frontend_net
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/nginx-health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LIMIT_NGINX_CPUS:-0.5}'
+          memory: ${LIMIT_NGINX_MEMORY:-192M}
+
+# ──────────────────────────────────────────────────────────────────────
+#  Réseaux  -  cloisonnement exigé par docs/environnement-local-docker.md §2
+# ──────────────────────────────────────────────────────────────────────
+networks:
+  frontend_net:
+    name: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}_frontend
+    driver: bridge
+  backend_net:
+    name: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}_backend
+    driver: bridge
+  mail_net:
+    name: ${COMPOSE_PROJECT_NAME:-africa-ingenierie}_mail
+    driver: bridge
+
+# ──────────────────────────────────────────────────────────────────────
+#  Volumes  -  les données survivent à un redémarrage ou une reconstruction.
+# ──────────────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  minio_data:
+  mailpit_data:
+  nginx_logs:
+  pnpm_store:
+  nm_root:
+  nm_web:
+  nm_cms:
+  nm_ui:
+  nm_validation:
+  next_web:
+  next_cms:

@@ -1,0 +1,54 @@
+# ── Dépendances ───────────────────────────────────────────
+node_modules/
+.pnpm-store/
+
+# ── Builds ────────────────────────────────────────────────
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# ── Secrets et environnement (JAMAIS committés) ───────────
+.env
+.env.local
+.env.*.local
+.env.oracle
+.env.render
+!.env.oracle.example
+!.env.example
+!.env.render.example
+.bootstrap-users.local.json
+*.pem
+*.key
+*.crt
+infra/nginx/certs/*
+!infra/nginx/certs/.gitkeep
+
+# ── Données locales et sauvegardes ────────────────────────
+/backups/
+/dumps/
+*.sql.gz
+*.dump
+
+# ── Sorties d'outillage ───────────────────────────────────
+coverage/
+playwright-report/
+test-results/
+lighthouse/
+.turbo/
+
+# ── Système et éditeurs ───────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# ── Payload ───────────────────────────────────────────────
+# `payload-types.ts` est GÉNÉRÉ mais reste VERSIONNÉ : sans lui, un clone
+# neuf ne typecheck pas tant que `generate:types` n'a pas tourné, ce qui
+# exige une base de données. Le régénérer après toute évolution du modèle.
