@@ -17,6 +17,7 @@ build/
 .env.oracle
 .env.render
 .env.ovh.test
+.env.ovh.test.backup
 .env.ovh.test.before-seaweedfs
 !.env.oracle.example
 !.env.example
