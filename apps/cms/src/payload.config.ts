@@ -190,6 +190,9 @@ export default buildConfig({
       host: process.env.SMTP_HOST || 'mailpit',
       port: Number(process.env.SMTP_PORT || 1025),
       secure: process.env.SMTP_SECURE === 'true',
+      // OVH port 587 uses STARTTLS. Require the TLS upgrade in production;
+      // implicit TLS remains available when SMTP_SECURE=true (typically 465).
+      requireTLS: process.env.NODE_ENV === 'production' && process.env.SMTP_SECURE !== 'true',
       auth: process.env.SMTP_USER
         ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD }
         : undefined,
