@@ -36,7 +36,7 @@ Un bloc précédé de `sudo`, `docker` ou `./scripts` est destiné au VPS. Un bl
 | Pare-feu/UFW | Filtrage des ports réseau | Seuls SSH contrôlé, HTTP et HTTPS doivent être accessibles. |
 | Docker | Moteur qui exécute des services isolés | Il évite d’installer chaque composant directement dans Ubuntu. |
 | Image | Modèle immuable d’un service | Elle est construite depuis le code et ses dépendances. |
-| Conteneur | Instance en fonctionnement d’une image | `web`, `cms`, `postgres`, `minio` et `nginx` sont des conteneurs distincts. |
+| Conteneur | Instance en fonctionnement d’une image | `web`, `cms`, `postgres`, `seaweedfs` et `nginx` sont des conteneurs distincts. |
 | Volume | Données persistantes hors du conteneur | La base et les fichiers médias doivent survivre à une recréation. |
 | Nginx | Reverse proxy et serveur HTTPS | Il reçoit Internet sur 80/443 et transmet vers les services internes. |
 | Migration | Évolution versionnée de la structure de base | Elle doit être appliquée avant d’utiliser la nouvelle version du code. |
@@ -302,11 +302,11 @@ Internet
                     +-- admin.ingenierieafrica.com --> Payload CMS
                                                    |
                                                    +-- PostgreSQL privé
-                                                   +-- MinIO privé
+                                                   +-- SeaweedFS S3 privé
                                                    +-- SMTP sortant
 ```
 
-Seuls Nginx et les ports 80/443 doivent être accessibles depuis Internet. PostgreSQL, MinIO, le CMS interne et les ports applicatifs ne doivent pas être publiés.
+Seuls Nginx et les ports 80/443 doivent être accessibles depuis Internet. PostgreSQL, SeaweedFS, le CMS interne et les ports applicatifs ne doivent pas être publiés.
 
 ## Corrections intégrées avant la préparation OVH
 
@@ -547,7 +547,7 @@ sudo ss -lntup
 sudo ufw status verbose
 ```
 
-Attention : Docker peut publier un port de conteneur via ses propres règles réseau, parfois en contournant une règle UFW. La configuration de production doit donc publier uniquement Nginx sur 80/443, vérifier les ports réellement exposés avec `docker ps`, et ne jamais ajouter `ports:` pour PostgreSQL, MinIO, Web ou CMS. Si un port interne apparaît malgré tout, arrêter le déploiement et corriger Compose avant exposition publique.
+Attention : Docker peut publier un port de conteneur via ses propres règles réseau, parfois en contournant une règle UFW. La configuration de production doit donc publier uniquement Nginx sur 80/443, vérifier les ports réellement exposés avec `docker ps`, et ne jamais ajouter `ports:` pour PostgreSQL, SeaweedFS, Web ou CMS. Si un port interne apparaît malgré tout, arrêter le déploiement et corriger Compose avant exposition publique.
 
 ### 4. Installer Docker Engine et Compose
 
@@ -650,17 +650,20 @@ Pour générer une valeur aléatoire sans l’afficher dans le document, utilise
 openssl rand -hex 32
 ```
 
-Copier chaque résultat directement dans la variable concernée. Ne pas réutiliser la même valeur pour la base, les sessions, le hachage contact, MinIO et l’authentification SMTP. Pour `DATABASE_URL`, encoder les caractères spéciaux du mot de passe selon le format URL ; le plus simple pour un débutant est de choisir un mot de passe généré en hexadécimal, qui ne contient pas de caractère nécessitant un encodage supplémentaire.
+Copier chaque résultat directement dans la variable concernée. Ne pas réutiliser la même valeur pour la base, les sessions, le hachage contact, SeaweedFS et l’authentification SMTP. Pour `DATABASE_URL`, encoder les caractères spéciaux du mot de passe selon le format URL ; le plus simple pour un débutant est de choisir un mot de passe généré en hexadécimal, qui ne contient pas de caractère nécessitant un encodage supplémentaire.
 
 Contrôler la configuration sans afficher les secrets :
 
 ```bash
 chmod 600 .env.ovh.test
 grep -nE 'change-me|CHANGE_ME|localhost|onrender|africaingenieries\.com' .env.ovh.test || true
-./scripts/assert-production-secrets.sh .env.ovh.test
+set -a
+. ./.env.ovh.test
+set +a
+NODE_ENV=production REQUIRED_PRODUCTION_SECRETS="PAYLOAD_SECRET PREVIEW_SECRET REVALIDATION_SECRET CONTACT_HASH_SECRET AUDIT_HASH_SECRET CONTACT_INTERNAL_SECRET CMS_INTERNAL_READ_SECRET BACKUP_ENCRYPTION_KEY S3_SECRET_KEY S3_BACKUP_SECRET_KEY" ./scripts/assert-production-secrets.sh true
 ```
 
-La première recherche doit ne rien retourner pour les valeurs interdites. La seconde commande vérifie la présence et la longueur minimale des secrets, mais elle ne vérifie pas qu’un compte SMTP, un bucket S3 ou une base externe existent réellement.
+La première recherche doit ne rien retourner pour les valeurs interdites. La seconde séquence charge temporairement les variables dans le shell puis vérifie la présence et la longueur minimale des secrets ; elle ne vérifie pas qu’un compte SMTP, un bucket S3 ou une base externe existent réellement.
 
 Ne pas mettre dans ce fichier :
 
@@ -691,7 +694,7 @@ Pourquoi ces quatre commandes :
 
 Ne jamais utiliser `docker compose down -v` en production : l’option `-v` supprime les volumes et peut détruire la base ou les médias. Pour une simple mise à jour, le Compose doit recréer uniquement les services concernés.
 
-L’ordre attendu est : PostgreSQL et MinIO sains, migration terminée, CMS prêt, Web prêt, Nginx prêt.
+L’ordre attendu est : PostgreSQL et SeaweedFS sains, migration terminée, CMS prêt, Web prêt, Nginx prêt.
 
 Consulter les logs sans afficher le contenu du fichier d’environnement :
 
@@ -814,7 +817,7 @@ Ne pas exécuter le seed de démonstration en production sans décision explicit
 
 ## Sauvegardes et retour arrière
 
-Une sauvegarde utile comprend au minimum : la base PostgreSQL, les médias MinIO, le fichier de configuration de déploiement chiffré ou les secrets conservés dans un coffre, les certificats si leur restauration est nécessaire, et la version exacte du code. Un snapshot OVH aide à revenir à un état du disque, mais ne remplace pas une sauvegarde externe testée.
+Une sauvegarde utile comprend au minimum : la base PostgreSQL, les médias SeaweedFS/S3, le fichier de configuration de déploiement chiffré ou les secrets conservés dans un coffre, les certificats si leur restauration est nécessaire, et la version exacte du code. Un snapshot OVH aide à revenir à un état du disque, mais ne remplace pas une sauvegarde externe testée.
 
 Avant migration ou mise à jour :
 

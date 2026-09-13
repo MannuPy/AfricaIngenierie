@@ -41,11 +41,10 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  minio:
+  seaweedfs:
     ports:
-      - '127.0.0.1:${MINIO_DEV_PORT:-9000}:9000'
-      # Console technique : administrateur / développeur uniquement.
-      - '127.0.0.1:${MINIO_CONSOLE_DEV_PORT:-9001}:9001'
+      # API S3 locale uniquement ; aucun accès depuis Internet.
+      - '127.0.0.1:${SEAWEEDFS_DEV_PORT:-8333}:8333'
 
   mailpit:
     ports:

@@ -8,18 +8,17 @@
 | `web` | Next.js public | 3000 interne | Via Nginx |
 | `cms` | Payload CMS + dashboard | 3001 interne | Via Nginx/admin |
 | `postgres` | Base CMS | 5432 interne | Jamais public |
-| `minio` | Objets médias | 9000 interne | Jamais public |
-| `minio-console` | Console technique médias | 9001 local | VPN/administrateur uniquement |
+| `seaweedfs` | Objets médias via API S3 | 8333 interne | Jamais public |
 | `mailpit` | SMTP de test local | 1025/8025 | Remplacé par SMTP professionnel |
 | `pgadmin` | IDE web PostgreSQL facultatif | 5050 local | Jamais activé |
 
 ## 2. Réseaux Docker
 
 - `frontend_net` : Nginx, Next.js et Payload.
-- `backend_net` : Payload, PostgreSQL et MinIO.
+- `backend_net` : Payload, PostgreSQL et SeaweedFS.
 - `mail_net` : Payload et service SMTP.
 
-PostgreSQL et MinIO ne doivent pas avoir de port publié dans le fichier de production. Les ports de développement ne doivent être utilisés qu’en local.
+PostgreSQL et SeaweedFS ne doivent pas avoir de port publié dans le fichier de production. Les ports de développement ne doivent être utilisés qu’en local.
 
 ## 2 bis. IDE de base de données local
 
@@ -72,11 +71,15 @@ NODE_ENV=development
 NEXT_PUBLIC_SITE_URL=http://localhost:8080
 PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3001
 DATABASE_URL=postgres://cms_user:change-me@postgres:5432/africa_ingenierie
-MINIO_ENDPOINT=minio
-MINIO_PORT=9000
-MINIO_BUCKET=africa-media
-MINIO_ACCESS_KEY=local-access
-MINIO_SECRET_KEY=local-secret-change-me
+S3_ENDPOINT=seaweedfs
+S3_PORT=8333
+S3_USE_SSL=false
+S3_REGION=us-east-1
+S3_BUCKET=africa-media
+S3_ACCESS_KEY=local-access
+S3_SECRET_KEY=local-secret-change-me
+S3_BACKUP_ACCESS_KEY=local-backup-read
+S3_BACKUP_SECRET_KEY=local-backup-secret-change-me
 PAYLOAD_SECRET=generate-a-long-random-secret
 SMTP_HOST=mailpit
 SMTP_PORT=1025
@@ -90,7 +93,7 @@ En production, les secrets doivent être injectés par l’environnement du serv
 ## 4. Démarrage recommandé
 
 ```bash
-docker compose up -d postgres minio mailpit
+docker compose up -d postgres seaweedfs mailpit
 docker compose run --rm cms pnpm payload migrate
 docker compose run --rm cms pnpm seed:demo
 docker compose up -d nginx web cms
@@ -118,4 +121,4 @@ Endpoints internes recommandés :
 /api/health    # Payload opérationnel
 ```
 
-Le redémarrage d’un conteneur ne doit pas supprimer les données PostgreSQL ni les objets MinIO.
+Le redémarrage d’un conteneur ne doit pas supprimer les données PostgreSQL ni les objets SeaweedFS.

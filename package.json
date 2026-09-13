@@ -11,7 +11,7 @@
   "scripts": {
     "dc": "docker compose --env-file .env.local",
     "up": "docker compose --env-file .env.local up -d",
-    "up:data": "docker compose --env-file .env.local up -d postgres minio mailpit",
+    "up:data": "docker compose --env-file .env.local up -d postgres seaweedfs mailpit",
     "db:ide": "docker compose --env-file .env.local --profile db-tools up -d pgadmin",
     "db:ide:down": "docker compose --env-file .env.local --profile db-tools stop pgadmin",
     "db:ide:logs": "docker compose --env-file .env.local --profile db-tools logs -f --tail=100 pgadmin",

@@ -5,10 +5,10 @@ set -eu
 : "${PGUSER:?PGUSER is required}"
 : "${PGPASSWORD:?PGPASSWORD is required}"
 : "${PGDATABASE:?PGDATABASE is required}"
-: "${MINIO_ENDPOINT:?MINIO_ENDPOINT is required}"
-: "${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}"
-: "${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}"
-: "${MINIO_BUCKET:?MINIO_BUCKET is required}"
+: "${S3_ENDPOINT:?S3_ENDPOINT is required}"
+: "${S3_ACCESS_KEY:?S3_ACCESS_KEY is required}"
+: "${S3_SECRET_KEY:?S3_SECRET_KEY is required}"
+: "${S3_BUCKET:?S3_BUCKET is required}"
 : "${BACKUP_ENCRYPTION_KEY:?BACKUP_ENCRYPTION_KEY is required}"
 
 if [ "${#BACKUP_ENCRYPTION_KEY}" -lt 32 ]; then
@@ -26,10 +26,12 @@ trap 'rm -rf "$WORK_DIR"' EXIT INT TERM
 echo "[backup] PostgreSQL dump: ${STAMP}"
 pg_dump --format=custom --no-owner --no-privileges > "${WORK_DIR}/postgres.dump"
 
-echo "[backup] MinIO mirror: ${STAMP}"
-mc alias set local "http://${MINIO_ENDPOINT}" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" --api S3v4 >/dev/null
-mc mirror --overwrite "local/${MINIO_BUCKET}" "${WORK_DIR}/minio"
-tar -czf "${WORK_DIR}/minio.tar.gz" -C "${WORK_DIR}" minio
+echo "[backup] SeaweedFS S3 mirror: ${STAMP}"
+export AWS_ACCESS_KEY_ID="${S3_ACCESS_KEY}"
+export AWS_SECRET_ACCESS_KEY="${S3_SECRET_KEY}"
+export AWS_DEFAULT_REGION="${S3_REGION:-us-east-1}"
+aws --endpoint-url "${S3_ENDPOINT}" s3 sync "s3://${S3_BUCKET}" "${WORK_DIR}/objects"
+tar -czf "${WORK_DIR}/objects.tar.gz" -C "${WORK_DIR}" objects
 
 encrypt() {
   input=$1
@@ -44,7 +46,7 @@ encrypt() {
 
 mkdir -p "$BACKUP_DIR"
 encrypt "${WORK_DIR}/postgres.dump" "${BACKUP_DIR}/postgres-${STAMP}.dump.enc"
-encrypt "${WORK_DIR}/minio.tar.gz" "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc"
+encrypt "${WORK_DIR}/objects.tar.gz" "${BACKUP_DIR}/objects-${STAMP}.tar.gz.enc"
 
 # Copie optionnelle vers un stockage objet distant. Les fichiers envoyés sont
 # déjà chiffrés ; les identifiants ne sont jamais inscrits dans les archives.
@@ -52,14 +54,20 @@ if [ -n "${BACKUP_S3_ENDPOINT:-}" ]; then
   : "${BACKUP_S3_BUCKET:?BACKUP_S3_BUCKET is required with BACKUP_S3_ENDPOINT}"
   : "${BACKUP_S3_ACCESS_KEY:?BACKUP_S3_ACCESS_KEY is required with BACKUP_S3_ENDPOINT}"
   : "${BACKUP_S3_SECRET_KEY:?BACKUP_S3_SECRET_KEY is required with BACKUP_S3_ENDPOINT}"
-  mc alias set offsite "${BACKUP_S3_ENDPOINT}" "${BACKUP_S3_ACCESS_KEY}" "${BACKUP_S3_SECRET_KEY}" --api S3v4 >/dev/null
-  mc mb --ignore-existing "offsite/${BACKUP_S3_BUCKET}" >/dev/null
-  mc cp "${BACKUP_DIR}/postgres-${STAMP}.dump.enc" "offsite/${BACKUP_S3_BUCKET}/"
-  mc cp "${BACKUP_DIR}/postgres-${STAMP}.dump.enc.sha256" "offsite/${BACKUP_S3_BUCKET}/"
-  mc cp "${BACKUP_DIR}/postgres-${STAMP}.dump.enc.hmac" "offsite/${BACKUP_S3_BUCKET}/"
-  mc cp "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc" "offsite/${BACKUP_S3_BUCKET}/"
-  mc cp "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc.sha256" "offsite/${BACKUP_S3_BUCKET}/"
-  mc cp "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc.hmac" "offsite/${BACKUP_S3_BUCKET}/"
+  export AWS_ACCESS_KEY_ID="${BACKUP_S3_ACCESS_KEY}"
+  export AWS_SECRET_ACCESS_KEY="${BACKUP_S3_SECRET_KEY}"
+  export AWS_DEFAULT_REGION="${BACKUP_S3_REGION:-us-east-1}"
+  aws --endpoint-url "${BACKUP_S3_ENDPOINT}" s3api head-bucket --bucket "${BACKUP_S3_BUCKET}" >/dev/null 2>&1 || \
+    aws --endpoint-url "${BACKUP_S3_ENDPOINT}" s3 mb "s3://${BACKUP_S3_BUCKET}"
+  for file in \
+    "${BACKUP_DIR}/postgres-${STAMP}.dump.enc" \
+    "${BACKUP_DIR}/postgres-${STAMP}.dump.enc.sha256" \
+    "${BACKUP_DIR}/postgres-${STAMP}.dump.enc.hmac" \
+    "${BACKUP_DIR}/objects-${STAMP}.tar.gz.enc" \
+    "${BACKUP_DIR}/objects-${STAMP}.tar.gz.enc.sha256" \
+    "${BACKUP_DIR}/objects-${STAMP}.tar.gz.enc.hmac"; do
+    aws --endpoint-url "${BACKUP_S3_ENDPOINT}" s3 cp "$file" "s3://${BACKUP_S3_BUCKET}/"
+  done
 fi
 
 # Nettoyage strict du seul répertoire de sauvegarde.

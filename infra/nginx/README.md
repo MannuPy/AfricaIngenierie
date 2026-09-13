@@ -1,7 +1,7 @@
 # Nginx  -  configuration locale
 
 Nginx est le **seul** service publié sur l'hôte. Tout le reste (Next.js, Payload,
-PostgreSQL, MinIO, Mailpit) reste sur les réseaux Docker internes.
+PostgreSQL, SeaweedFS, Mailpit) reste sur les réseaux Docker internes.
 
 ## Hôtes servis
 

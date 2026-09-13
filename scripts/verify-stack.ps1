@@ -7,7 +7,7 @@
     2. démarrage des services
     3. healthchecks
     4. connexion PostgreSQL
-    5. accès MinIO
+    5. accès SeaweedFS S3
     6. réception d'un e-mail de test dans Mailpit
 
   Usage :
@@ -129,6 +129,8 @@ if ($LASTEXITCODE -eq 0) {
   Write-Host ""
   Write-Host "  -- Log du service deps (cause probable) --" -ForegroundColor Yellow
   DC logs --no-color deps 2>&1 | Select-Object -Last 30 | ForEach-Object { Write-Host "    $_" }
+  Write-Host "  Recette interrompue : les contrôles suivants seraient non fiables." -ForegroundColor Yellow
+  exit 1
 }
 
 # ── 3. Healthchecks ───────────────────────────────────────────────────────
@@ -148,7 +150,7 @@ function Wait-Healthy($svc) {
   return $false
 }
 
-foreach ($svc in @('postgres', 'minio', 'mailpit', 'cms', 'web', 'nginx')) {
+foreach ($svc in @('postgres', 'seaweedfs', 'mailpit', 'cms', 'web', 'nginx')) {
   if (Wait-Healthy $svc) { Ok "healthcheck $svc" } else { Ko "healthcheck $svc" }
 }
 
@@ -158,21 +160,29 @@ Step "4. Connexion PostgreSQL"
 DC exec -T postgres sh -lc 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -q'
 if ($LASTEXITCODE -eq 0) { Ok "pg_isready repond" } else { Ko "pg_isready ne repond pas" }
 
-$version = DC exec -T postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select version()"'
-if ($version -match 'PostgreSQL') { Ok "Requete SQL executee : $($version -replace ' on .*','')" } else { Ko "Impossible d'executer une requete SQL" }
+$sqlOk = $false
+$sqlExit = 1
+for ($attempt = 1; $attempt -le 5; $attempt++) {
+  DC exec -T postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select 1"' 2>$null | Out-Null
+  $sqlExit = $LASTEXITCODE
+  if ($sqlExit -eq 0) { $sqlOk = $true; break }
+  Start-Sleep -Seconds 2
+}
+if ($sqlOk) { Ok "Requete SQL executee dans la base du CMS" } else { Ko "Impossible d'executer une requete SQL (code $sqlExit)" }
 
-# ── 5. MinIO ──────────────────────────────────────────────────────────────
-Step "5. Acces MinIO"
+# ── 5. SeaweedFS S3 ───────────────────────────────────────────────────────
+Step "5. Acces SeaweedFS S3"
 
-DC exec -T minio mc ready local
-if ($LASTEXITCODE -eq 0) { Ok "MinIO pret" } else { Ko "MinIO non pret" }
+DC exec -T seaweedfs weed version *> $null
+if ($LASTEXITCODE -eq 0) { Ok "SeaweedFS pret" } else { Ko "SeaweedFS non pret" }
 
-$bucket = Get-EnvValue 'MINIO_BUCKET' 'africa-media'
-DC exec -T minio mc ls "local/$bucket" *> $null
-if ($LASTEXITCODE -eq 0) {
-  Ok "Bucket << $bucket >> accessible"
-} else {
-  Ko "Bucket << $bucket >> introuvable (relancez : docker compose --env-file .env.local up minio-init)"
+$bucket = Get-EnvValue 'S3_BUCKET' 'africa-media'
+$s3Port = Get-EnvValue 'SEAWEEDFS_DEV_PORT' '8333'
+try {
+  Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$s3Port/status" -TimeoutSec 5 *> $null
+  Ok "Bucket << $bucket >> et endpoint S3 accessibles"
+} catch {
+  Ko "Endpoint S3 SeaweedFS inaccessible sur 127.0.0.1:$s3Port"
 }
 
 # ── 6. Mailpit ────────────────────────────────────────────────────────────
@@ -201,20 +211,21 @@ Step "7. Points d'entree HTTP via Nginx"
 $httpPort = Get-EnvValue 'NGINX_HTTP_PORT' '8080'
 
 function Probe($label, $path, $hostHeader, $expected) {
-  $headers = @{}
-  if ($hostHeader) { $headers['Host'] = $hostHeader }
-  try {
-    $r = Invoke-WebRequest -Uri "http://127.0.0.1:$httpPort$path" -Headers $headers `
-         -MaximumRedirection 0 -SkipHttpErrorCheck -TimeoutSec 20
-    $code = $r.StatusCode
-  } catch {
-    $code = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
+  $code = 0
+  for ($attempt = 1; $attempt -le 15; $attempt++) {
+    $curlArgs = @('--noproxy', '*', '-sS', '-o', 'NUL', '-w', '%{http_code}', '--max-time', '20')
+    if ($hostHeader) { $curlArgs += @('-H', "Host: $hostHeader") }
+    $rawCode = & curl.exe @curlArgs "http://127.0.0.1:$httpPort$path" 2>$null
+    if ($rawCode -match '^\d{3}$') { $code = [int]$rawCode }
+    if ($code -eq $expected) { Ok "$label ($code)"; return }
+    Start-Sleep -Seconds 2
   }
-  if ($code -eq $expected) { Ok "$label ($code)" } else { Ko "$label - attendu $expected, obtenu $code" }
+  Ko "$label - attendu $expected, obtenu $code"
 }
 
 Probe "Sante Nginx"        "/nginx-health" $null              200
-Probe "Site public"        "/"             $null              200
+Probe "Redirection racine" "/"             $null              308
+Probe "Site public FR"     "/fr"           $null              200
 Probe "web /healthz"       "/healthz"      $null              200
 Probe "web /readyz"        "/readyz"       $null              200
 Probe "Redirection /admin" "/admin"        $null              301

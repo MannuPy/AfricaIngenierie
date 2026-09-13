@@ -5,7 +5,7 @@
 Le socle Docker, les healthchecks, le typage, le lint, la suite CMS et le
 contrôle HTTP des adresses publiques passent en local. Le flux E2E de publication
 Produit, l’API événements, le contact renforcé, les redirections, le sitemap et
-les restaurations PostgreSQL/MinIO ont été vérifiés. Les images et scripts
+les restaurations PostgreSQL/SeaweedFS ont été vérifiés. Les images et scripts
 Oracle Cloud sont maintenant fournis ; Lighthouse/axe-core, les scans CVE/ZAP,
 le SMTP réel et une restauration sur le VPS restent à exécuter avant le go
 production. Voir le [rapport d’audit complet](./rapport-audit-complet-2026-08-28.md).
@@ -58,7 +58,7 @@ Une fonctionnalité est terminée lorsque :
 ## 4. Tests automatisés
 
 - Tests unitaires : validateurs, slugs, traductions, dates, permissions.
-- Tests d’intégration : hooks Payload, PostgreSQL et MinIO ; SMTP de test disponible pour la recette, notification applicative à vérifier avec les secrets de production.
+- Tests d’intégration : hooks Payload, PostgreSQL et SeaweedFS ; SMTP de test disponible pour la recette, notification applicative à vérifier avec les secrets de production.
 - Tests end-to-end Playwright : parcours visiteur et parcours des trois rôles.
 - Tests de contrat : validation de `openapi-evenements.yaml`.
 - Tests de liens : aucun lien mort, aucune URL `#` vide, aucune boucle de redirection.
@@ -94,14 +94,14 @@ Avant déploiement :
 - scan des images Docker ;
 - test OWASP ZAP sur l’environnement de recette ;
 - contrôle d’absence de secrets dans Git et dans les logs ;
-- restauration d’une sauvegarde PostgreSQL et MinIO.
+- restauration d’une sauvegarde PostgreSQL et SeaweedFS.
 
 ## 7. Procédure de déploiement
 
 1. Geler les migrations et créer une sauvegarde.
 2. Construire les images Docker depuis le commit validé.
 3. Vérifier les variables de production hors dépôt.
-4. Déployer PostgreSQL et MinIO privés.
+4. Déployer PostgreSQL et SeaweedFS privés.
 5. Exécuter les migrations.
 6. Déployer Payload et le site Next.js.
 7. Configurer Nginx, DNS et certificats TLS.
@@ -115,7 +115,7 @@ Le déploiement doit permettre :
 
 - retour vers l’image Docker précédente ;
 - restauration de la base avant migration ;
-- restauration des objets MinIO ;
+- restauration des objets SeaweedFS/S3 ;
 - désactivation temporaire de la publication ;
 - maintien des redirections et du HTTPS.
 

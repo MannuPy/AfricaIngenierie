@@ -23,15 +23,15 @@ export const serverEnvSchema = z.object({
   PAYLOAD_PUBLIC_SERVER_URL: z.url(),
   CMS_INTERNAL_URL: z.url(),
 
-  MINIO_ENDPOINT: z.string().min(1),
-  MINIO_PORT: z.coerce.number().int().positive().default(9000),
-  MINIO_USE_SSL: z
+  S3_ENDPOINT: z.string().min(1),
+  S3_PORT: z.coerce.number().int().positive().default(8333),
+  S3_USE_SSL: z
     .string()
     .default('false')
     .transform((value) => value === 'true'),
-  MINIO_BUCKET: z.string().min(1),
-  MINIO_ACCESS_KEY: z.string().min(1),
-  MINIO_SECRET_KEY: z.string().min(1),
+  S3_BUCKET: z.string().min(1),
+  S3_ACCESS_KEY: z.string().min(1),
+  S3_SECRET_KEY: z.string().min(1),
 
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive().default(1025),

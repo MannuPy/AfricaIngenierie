@@ -1,7 +1,7 @@
 # ══════════════════════════════════════════════════════════════════════════
 #  Africa Ingénierie  -  pile de DÉVELOPPEMENT LOCAL
 #
-#  Ce fichier de base n'expose AUCUN port hôte pour PostgreSQL, MinIO ou
+#  Ce fichier de base n'expose AUCUN port hôte pour PostgreSQL, SeaweedFS ou
 #  Mailpit : seul Nginx est publié. Les ports de confort du développeur sont
 #  ajoutés par docker-compose.override.yml, chargé automatiquement en local
 #  et lié à 127.0.0.1 uniquement.
@@ -113,24 +113,23 @@ services:
           memory: ${LIMIT_POSTGRES_MEMORY:-768M}
 
   # ────────────────────────────────────────────────────────────────────
-  #  minio  -  stockage objet des médias. Réseau backend uniquement.
+  #  seaweedfs  -  stockage objet S3 des médias. Réseau backend uniquement.
   # ────────────────────────────────────────────────────────────────────
-  minio:
-    # Digest relevé localement le 28/08/2026 : pas de version flottante.
-    image: minio/minio:latest@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
-    container_name: ai-minio
+  seaweedfs:
+    build:
+      context: .
+      dockerfile: infra/docker/seaweedfs.Dockerfile
+    image: africa-ingenierie-seaweedfs:4.46
+    container_name: ai-seaweedfs
     env_file: [.env.local]
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:${MINIO_CONSOLE_DEV_PORT:-9001}
-    command: server /data --console-address ":9001"
+      S3_BUCKET: ${S3_BUCKET}
     volumes:
-      - minio_data:/data
+      - seaweedfs_data:/data
     networks:
       - backend_net
     healthcheck:
-      test: ['CMD', 'mc', 'ready', 'local']
+      test: ['CMD', 'weed', 'version']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -139,30 +138,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${LIMIT_MINIO_CPUS:-0.75}'
-          memory: ${LIMIT_MINIO_MEMORY:-512M}
+          cpus: '${LIMIT_SEAWEEDFS_CPUS:-0.75}'
+          memory: ${LIMIT_SEAWEEDFS_MEMORY:-512M}
 
   # ────────────────────────────────────────────────────────────────────
-  #  minio-init  -  crée le bucket des médias, de façon idempotente.
+  #  Le bucket et les identités limitées sont créés automatiquement au
+  #  démarrage par le wrapper SeaweedFS.
   # ────────────────────────────────────────────────────────────────────
-  minio-init:
-    image: minio/mc:latest@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
-    container_name: ai-minio-init
-    depends_on:
-      minio:
-        condition: service_healthy
-    env_file: [.env.local]
-    entrypoint: >
-      sh -c "
-      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
-      mc mb --ignore-existing local/$${MINIO_BUCKET} &&
-      mc anonymous set download local/$${MINIO_BUCKET} &&
-      echo '[minio-init] bucket '$${MINIO_BUCKET}' prêt'
-      "
-    networks:
-      - backend_net
-    restart: 'no'
-
   # ────────────────────────────────────────────────────────────────────
   #  mailpit  -  SMTP de test. Remplacé par le SMTP professionnel en prod.
   # ────────────────────────────────────────────────────────────────────
@@ -193,7 +175,7 @@ services:
 
   # ────────────────────────────────────────────────────────────────────
   #  cms  -  Payload CMS hébergé par Next.js. Seul service à toucher
-  #  PostgreSQL, MinIO et le SMTP.
+  #  PostgreSQL, SeaweedFS et le SMTP.
   # ────────────────────────────────────────────────────────────────────
   cms:
     <<: *dev-image
@@ -225,7 +207,7 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
-      minio:
+      seaweedfs:
         condition: service_healthy
       mailpit:
         condition: service_started
@@ -352,7 +334,7 @@ networks:
 # ──────────────────────────────────────────────────────────────────────
 volumes:
   postgres_data:
-  minio_data:
+  seaweedfs_data:
   mailpit_data:
   nginx_logs:
   pnpm_store:

@@ -89,7 +89,7 @@ COMPOSE_PROJECT_NAME=africa-ingenierie-test
 PRODUCTION_ENV_FILE=.env.ovh.test
 ```
 
-Les secrets à générer séparément sont notamment `PAYLOAD_SECRET`, `PREVIEW_SECRET`, `REVALIDATION_SECRET`, `CONTACT_HASH_SECRET`, `AUDIT_HASH_SECRET`, `CONTACT_INTERNAL_SECRET`, `CMS_INTERNAL_READ_SECRET`, `BACKUP_ENCRYPTION_KEY`, les mots de passe PostgreSQL/MinIO et le secret SMTP.
+Les secrets à générer séparément sont notamment `PAYLOAD_SECRET`, `PREVIEW_SECRET`, `REVALIDATION_SECRET`, `CONTACT_HASH_SECRET`, `AUDIT_HASH_SECRET`, `CONTACT_INTERNAL_SECRET`, `CMS_INTERNAL_READ_SECRET`, `BACKUP_ENCRYPTION_KEY`, les mots de passe PostgreSQL/SeaweedFS et le secret SMTP.
 
 Ne réutilise pas les secrets locaux, Oracle, Render ou du site actuel.
 
@@ -140,7 +140,7 @@ sudo timedatectl set-timezone Africa/Porto-Novo
 sudo ss -tulpn
 ```
 
-Avant le pare-feu, vérifier qu’aucun site existant n’utilise les ports 80 et 443. Le pare-feu final doit laisser uniquement SSH, HTTP et HTTPS ; PostgreSQL, MinIO, CMS et Next.js restent privés.
+Avant le pare-feu, vérifier qu’aucun site existant n’utilise les ports 80 et 443. Le pare-feu final doit laisser uniquement SSH, HTTP et HTTPS ; PostgreSQL, SeaweedFS, CMS et Next.js restent privés.
 
 ## 9. Installer le projet après validation du serveur
 

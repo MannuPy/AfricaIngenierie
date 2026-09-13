@@ -10,7 +10,7 @@ Servi sur l'hôte d'administration (`http://admin.localhost:8080` en local).
 | Collection | Rôle | Workflow |
 |---|---|---|
 | `users` | Comptes du dashboard, rôles, verrouillage |  -  |
-| `media-assets` | Médiathèque, alt obligatoire, MinIO |  -  |
+| `media-assets` | Médiathèque, alt obligatoire, SeaweedFS/S3 |  -  |
 | `pages` | Hero et SEO des pages de liste (D-05) | oui |
 | `expertises` | Six domaines d'expertise | oui |
 | `projects` | Projets, avec avancement métier distinct | oui |

@@ -273,7 +273,7 @@ def main():
         ["Nginx", "Portier de l’immeuble", "Dirige chaque demande vers le bon service"],
         ["CMS Payload", "Secrétariat central", "Applique les règles et organise les contenus"],
         ["PostgreSQL", "Registre sécurisé", "Conserve les textes, réglages, comptes et historiques"],
-        ["MinIO", "Coffre de fichiers", "Conserve les logos, photos et autres médias"],
+        ["SeaweedFS/S3", "Coffre de fichiers", "Conserve les logos, photos et autres médias"],
         ["Journal d’audit", "Cahier de suivi", "Garde la trace des actions importantes"],
     ], widths=[1.7, 1.65, 2.95])
 
@@ -304,8 +304,8 @@ def main():
     body(doc, "Le CMS est le responsable de l’organisation. Il sait quels champs sont obligatoires, quel contenu est un brouillon, qui peut publier et quelles versions ont existé. Cette couche évite que chacun écrive directement dans les données sans contrôle.")
     heading(doc, "La base PostgreSQL", 2)
     body(doc, "PostgreSQL est le registre structuré. Il conserve les informations sous forme organisée : un contact, une formation, un produit ou un témoignage sont des fiches avec des champs identifiables. Cela permet de rechercher, filtrer, sauvegarder et restaurer les informations.")
-    heading(doc, "Le stockage MinIO", 2)
-    body(doc, "MinIO est le coffre réservé aux fichiers lourds : logos, photos, visuels et autres médias. La base conserve la fiche du média et ses informations, tandis que le fichier lui-même reste dans ce stockage spécialisé.")
+    heading(doc, "Le stockage SeaweedFS via S3", 2)
+    body(doc, "SeaweedFS est le coffre réservé aux fichiers lourds : logos, photos, visuels et autres médias. La base conserve la fiche du média et ses informations, tandis que le fichier lui-même reste dans ce stockage spécialisé.")
     heading(doc, "Le service de messagerie", 2)
     body(doc, "Il sert à transmettre les notifications liées aux formulaires, par exemple lorsqu’un visiteur envoie une demande de contact. Les messages restent également consultables dans l’administration afin de ne pas dépendre d’un seul e-mail.")
 
@@ -372,7 +372,7 @@ def main():
     heading(doc, "Ce qu’il ne faut jamais faire", 2)
     bullet(doc, "Partager un mot de passe d’administration dans un e-mail ou une conversation non sécurisée.")
     bullet(doc, "Modifier directement la base sans sauvegarde et sans vérifier la requête.")
-    bullet(doc, "Exposer PostgreSQL, MinIO ou pgAdmin sur Internet.")
+    bullet(doc, "Exposer PostgreSQL, SeaweedFS ou pgAdmin sur Internet.")
     bullet(doc, "Publier une fiche sans vérifier son contenu dans les deux langues.")
 
     page_break(doc)
@@ -380,7 +380,7 @@ def main():
     body(doc, "Une plateforme bien gérée n’attend pas une panne pour réfléchir à la récupération. Les données structurées et les fichiers doivent être sauvegardés ensemble, car une page peut dépendre à la fois d’un texte en base et d’un visuel dans le stockage.")
     table(doc, ["Élément", "Ce qui doit être préservé", "Pourquoi"], [
         ["PostgreSQL", "Contenus, comptes, réglages, messages et historiques.", "Sans le registre, les fiches et les droits sont perdus."],
-        ["MinIO", "Logos, photos et visuels.", "Une fiche sans son image peut devenir incomplète."],
+        ["SeaweedFS/S3", "Logos, photos et visuels.", "Une fiche sans son image peut devenir incomplète."],
         ["Secrets", "Clés d’accès et variables d’environnement, selon la procédure interne.", "Ils permettent aux services de communiquer sans les afficher."],
         ["Procédure de restauration", "Un mode d’emploi et un test périodique.", "Une sauvegarde n’est utile que si elle peut être restaurée."],
     ], widths=[1.35, 3.45, 2.1])
@@ -420,7 +420,7 @@ def main():
         ["CMS", "Outil de gestion de contenu utilisé pour rédiger, organiser et publier."],
         ["Docker", "Méthode qui fait fonctionner chaque service dans un environnement isolé."],
         ["Média", "Fichier comme une photo, un logo ou un visuel."],
-        ["MinIO", "Stockage spécialisé utilisé pour conserver les fichiers médias."],
+        ["SeaweedFS/S3", "Stockage spécialisé utilisé pour conserver les fichiers médias."],
         ["PostgreSQL", "Système utilisé comme base de données du CMS."],
         ["Publication", "Décision de rendre une fiche visible sur le site public."],
         ["Revalidation", "Actualisation d’une page après une modification publiée."],
@@ -429,7 +429,7 @@ def main():
     ], widths=[1.55, 5.35])
     heading(doc, "Checklist de compréhension", 2)
     bullet(doc, "Je sais que le site public et l’administration sont deux espaces différents.")
-    bullet(doc, "Je sais que les textes sont dans PostgreSQL et les fichiers dans MinIO.")
+    bullet(doc, "Je sais que les textes sont dans PostgreSQL et les fichiers dans SeaweedFS/S3.")
     bullet(doc, "Je sais qu’une fiche doit être enregistrée et publiée pour devenir visible.")
     bullet(doc, "Je sais que les droits dépendent du rôle du compte.")
     bullet(doc, "Je sais que les actions importantes sont conservées dans un historique.")

@@ -35,30 +35,30 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
- * Le stockage objet n'est branché que si MinIO est configuré.
+ * Le stockage objet n'est branché que si SeaweedFS/S3 est configuré.
  *
  * Cela permet d'exécuter les migrations et la suite de tests sans le service
  * objet, tout en gardant une configuration unique.
  */
-const minioConfigured = Boolean(
-  process.env.MINIO_ENDPOINT && process.env.MINIO_ACCESS_KEY && process.env.MINIO_SECRET_KEY,
+const s3Configured = Boolean(
+  process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY,
 )
 
-const storagePlugins = minioConfigured
+const storagePlugins = s3Configured
   ? [
       s3Storage({
         collections: { 'media-assets': true },
-        bucket: process.env.MINIO_BUCKET || 'africa-media',
+        bucket: process.env.S3_BUCKET || 'africa-media',
         config: {
-          endpoint: `${process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http'}://${
-            process.env.MINIO_ENDPOINT
-          }:${process.env.MINIO_PORT || 9000}`,
-          region: process.env.MINIO_REGION || 'us-east-1',
-          // MinIO n'accepte pas l'adressage par sous-domaine de bucket.
+          endpoint: `${process.env.S3_USE_SSL === 'true' ? 'https' : 'http'}://${
+            process.env.S3_ENDPOINT
+          }:${process.env.S3_PORT || 8333}`,
+          region: process.env.S3_REGION || 'us-east-1',
+          // SeaweedFS fonctionne avec l'adressage S3 par chemin.
           forcePathStyle: true,
           credentials: {
-            accessKeyId: process.env.MINIO_ACCESS_KEY as string,
-            secretAccessKey: process.env.MINIO_SECRET_KEY as string,
+            accessKeyId: process.env.S3_ACCESS_KEY as string,
+            secretAccessKey: process.env.S3_SECRET_KEY as string,
           },
         },
       }),

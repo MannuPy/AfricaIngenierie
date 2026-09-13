@@ -34,7 +34,7 @@ Le cahier des charges reste la source des exigences contractuelles. Le prototype
 - Site public : Next.js, rendu hybride SSR/SSG/ISR.
 - CMS et dashboard : Payload CMS, Node.js, TypeScript.
 - Base de données : PostgreSQL.
-- Médias : MinIO en local et sur le VPS OVH ; une réplication S3-compatible hors
+- Médias : SeaweedFS via S3 en local et sur le VPS OVH ; une réplication S3-compatible hors
   VPS est recommandée pour les sauvegardes.
 - Reverse proxy : Nginx sur le VPS OVH ; terminaison TLS et routage gérés par la pile Docker
   en production.
@@ -51,11 +51,11 @@ La rubrique Formations & événements est regroupée dans le parcours public, ma
 ## Règle d’implémentation importante
 
 `standalone.html` reste la référence visuelle. Le socle local utilise désormais
-Next.js, Payload, PostgreSQL, MinIO et Nginx. Les collections métier, le
+Next.js, Payload, PostgreSQL, SeaweedFS et Nginx. Les collections métier, le
 bilinguisme, le versionnage, l'audit, la prévisualisation sécurisée, la
 revalidation Produit, le contact renforcé et l'API événements sont implémentés.
 Lighthouse/axe-core, le scan CVE/ZAP, les tests clavier/focus/contraste et la
 validation de la configuration de production restent des contrôles à exécuter
 avant production. Les comptes,
-mots de passe, secrets SMTP et clés MinIO ne doivent jamais être écrits dans ce
+mots de passe, secrets SMTP et clés S3 ne doivent jamais être écrits dans ce
 dépôt.

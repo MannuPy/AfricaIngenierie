@@ -12,14 +12,18 @@ build/
 # ── Secrets et environnement (JAMAIS committés) ───────────
 .env
 .env.local
+.env.local.before-seaweedfs
 .env.*.local
 .env.oracle
 .env.render
 .env.ovh.test
+.env.ovh.test.before-seaweedfs
 !.env.oracle.example
 !.env.example
 !.env.render.example
 !.env.ovh.test.example
+# Export de travail susceptible de contenir des identifiants historiques.
+/docs/docsimport.txt
 .bootstrap-users.local.json
 *.pem
 *.key

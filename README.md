@@ -1,7 +1,7 @@
 # Africa Ingénierie - plateforme web
 
 Monorepo local de la plateforme : site public **Next.js**, dashboard et API
-**Payload CMS**, données **PostgreSQL**, médias **MinIO**, reverse proxy **Nginx**,
+**Payload CMS**, données **PostgreSQL**, médias **SeaweedFS (API S3)**, reverse proxy **Nginx**,
 orchestration **Docker Compose**.
 
 > **État au 12/09/2026 : socle local audité et préparation OVH en cours de finalisation.**
@@ -18,6 +18,8 @@ orchestration **Docker Compose**.
 ## 1. Démarrage rapide
 
 Déploiement hébergé recommandé : [procédure OVH finale](docs/deploiement-ovh-ingenierieafrica-final.md).
+La migration et les variables SeaweedFS sont détaillées dans
+[`docs/seaweedfs-migration-ovh.md`](docs/seaweedfs-migration-ovh.md).
 La cible publique est exclusivement `https://ingenierieafrica.com/`. Le CMS
 utilise uniquement `https://admin.ingenierieafrica.com/admin` pour
 l’administration technique. Le domaine `africaingenierie.com` et les services
@@ -51,7 +53,7 @@ ralentissements et les liens `node_modules` incomplets.
 | <http://127.0.0.1:8080> | Site public |
 | <http://admin.localhost:8080/admin> | Dashboard Payload |
 | <http://127.0.0.1:8025> | Mailpit - boîte de réception de test |
-| <http://127.0.0.1:9001> | Console MinIO |
+| <http://127.0.0.1:8333> | API S3 SeaweedFS locale |
 
 Si `http://localhost:8080` affiche `ERR_CONNECTION_RESET` sur Windows,
 utiliser `http://127.0.0.1:8080` : Docker Desktop réinitialise ici la première
@@ -69,7 +71,9 @@ docker compose --env-file .env.local down -v    # supprime aussi les volumes
 ## 2. Secrets et configuration
 
 `.env.local` est **ignoré par Git** et ne doit jamais être committé. `.env.example`
-ne contient que des valeurs de développement inutilisables ailleurs.
+ne contient que des valeurs de développement inutilisables ailleurs. Après la
+migration SeaweedFS, un ancien `.env.local` doit être mis à jour manuellement :
+les variables `MINIO_*` ne sont plus utilisées.
 
 Générer le secret Payload :
 
@@ -83,7 +87,8 @@ Remplacer ensuite dans `.env.local` :
 |---|---|
 | `PAYLOAD_SECRET` | valeur aléatoire de 48 octets minimum |
 | `POSTGRES_PASSWORD` | doit correspondre au mot de passe présent dans `DATABASE_URL` |
-| `MINIO_ROOT_PASSWORD` | doit correspondre à `MINIO_SECRET_KEY` |
+| `S3_SECRET_KEY` | clé privée S3 de l'application ; ne jamais la publier |
+| `S3_BACKUP_SECRET_KEY` | clé distincte en lecture seule pour les sauvegardes |
 
 En production, aucun de ces secrets ne provient d'un fichier du dépôt : ils sont
 injectés par l'environnement du serveur ou un gestionnaire de secrets.
@@ -107,7 +112,7 @@ bash scripts/verify-stack.sh
 
 Le script exécute et journalise les six vérifications exigées au prompt 01 :
 validation `docker compose config`, démarrage, healthchecks, connexion
-PostgreSQL, accès MinIO, envoi et réception d'un e-mail dans Mailpit  -  puis
+PostgreSQL, accès SeaweedFS S3, envoi et réception d'un e-mail dans Mailpit  -  puis
 sonde les points d'entrée HTTP et arrête la pile. Ajouter `--keep` / `-Keep`
 pour laisser les services démarrés.
 
@@ -127,7 +132,7 @@ pour laisser les services démarrés.
                                         │   │   │
                      ┌──────────────────┘   │   └──────────────┐
                 ┌────▼─────┐          ┌─────▼────┐        ┌────▼─────┐
-                │ postgres │          │  minio   │        │ mailpit  │
+                    │ postgres │          │ seaweedfs│        │ mailpit  │
                 └──────────┘          └──────────┘        └──────────┘
                      └──── backend_net ────┘               mail_net
 ```
@@ -137,7 +142,7 @@ pour laisser les services démarrés.
 | Réseau | Services | Rôle |
 |---|---|---|
 | `frontend_net` | nginx, web, cms | Trafic HTTP entrant |
-| `backend_net` | cms, postgres, minio | Données et médias  -  jamais exposés |
+| `backend_net` | cms, postgres, seaweedfs | Données et médias  -  jamais exposés |
 | `mail_net` | cms, mailpit | Notifications SMTP |
 
 `web` n'est raccordé qu'à `frontend_net` : le site public ne peut pas atteindre
@@ -148,7 +153,7 @@ PostgreSQL, conformément à `docs/architecture-et-uml.md` §1.
 | Fichier | Effet |
 |---|---|
 | `docker-compose.yml` | Base. Seul Nginx publie des ports. |
-| `docker-compose.override.yml` | Développement, chargé automatiquement. Publie PostgreSQL, MinIO et Mailpit **sur 127.0.0.1 uniquement**. |
+| `docker-compose.override.yml` | Développement, chargé automatiquement. Publie PostgreSQL, l'API S3 SeaweedFS et Mailpit **sur 127.0.0.1 uniquement**. |
 | `docker-compose.prod.yml` | Production OVH autonome, sans override de développement ; ne publie que Nginx sur 80/443. |
 
 Production OVH (sur le VPS, après création de `.env.ovh.test`) :
@@ -275,7 +280,7 @@ de le laisser démarrer sur un schéma faux.
 
 > **Ces commandes s'exécutent DANS le conteneur `cms`, pas sur l'hôte.**
 > `.env.local` est chargé par Docker Compose (`env_file`), et les noms d'hôtes
-> `postgres`, `minio` et `mailpit` n'existent que sur le réseau Docker. Lancées
+> `postgres`, `seaweedfs` et `mailpit` n'existent que sur le réseau Docker. Lancées
 > depuis Windows, les mêmes commandes échouent sur `missing secret key` puis
 > sur une base injoignable. Les scripts `pnpm` ci-dessous encapsulent déjà
 > `docker compose run --rm cms` : il n'y a **jamais** de fichier `.env` à créer

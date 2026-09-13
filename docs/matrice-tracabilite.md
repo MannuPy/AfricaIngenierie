@@ -17,7 +17,7 @@ en bout.
 | SEO | Metadata par page, canonical, hreflang, OG, sitemap | `urls-et-redirections.md` | Lighthouse et inspection HTML |
 | Performance | Next.js SSR/ISR, images optimisées, cache | `plan-recette-securite.md` | Lighthouse mobile ≥ 90 |
 | Événements sans paiement | Périmètre et contrat OpenAPI documentés ; routes non livrées | `openapi-evenements.yaml` | Implémentation et validation OpenAPI à faire |
-| Développement local | Docker Compose, PostgreSQL, MinIO, SMTP test | `environnement-local-docker.md` | Démarrage local reproductible |
+| Développement local | Docker Compose, PostgreSQL, SeaweedFS/S3, SMTP test | `environnement-local-docker.md` | Démarrage local reproductible |
 | Migration Framer | Nouvelles URL et redirections 301 | `urls-et-redirections.md` | Crawl sans 404 sur l’inventaire fourni |
 | Médias IA de démonstration | Seeds et médias marqués démonstration | `architecture-et-uml.md` | Vérification droits/alt text avant production |
 

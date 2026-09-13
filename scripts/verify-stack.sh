@@ -7,7 +7,7 @@
 #    2. démarrage des services
 #    3. healthchecks
 #    4. connexion PostgreSQL
-#    5. accès MinIO
+#    5. accès SeaweedFS S3
 #    6. réception d'un e-mail de test dans Mailpit
 #
 #  Usage :  bash scripts/verify-stack.sh  [--keep]
@@ -106,6 +106,8 @@ else
   echo
   echo "  ── Log du service deps (cause probable) ──"
   "${DC[@]}" logs --no-color deps 2>&1 | tail -30 | sed 's/^/    /'
+  echo "  Recette interrompue : les contrôles suivants seraient non fiables."
+  exit 1
 fi
 
 # ── 3. Healthchecks ─────────────────────────────────────────────────────
@@ -125,7 +127,7 @@ wait_healthy() {
   return 1
 }
 
-for svc in postgres minio mailpit cms web nginx; do
+for svc in postgres seaweedfs mailpit cms web nginx; do
   if wait_healthy "$svc"; then ok "healthcheck $svc"; else ko "healthcheck $svc"; fi
 done
 
@@ -138,26 +140,33 @@ else
   ko "pg_isready ne répond pas"
 fi
 
-if "${DC[@]}" exec -T postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select version()"' | grep -q PostgreSQL; then
+SQL_OK=0
+for attempt in 1 2 3 4 5; do
+  if "${DC[@]}" exec -T postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select version()"' 2>/dev/null | grep -q PostgreSQL; then SQL_OK=1; break; fi
+  sleep 2
+done
+if (( SQL_OK == 1 )); then
   ok "Requête SQL exécutée dans la base du CMS"
 else
   ko "Impossible d'exécuter une requête SQL"
 fi
 
-# ── 5. MinIO ────────────────────────────────────────────────────────────
-step "5. Accès MinIO"
+# ── 5. SeaweedFS S3 ────────────────────────────────────────────────────
+step "5. Accès SeaweedFS S3"
 
-if "${DC[@]}" exec -T minio mc ready local; then
-  ok "MinIO prêt"
+if "${DC[@]}" exec -T seaweedfs weed version >/dev/null 2>&1; then
+  ok "SeaweedFS prêt"
 else
-  ko "MinIO non prêt"
+  ko "SeaweedFS non prêt"
 fi
 
-BUCKET=$(grep -E '^MINIO_BUCKET=' .env.local | cut -d= -f2)
-if "${DC[@]}" exec -T minio mc ls "local/${BUCKET}" >/dev/null 2>&1; then
-  ok "Bucket « ${BUCKET} » accessible"
+BUCKET=$(grep -E '^S3_BUCKET=' .env.local | cut -d= -f2)
+S3_PORT=$(grep -E '^SEAWEEDFS_DEV_PORT=' .env.local | cut -d= -f2 || true)
+S3_PORT=${S3_PORT:-8333}
+if curl -fsS "http://127.0.0.1:${S3_PORT}/status" >/dev/null 2>&1; then
+  ok "Bucket « ${BUCKET} » et endpoint S3 accessibles"
 else
-  ko "Bucket « ${BUCKET} » introuvable (relancez : docker compose --env-file .env.local up minio-init)"
+  ko "Endpoint S3 SeaweedFS inaccessible sur 127.0.0.1:${S3_PORT}"
 fi
 
 # ── 6. Mailpit ──────────────────────────────────────────────────────────
@@ -193,17 +202,22 @@ HTTP_PORT=${HTTP_PORT:-8080}
 
 probe() {
   local label="$1" url="$2" host="${3:-}" expected="$4"
-  local code
-  if [[ -n "$host" ]]; then
-    code=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $host" --max-time 20 "$url")
-  else
-    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url")
-  fi
-  if [[ "$code" == "$expected" ]]; then ok "$label ($code)"; else ko "$label  -  attendu $expected, obtenu $code"; fi
+  local code=0
+  for attempt in 1 2 3 4 5; do
+    if [[ -n "$host" ]]; then
+      code=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $host" --max-time 20 "$url")
+    else
+      code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url")
+    fi
+    if [[ "$code" == "$expected" ]]; then ok "$label ($code)"; return; fi
+    sleep 2
+  done
+  ko "$label  -  attendu $expected, obtenu $code"
 }
 
 probe "Santé Nginx"        "http://127.0.0.1:${HTTP_PORT}/nginx-health" ""              200
-probe "Site public"        "http://127.0.0.1:${HTTP_PORT}/"             ""              200
+probe "Redirection racine" "http://127.0.0.1:${HTTP_PORT}/"             ""              308
+probe "Site public FR"     "http://127.0.0.1:${HTTP_PORT}/fr"            ""              200
 probe "web /healthz"       "http://127.0.0.1:${HTTP_PORT}/healthz"      ""              200
 probe "web /readyz"        "http://127.0.0.1:${HTTP_PORT}/readyz"       ""              200
 probe "Redirection /admin" "http://127.0.0.1:${HTTP_PORT}/admin"        ""              301

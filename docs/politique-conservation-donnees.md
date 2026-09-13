@@ -38,7 +38,7 @@ La plateforme ne prévoit actuellement ni paiement, ni billetterie, ni suivi de 
 | Brouillons | Contenus non publiés | 24 mois après dernière modification | Archivage puis suppression | Équipe éditoriale |
 | Contenus publiés | Contenus institutionnels et métier | Tant qu’ils sont utiles ou publiés | Archivage versionné | Public selon statut |
 | Médias | Fichiers liés à un contenu | Tant que le contenu ou l’obligation de preuve existe | Suppression après vérification des références | Administrateur/éditeur |
-| Sauvegardes | Base et MinIO chiffrés | 30 jours quotidiennes, 12 mois mensuelles | Rotation automatique | Administrateur système |
+| Sauvegardes | Base et SeaweedFS/S3 chiffrés | 30 jours quotidiennes, 12 mois mensuelles | Rotation automatique | Administrateur système |
 | SMTP | Copies techniques de notification | Selon le fournisseur, cible maximale 30 jours | Suppression côté boîte/serveur | Administrateur autorisé |
 
 Ces durées sont des choix techniques prudents, pas une validation juridique. Le Client doit confirmer la durée nécessaire à ses obligations commerciales, comptables, contractuelles et contentieuses.
@@ -96,7 +96,7 @@ Les contenus éditoriaux sont archivés plutôt que supprimés directement afin 
 - chiffrement des sauvegardes au repos ;
 - comptes à privilèges minimaux ;
 - secrets hors dépôt Git ;
-- PostgreSQL et MinIO sur réseau privé ;
+- PostgreSQL et SeaweedFS sur réseau privé ;
 - accès administrateur journalisé ;
 - restauration testée au moins une fois par trimestre ;
 - procédure documentée de violation de données ;

@@ -360,7 +360,7 @@ Aucune donnée réelle n'existe à ce stade : la remise à zéro est sans perte.
 
 **Corollaire  -  les commandes Payload s'exécutent dans le conteneur.** Lancé
 depuis Windows, `payload migrate` ne voit ni `.env.local` (chargé par Docker
-Compose via `env_file`) ni les noms d'hôtes `postgres`/`minio` (résolus par le
+Compose via `env_file`) ni les noms d'hôtes `postgres`/`seaweedfs` (résolus par le
 réseau Docker) : il échoue sur `missing secret key`, puis sur une base
 injoignable. Les scripts racine `migrate`, `migrate:create`, `migrate:status`,
 `bootstrap:users`, `generate:types` et `test` encapsulent donc

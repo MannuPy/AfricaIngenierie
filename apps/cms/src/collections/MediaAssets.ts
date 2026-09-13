@@ -15,8 +15,8 @@ import { GROUPS } from './factory'
  *   • SVG refusé  -  un SVG arbitraire est un vecteur d'injection ; il pourra
  *     être accepté après mise en place d'un pipeline de nettoyage dédié.
  *
- * Le stockage réel est MinIO (branché dans payload.config.ts quand les
- * variables MINIO_* sont présentes) ; en leur absence, Payload écrit dans un
+ * Le stockage réel est SeaweedFS via S3 (branché dans payload.config.ts quand
+ * les variables S3_* sont présentes) ; en leur absence, Payload écrit dans un
  * dossier local, ce qui permet de développer sans le service objet.
  *
  * `demoKey` porte l'identité des visuels du pack de démonstration. Le nom de

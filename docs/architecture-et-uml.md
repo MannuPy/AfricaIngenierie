@@ -29,7 +29,7 @@ flowchart TB
   end
   subgraph D[Couche données]
     PG[(PostgreSQL)]
-    MinIO[(MinIO objets médias)]
+    SeaweedFS[(SeaweedFS S3 objets médias)]
     Audit[(Journal d’audit)]
   end
   Browser --> Next
@@ -41,7 +41,7 @@ flowchart TB
   CMS --> Publish
   CMS --> Validate
   CMS --> PG
-  MediaService --> MinIO
+  MediaService --> SeaweedFS
   CMS --> MediaService
   CMS --> Audit
   CMS --> Mail
@@ -63,7 +63,7 @@ flowchart LR
     Web[web : Next.js]
     Cms[cms : Payload]
     Db[(postgres :5432)]
-    Object[(minio :9000 / console :9001)]
+    Object[(seaweedfs :8333 S3)]
     Mailhog[mailpit ou SMTP de test]
   end
   Dev --> Browser
@@ -87,7 +87,7 @@ flowchart LR
   Web[Conteneur Next.js]
   Cms[Conteneur Payload CMS]
   DB[(Conteneur PostgreSQL privé)]
-  Storage[(Conteneur MinIO privé)]
+  Storage[(Conteneur SeaweedFS S3 privé)]
   SMTP[Compte SMTP professionnel]
   Backup[Stockage de sauvegardes chiffrées]
   User --> DNS
@@ -102,7 +102,7 @@ flowchart LR
   Storage --> Backup
 ```
 
-Règles de déploiement : PostgreSQL et MinIO ne sont jamais exposés sur Internet ; seuls Nginx et les ports strictement nécessaires sont publics. Le DNS pointe vers le VPS uniquement après validation du serveur et du certificat.
+Règles de déploiement : PostgreSQL et SeaweedFS ne sont jamais exposés sur Internet ; seuls Nginx et les ports strictement nécessaires sont publics. Le DNS pointe vers le VPS uniquement après validation du serveur et du certificat.
 
 ## 3. Diagramme de composants UML
 
@@ -116,12 +116,12 @@ flowchart TB
   Auth[Auth / RBAC]
   ContentService[Services de contenu]
   SEO[SEO / sitemap / redirections]
-  Media[Service MinIO]
+  Media[Service SeaweedFS S3]
   Contact[Service contact, validation anti-abus et audit]
   Audit[Service audit log]
   Revalidate[Webhook revalidation]
   PG[(PostgreSQL)]
-  MinIO[(MinIO)]
+  SeaweedFS[(SeaweedFS)]
   SMTP[SMTP]
   VisitorUI --> Router
   AdminUI --> Auth
@@ -132,7 +132,7 @@ flowchart TB
   ContentService --> SEO
   AdminUI --> ContentAPI
   AdminUI --> Media
-  Media --> MinIO
+  Media --> SeaweedFS
   AdminUI --> Audit
   ContentService --> Audit
   Contact --> ContentService
@@ -230,7 +230,7 @@ flowchart LR
 | Flux | Entrée | Traitement | Sortie | Contrôles |
 |---|---|---|---|---|
 | Contenu éditorial | Formulaire dashboard | Auth, validation, sanitation, versioning | Brouillon ou contenu publié | RBAC, champs requis, audit |
-| Média | Upload image/document | Taille, MIME, nom sûr, alt text, stockage MinIO | URL média signée ou publique contrôlée | Extension autorisée, droits, antivirus si disponible |
+| Média | Upload image/document | Taille, MIME, nom sûr, alt text, stockage SeaweedFS/S3 | URL média signée ou publique contrôlée | Extension autorisée, droits, antivirus si disponible |
 | Site public | Requête HTTP | Next.js lit l’API/CMS et utilise ISR | HTML, métadonnées, JSON-LD | Cache, locale, statut publié |
 | Publication | Action publicateur/admin | Transaction DB + événement de revalidation | Page publique actualisée | Audit, cohérence et rollback |
 | Contact | Formulaire visiteur | Validation, consentement, anti-abus et audit ; SMTP à vérifier en recette | Message DB | Conservation limitée |

@@ -519,7 +519,7 @@ def main():
     ]:
         add_bullet(doc, item)
     add_heading(doc, "Sauvegardes", 2)
-    add_body(doc, "La restauration d’un dump PostgreSQL et des objets MinIO est une opération d’exploitation. Elle doit être faite dans un environnement de test, documentée, puis vérifiée par une recette des pages, des médias et des réglages.")
+    add_body(doc, "La restauration d’un dump PostgreSQL et des objets SeaweedFS/S3 est une opération d’exploitation. Elle doit être faite dans un environnement de test, documentée, puis vérifiée par une recette des pages, des médias et des réglages.")
 
     # 14
     add_heading(doc, "14. Dépannage rapide et check-lists", 1)
