@@ -78,7 +78,11 @@ services:
       AUDIT_HASH_SECRET: ${AUDIT_HASH_SECRET:?AUDIT_HASH_SECRET is required}
     depends_on:
       postgres: { condition: service_healthy }
-    networks: [backend_net]
+    # Payload initialise le transport SMTP pendant la migration. Le réseau
+    # frontend_net fournit uniquement la sortie réseau nécessaire vers OVH;
+    # aucun port n'est publié et le service reste aussi sur backend_net pour
+    # accéder à PostgreSQL.
+    networks: [frontend_net, backend_net]
     restart: 'no'
 
   retention-cleanup:
