@@ -73,8 +73,26 @@ const NAV_LABEL_FALLBACKS: Record<Locale, Record<string, string>> = {
   },
 }
 
+/** Routes publiques couvertes par une même entrée de navigation regroupée. */
+const NAV_ROUTE_ALIASES: Partial<Record<string, SectionKey[]>> = {
+  formationsEvenements: ['formationsEvenements', 'formations', 'evenements'],
+}
+
 function navLabel(label: string | null | undefined, section: string, locale: Locale): string {
   return label?.trim() || NAV_LABEL_FALLBACKS[locale][section] || section
+}
+
+function matchesNavRoute(
+  section: string,
+  href: string,
+  locale: Locale,
+  currentPath: string,
+): boolean {
+  const sections = NAV_ROUTE_ALIASES[section]
+  const paths = sections?.map((key) => listPath(key, locale)) ?? [href]
+  return paths.some(
+    (path) => currentPath === path || currentPath.startsWith(`${path}/`),
+  )
 }
 
 /** Dédoublonné pour un rendu : l'en-tête et le pied de page lisent la même chose. */
@@ -109,7 +127,7 @@ export function mainNav(
         current:
           href === homePath(locale)
             ? currentPath === href || currentPath === href.replace(/\/$/, '')
-            : currentPath.startsWith(href),
+            : matchesNavRoute(entry.section, href, locale, currentPath),
       }
     })
     .filter((item): item is NavItem => item !== null)
@@ -158,13 +176,15 @@ export function footerColumns(
 
   return [
     { title: strings.home, links: links.slice(0, middle) },
-    { title: strings.contactDetails, links: links.slice(middle) },
+    { title: strings.explore, links: links.slice(middle) },
   ]
 }
 
 /** Coordonnées du pied de page, telles que saisies dans les Réglages généraux. */
 export function footerContact(settings: SiteSettingsDoc | null, locale: Locale) {
   const strings = ui(locale)
+  const whatsapp = whatsappHref(settings?.whatsapp)
+  const phone = phoneHref(settings?.phoneRaw)
 
   const addressLines = [
     settings?.addressLine1,
@@ -175,14 +195,55 @@ export function footerContact(settings: SiteSettingsDoc | null, locale: Locale) 
   return {
     title: strings.contactDetails,
     addressLines,
-    phone:
-      settings?.phone && settings?.phoneRaw
-        ? { label: settings.phone, href: `tel:${settings.phoneRaw}` }
-        : undefined,
+    phone: settings?.phone && phone ? { label: settings.phone, href: phone } : undefined,
     email: settings?.email ?? undefined,
-    whatsapp: settings?.whatsapp
-      ? { label: 'WhatsApp', href: `https://wa.me/${settings.whatsapp}` }
-      : undefined,
+    whatsapp: whatsapp ? { label: 'WhatsApp', href: whatsapp } : undefined,
+    map: mapDetails(settings, strings, `${strings.mapTitle} — ${strings.contactDetails}`),
+  }
+}
+
+/** Transforme le numéro administrable en lien tel: sans jamais doubler le schéma. */
+export function phoneHref(value: string | number | null | undefined): string | undefined {
+  const raw = String(value ?? '').trim()
+  if (!raw) return undefined
+  const normalized = raw.replace(/^tel:/i, '').trim()
+  return normalized ? `tel:${normalized}` : undefined
+}
+
+/** Transforme le numéro administrable en lien WhatsApp wa.me valide. */
+export function whatsappHref(value: string | number | null | undefined): string | undefined {
+  const digits = String(value ?? '').replace(/\D/g, '')
+  if (digits.length < 7 || digits.length > 15) return undefined
+  return `https://wa.me/${digits}`
+}
+
+/** Construit une carte OpenStreetMap uniquement si l'administrateur a fourni des coordonnées valides. */
+export function mapDetails(
+  settings: SiteSettingsDoc | null,
+  strings = ui('fr'),
+  titleOverride?: string,
+): { title: string; embedUrl: string; linkUrl: string; openLabel: string } | undefined {
+  const latitude = Number(settings?.mapLatitude)
+  const longitude = Number(settings?.mapLongitude)
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return undefined
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return undefined
+
+  const zoom = Math.max(1, Math.min(19, Math.round(Number(settings?.mapZoom) || 15)))
+  const span = Math.max(0.002, Math.min(0.35, 0.35 / 2 ** Math.max(0, zoom - 8)))
+  const bbox = [longitude - span, latitude - span * 0.72, longitude + span, latitude + span * 0.72]
+    .map((value) => value.toFixed(6))
+    .join(',')
+  const embedParams = new URLSearchParams({
+    bbox,
+    layer: 'mapnik',
+    marker: `${latitude.toFixed(6)},${longitude.toFixed(6)}`,
+  })
+
+  return {
+    title: titleOverride || strings.mapTitle,
+    embedUrl: `https://www.openstreetmap.org/export/embed.html?${embedParams.toString()}`,
+    linkUrl: `https://www.openstreetmap.org/?mlat=${latitude.toFixed(6)}&mlon=${longitude.toFixed(6)}#map=${zoom}/${latitude.toFixed(6)}/${longitude.toFixed(6)}`,
+    openLabel: strings.mapOpen,
   }
 }
 
@@ -194,19 +255,24 @@ export function footerContact(settings: SiteSettingsDoc | null, locale: Locale) 
  * même règle de son côté.
  */
 export function socialLinks(settings: SiteSettingsDoc | null): SocialLink[] {
-  const names: Record<'li' | 'fb' | 'yt', string> = {
+  const names: Record<'li' | 'fb' | 'yt' | 'wa', string> = {
     li: 'LinkedIn',
     fb: 'Facebook',
     yt: 'YouTube',
+    wa: 'WhatsApp',
   }
 
-  return (settings?.socialLinks ?? [])
-    .filter((entry) => Boolean(entry.url))
-    .map((entry) => ({
-      network: entry.network,
-      name: names[entry.network],
-      url: entry.url ?? undefined,
-    }))
+  const links: SocialLink[] = []
+  const whatsapp = whatsappHref(settings?.whatsapp)
+  if (whatsapp) links.push({ network: 'wa', name: names.wa, url: whatsapp })
+
+  const seen = new Set<keyof typeof names>(['wa'])
+  for (const entry of settings?.socialLinks ?? []) {
+    if (!entry.url || !entry.url.startsWith('https://') || seen.has(entry.network)) continue
+    seen.add(entry.network)
+    links.push({ network: entry.network, name: names[entry.network], url: entry.url })
+  }
+  return links
 }
 
 /** Liens légaux du pied de page, alimentés par la collection correspondante. */

@@ -21,6 +21,12 @@ export interface SeedDocument {
   en: LocaleFields
   /** Clé du média principal dans le pack de démonstration, si présent. */
   mediaKey?: string
+  /** Clé d'une fiche PDF complémentaire, si présente. */
+  productSheetKey?: string
+  /** URL YouTube commune à la fiche, si présente. */
+  videoUrl?: string
+  /** Photos supplémentaires de la galerie 360°, dans l'ordre de rotation. */
+  galleryMediaKeys?: string[]
   /** Publier après écriture des deux langues. */
   publish: boolean
 }
@@ -33,10 +39,16 @@ export interface SeedMedia {
   filename: string
   width: number
   height: number
+  /** Type forcé pour les fichiers qui ne sont pas des images. */
+  mimeType?: string
   /** Teinte de base, pour que deux visuels voisins restent distinguables. */
   hue: number
   /** Fichier source local optionnel du pack visuel validé pour le prototype. */
   assetFile?: string
+  /** Fichier fourni et validé par le Client : ne pas remplacer par un visuel de démonstration. */
+  approvedAsset?: boolean
+  /** Mention de droits/provenance affichée dans la médiathèque. */
+  rightsNote?: string
   altFr: string
   altEn: string
   captionFr?: string

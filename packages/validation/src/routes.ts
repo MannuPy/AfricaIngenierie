@@ -40,6 +40,7 @@ export const SEGMENTS = {
   produits: { fr: 'produits', en: 'products' },
   aPropos: { fr: 'a-propos', en: 'about' },
   contact: { fr: 'contact', en: 'contact' },
+  temoignage: { fr: 'temoignage', en: 'testimonial' },
   mentionsLegales: { fr: 'mentions-legales', en: 'legal-notice' },
   confidentialite: { fr: 'confidentialite', en: 'privacy-policy' },
 } as const

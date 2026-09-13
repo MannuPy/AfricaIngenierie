@@ -6,16 +6,31 @@
  * Elle aligne uniquement l'interface d'administration sur standalone(1).html:
  * bleu institutionnel, accent rouge, surfaces sobres et hiérarchie lisible.
  */
+/*
+ * Jetons de l'administration.
+ *
+ * Ils reprennent desormais, valeur pour valeur, ceux du site public
+ * (packages/ui/src/styles/tokens.css). Trois divergences ont ete corrigees :
+ *   - l'encre  : #0b1730 -> #0f1720   (--ink)
+ *   - le filet : #dbe3ef -> #d9e0e9   (--line)
+ *   - le fond  : #f4f7fb -> #f4f7fc   (--surface)
+ * Elles etaient invisibles a l'oeil mais faisaient deriver les deux interfaces.
+ *
+ * « surface » a ete renomme en « card » : dans le site public --surface designe
+ * le fond teinte d'une section, ici il designait le blanc d'une carte. Le meme
+ * mot voulait dire l'inverse d'une interface a l'autre.
+ */
 :root {
-  --ai-admin-brand: #003087;
-  --ai-admin-deep: #001f57;
-  --ai-admin-accent: #e01e37;
-  --ai-admin-ink: #0b1730;
-  --ai-admin-muted: #62708a;
-  --ai-admin-line: #dbe3ef;
-  --ai-admin-surface: #ffffff;
-  --ai-admin-soft: #f4f7fb;
-  --ai-admin-radius: 14px;
+  --ai-admin-brand: #003087;   /* = --brand      */
+  --ai-admin-deep: #001f57;    /* = --brand-deep */
+  --ai-admin-accent: #e01e37;  /* = --accent     */
+  --ai-admin-ink: #0f1720;     /* = --ink        */
+  --ai-admin-muted: #5f6b7a;   /* = --ink-500    */
+  --ai-admin-line: #d9e0e9;    /* = --line       */
+  --ai-admin-card: #ffffff;    /* = --card       */
+  --ai-admin-soft: #f4f7fc;    /* = --surface    */
+  --ai-admin-radius: 14px;     /* = --r-card     */
+  --ai-admin-radius-sm: 8px;   /* = --r-btn      */
   --ai-admin-shadow: 0 12px 34px rgba(0, 31, 87, 0.08);
 }
 
@@ -26,7 +41,9 @@ body {
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Meme pile que le site public (packages/ui tokens.css --f-ui). */
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 a {
@@ -44,7 +61,7 @@ input,
 select,
 textarea {
   border-color: var(--ai-admin-line) !important;
-  background: var(--ai-admin-surface) !important;
+  background: var(--ai-admin-card) !important;
   color: var(--ai-admin-ink) !important;
 }
 
@@ -67,6 +84,26 @@ textarea:focus {
   gap: 11px;
   color: var(--ai-admin-deep);
   letter-spacing: -0.02em;
+}
+
+.ai-admin-logo__full {
+  display: inline-flex;
+  width: 184px;
+  max-width: 100%;
+  align-items: center;
+}
+
+.ai-admin-logo__full img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ai-admin-logo__symbol {
+  display: block;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .ai-admin-logo__mark {
@@ -98,7 +135,11 @@ textarea:focus {
 }
 
 .ai-admin-logo__copy strong {
-  font-family: Georgia, 'Times New Roman', serif;
+  /* Playfair Display porte l'identite editoriale du site public ; Georgia
+     n'en est que le repli. Le nom de marque s'affichait donc dans la police
+     de secours. */
+  font-family: 'Playfair Display Variable', 'Playfair Display', Georgia,
+    'Times New Roman', serif;
   font-size: 18px;
 }
 
@@ -110,10 +151,213 @@ textarea:focus {
   text-transform: uppercase;
 }
 
+/* Variante « fil d'Ariane ».
+   Payload dimensionne .step-nav__home à 16 px (18 px au-dessus de 640 px) et
+   place un separateur « / » juste apres. Le carre bleu de la marque, ses coins
+   arrondis et son ombre portee debordaient de 18 px dans les deux axes et
+   recouvraient ce separateur. On garde le seul glyphe, a plat, et on le laisse
+   remplir exactement l'emplacement fourni par Payload. */
+.step-nav__home > span {
+  height: 100%;
+}
+
 .ai-admin-logo__mark--icon {
-  width: 34px;
-  height: 34px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ai-admin-brand);
+}
+
+.ai-admin-logo__mark--icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2.4;
+}
+
+/* Marque complète affichée avant les liens du menu sur tous les écrans du
+   dashboard. Le texte reste blanc sur le rail bleu, contrairement au logo de
+   connexion qui vit sur fond clair. */
+.ai-admin-brand {
+  display: flex;
+  align-items: center;
+  min-height: 78px;
+  margin: 0 10px 12px;
+  padding: 14px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff !important;
+  text-decoration: none;
+}
+
+.ai-admin-brand .ai-admin-logo {
+  width: 100%;
+  color: #fff;
+}
+
+.ai-admin-brand .ai-admin-logo__copy strong {
+  color: #fff;
+}
+
+.ai-admin-brand .ai-admin-logo__copy small {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ai-admin-brand:hover {
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
+}
+
+/* Tableau de bord : repères de publication et accès rapides. */
+.ai-admin-summary {
+  margin: 0 0 28px;
+  padding: 24px;
+  border: 1px solid var(--ai-admin-line);
+  border-radius: var(--ai-admin-radius);
+  background: linear-gradient(135deg, #fff 0%, #f7faff 100%);
+  box-shadow: var(--ai-admin-shadow);
+}
+
+.ai-admin-summary__header,
+.ai-admin-summary__columns {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.ai-admin-summary__header h2 {
+  margin: 0;
+  color: var(--ai-admin-deep);
+  font-size: clamp(22px, 2.4vw, 32px);
+  letter-spacing: -0.03em;
+}
+
+.ai-admin-summary__header p {
+  margin: 6px 0 0;
+  color: var(--ai-admin-muted);
+}
+
+.ai-admin-summary__eyebrow {
+  color: var(--ai-admin-accent) !important;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ai-admin-summary__status {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid rgba(0, 48, 135, 0.16);
+  border-radius: 999px;
+  background: rgba(0, 48, 135, 0.06);
+  color: var(--ai-admin-brand) !important;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ai-admin-summary__status--warning {
+  border-color: rgba(180, 106, 0, 0.28);
+  background: #fff7e8;
+  color: #8a5600 !important;
+}
+
+.ai-admin-summary__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.ai-admin-metric {
+  display: grid;
+  gap: 7px;
+  min-height: 94px;
+  padding: 16px;
+  border: 1px solid var(--ai-admin-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ai-admin-ink) !important;
+  text-decoration: none;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.ai-admin-metric:hover {
+  border-color: rgba(0, 48, 135, 0.34);
+  box-shadow: 0 10px 24px rgba(0, 31, 87, 0.09);
+  transform: translateY(-2px);
+}
+
+.ai-admin-metric span {
+  color: var(--ai-admin-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ai-admin-metric strong {
+  color: var(--ai-admin-deep);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.ai-admin-metric strong.is-warning {
+  color: var(--ai-admin-accent);
+}
+
+.ai-admin-summary__columns {
+  padding-top: 20px;
+  border-top: 1px solid var(--ai-admin-line);
+}
+
+.ai-admin-summary__columns > div {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.ai-admin-summary__columns h3 {
+  margin: 0 0 10px;
+  color: var(--ai-admin-deep);
+  font-size: 14px;
+}
+
+.ai-admin-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-admin-shortcuts a {
+  padding: 8px 11px;
+  border: 1px solid var(--ai-admin-line);
+  border-radius: 9px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ai-admin-recent-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-admin-recent-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ai-admin-line);
+  color: var(--ai-admin-ink);
+  font-size: 12px;
+}
+
+.ai-admin-recent-list time,
+.ai-admin-empty {
+  color: var(--ai-admin-muted);
 }
 
 .nav__link,
@@ -139,7 +383,7 @@ textarea:focus {
 .app-header,
 .step-nav,
 .template-default__header {
-  background: var(--ai-admin-surface) !important;
+  background: var(--ai-admin-card) !important;
   border-bottom: 1px solid var(--ai-admin-line) !important;
 }
 
@@ -162,10 +406,95 @@ textarea:focus {
 .login__form,
 .before-dashboard,
 .after-dashboard {
-  background: var(--ai-admin-surface);
+  background: var(--ai-admin-card);
   border: 1px solid var(--ai-admin-line);
   border-radius: var(--ai-admin-radius);
   box-shadow: var(--ai-admin-shadow);
+}
+
+/*
+ * Carte de connexion.
+ *
+ * `.login__form` recevait le fond, la bordure et l'ombre d'une carte, mais
+ * `padding: 0` : le libelle, le champ et le bouton se collaient au bord, et le
+ * champ, plus large que son conteneur, debordait sur la droite. La carte a donc
+ * maintenant un rembourrage reel, et tout ce qu'elle contient est borne a sa
+ * largeur interieure.
+ */
+.login__form {
+  padding: 34px 32px 30px;
+}
+
+/* Centrage stable de la connexion : Payload garde ses classes natives, mais
+ * le contenu ne doit pas dépendre de la hauteur variable de la fenêtre. */
+.login {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.login__brand {
+  display: flex;
+  justify-content: center;
+  width: min(100%, 520px);
+  text-align: center;
+}
+
+.login__form {
+  width: min(100%, 520px);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.login__form .field-type {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.login__form input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  border-radius: var(--ai-admin-radius-sm);
+  border: 1px solid var(--ai-admin-line);
+  font-size: 15px;
+}
+
+.login__form input:focus {
+  outline: none;
+  border-color: var(--ai-admin-brand);
+  box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.15);
+}
+
+/* « Mot de passe oublie ? » : un lien court entre deux blocs pleine largeur.
+   Il lui faut sa propre respiration, sinon il se colle au champ. */
+.login__form a {
+  display: inline-block;
+  margin: 0 0 22px;
+  color: var(--ai-admin-brand);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.login__form .form-submit {
+  margin: 0;
+}
+
+.login__form button[type='submit'] {
+  width: 100%;
+  min-height: 48px;
+  border-radius: var(--ai-admin-radius-sm) !important;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+/* Le bloc de marque respire au-dessus de la carte. */
+.login__brand {
+  margin-bottom: 26px;
 }
 
 /*
@@ -176,7 +505,7 @@ textarea:focus {
  */
 .dashboard .dashboard__card,
 .dashboard .card {
-  background: var(--ai-admin-surface) !important;
+  background: var(--ai-admin-card) !important;
   border: 1px solid var(--ai-admin-line) !important;
   border-radius: var(--ai-admin-radius);
   color: var(--ai-admin-ink) !important;
@@ -251,9 +580,93 @@ button[type='submit']:hover,
   box-shadow: var(--ai-admin-shadow);
 }
 
+.ai-inbox-tools {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 24px;
+  padding: 20px 22px;
+  border: 1px solid var(--ai-admin-line);
+  border-radius: var(--ai-admin-radius);
+  background: linear-gradient(135deg, #f7faff, #fff);
+  box-shadow: 0 8px 24px rgba(0, 31, 87, 0.07);
+}
+
+.ai-inbox-tools__eyebrow {
+  margin: 0 0 5px;
+  color: var(--ai-admin-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ai-inbox-tools h2 {
+  margin: 0;
+  color: var(--ai-admin-deep);
+  font-size: 21px;
+}
+
+.ai-inbox-tools p:last-child {
+  margin: 6px 0 0;
+  color: var(--ai-admin-muted);
+  font-size: 13px;
+}
+
+.ai-inbox-tools__filters {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-inbox-tools__filters label {
+  display: grid;
+  gap: 5px;
+  color: var(--ai-admin-deep);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ai-inbox-tools__filters select,
+.ai-inbox-tools__filters input {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--ai-admin-line);
+  border-radius: var(--ai-admin-radius-sm);
+  background: #fff;
+  color: var(--ai-admin-deep);
+}
+
+.ai-inbox-tools__export {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 15px;
+  border-radius: var(--ai-admin-radius-sm);
+  background: var(--ai-admin-brand);
+  color: #fff !important;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none !important;
+  box-shadow: 0 7px 16px rgba(0, 48, 135, 0.18);
+}
+
+.ai-inbox-tools__export:hover,
+.ai-inbox-tools__export:focus-visible {
+  background: var(--ai-admin-deep);
+}
+
 @media (max-width: 900px) {
   .nav {
     box-shadow: 0 10px 24px rgba(0, 31, 87, 0.16);
+  }
+
+  .ai-admin-brand {
+    min-height: 64px;
+    padding: 10px 8px;
   }
 
   .dashboard,
@@ -261,5 +674,137 @@ button[type='submit']:hover,
   .edit-view,
   .account {
     padding-inline: 16px;
+  }
+}
+
+/* Responsive administration : conserver la lisibilité des formulaires et
+ * permettre le défilement maîtrisé des listes riches en colonnes. Payload
+ * reste responsable de la structure et du comportement du dashboard ; ces
+ * règles ne font qu'éviter les compressions et débordements sur mobile. */
+@media (max-width: 640px) {
+  .app-header,
+  .step-nav,
+  .template-default__header {
+    padding-inline: 12px !important;
+  }
+
+  .dashboard,
+  .collection-list,
+  .edit-view,
+  .account {
+    padding-inline: 12px;
+  }
+
+  .collection-list__table,
+  .table {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .collection-list__table table,
+  .table table {
+    min-width: 620px;
+  }
+
+  .render-fields,
+  .form,
+  .field-type,
+  .tabs-field__tabs {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  .btn {
+    max-width: 100%;
+  }
+
+  textarea {
+    min-height: 120px;
+  }
+
+  .login__form {
+    margin-inline: 12px;
+    width: auto;
+  }
+
+  .ai-admin-summary {
+    padding: 16px;
+  }
+
+  .ai-admin-summary__header,
+  .ai-admin-summary__columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .ai-admin-summary__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-inbox-tools {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .ai-inbox-tools__filters {
+    justify-content: stretch;
+  }
+
+  .ai-inbox-tools__filters label,
+  .ai-inbox-tools__filters select,
+  .ai-inbox-tools__filters input,
+  .ai-inbox-tools__export {
+    flex: 1 1 140px;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard,
+  .collection-list,
+  .edit-view,
+  .account {
+    padding-inline: 8px;
+  }
+
+  .collection-list__table,
+  .table,
+  .login__form {
+    border-radius: var(--ai-admin-radius-sm);
+  }
+
+  .login__form {
+    padding: 24px 20px 22px;
+  }
+
+  .ai-admin-logo__copy small {
+    letter-spacing: 0.08em;
+  }
+
+  .ai-admin-shortcuts {
+    display: grid;
+  }
+
+  .ai-admin-shortcuts a {
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__link,
+  .dashboard .dashboard__card,
+  .dashboard .card {
+    transition: none;
+  }
+
+  .ai-admin-metric {
+    transition: none;
   }
 }

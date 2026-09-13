@@ -7,7 +7,7 @@ import { revalidationAfterGlobalChange, writeAuditLog } from '../hooks'
  * Page de garde  -  ordre, visibilité et contenus mis en avant.
  *
  * L'ordre validé de la maquette est conservé : hero, confiance, qui sommes-nous,
- * expertises, produits, chiffres, réalisations, formations & événements,
+ * expertises, produits, chiffres clés, réalisations, formations & événements,
  * direction, témoignages, appel à l'action.
  *
  * Modifiable par un Publicateur : il s'agit de mise en avant éditoriale, pas de
@@ -59,6 +59,33 @@ export const Homepage: GlobalConfig = {
           type: 'upload',
           relationTo: 'media-assets',
           label: { fr: 'Visuel', en: 'Visual' },
+          admin: {
+            description: {
+              fr: 'Choisissez un média existant ou cliquez sur « Ajouter un média ». Les textes alternatifs FR et EN sont obligatoires.',
+              en: 'Choose an existing media item or click “Add media”. French and English alt text are required.',
+            },
+          },
+        },
+        {
+          name: 'heroMediaCarousel',
+          type: 'array',
+          maxRows: 3,
+          label: { fr: 'Visuels du carrousel', en: 'Carousel visuals' },
+          admin: {
+            description: {
+              fr: 'Ajoutez jusqu’à trois visuels. Ils défilent automatiquement toutes les 4 secondes. Le premier visuel est utilisé si le carrousel est vide.',
+              en: 'Add up to three visuals. They rotate automatically every 4 seconds. The first visual is used when the carousel is empty.',
+            },
+          },
+          fields: [
+            {
+              name: 'media',
+              type: 'upload',
+              relationTo: 'media-assets',
+              required: true,
+              label: { fr: 'Visuel', en: 'Visual' },
+            },
+          ],
         },
       ],
     },
@@ -105,14 +132,25 @@ export const Homepage: GlobalConfig = {
       label: { fr: 'Chiffres clés', en: 'Key figures' },
       admin: {
         description: {
-          fr: 'Une valeur vide ou nulle n’est jamais affichée  -  aucun « 0 » ne doit apparaître.',
-          en: 'An empty or zero value is never displayed  -  no “0” should ever appear.',
+          fr: 'Section dédiée aux statistiques affichées sur l’accueil. Renseignez les deux langues et utilisez « Visible » pour publier ou retirer chaque chiffre.',
+          en: 'Dedicated section for homepage statistics. Fill in both languages and use “Visible” to publish or remove each figure.',
         },
       },
       fields: [
-        { name: 'value', type: 'number', label: { fr: 'Valeur', en: 'Value' } },
+        {
+          name: 'value',
+          type: 'number',
+          label: { fr: 'Valeur', en: 'Value' },
+          admin: {
+            description: {
+              fr: 'Nombre affiché sur la page d’accueil. Laissez vide pour masquer l’indicateur.',
+              en: 'Number displayed on the homepage. Leave empty to hide the metric.',
+            },
+          },
+        },
         { name: 'suffix', type: 'text', localized: true, label: { fr: 'Suffixe', en: 'Suffix' } },
         { name: 'label', type: 'text', required: true, localized: true, label: { fr: 'Intitulé', en: 'Label' } },
+        { name: 'isVisible', type: 'checkbox', defaultValue: true, label: { fr: 'Visible sur le site', en: 'Visible on the site' } },
       ],
     },
     {

@@ -14,7 +14,7 @@ les services Docker.
 
 L'URL fournie `ingenierieafrica.com` est la référence du site actuellement en
 ligne. Elle est distincte du domaine cible du nouveau déploiement, qui est
-`africaingenieries.com`.
+`ingenierieafrica.com`.
 
 ## 2. Comparaison non technique
 

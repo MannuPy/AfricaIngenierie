@@ -14,6 +14,10 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: 'standalone',
+  // Pastille flottante de Next.js en bas de l'écran : c'est un artefact de
+  // développement, pas un élément de l'interface. Elle se superposait au
+  // dashboard et à l'écran de connexion.
+  devIndicators: false,
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

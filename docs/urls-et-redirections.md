@@ -9,7 +9,7 @@
 - Une URL canonique par contenu et par locale.
 - Redirection 301 depuis les anciennes URL Framer après inventaire complet.
 
-Le domaine de production retenu pour le déploiement est `africaingenieries.com`.
+Le domaine de production retenu pour le déploiement est `ingenierieafrica.com`.
 Les chemins ci-dessous sont les chemins canoniques indépendants du domaine.
 
 ## 2. Nouvelles URL publiques
@@ -50,7 +50,7 @@ Les chemins ci-dessous sont les chemins canoniques indépendants du domaine.
 ```
 
 En production, l’administration est servie sur le sous-domaine distinct
-`admin.africaingenieries.com` et doit être protégée par une authentification forte.
+`admin.ingenierieafrica.com` et doit être protégée par une authentification forte.
 
 ## 4. API événements en lecture seule
 

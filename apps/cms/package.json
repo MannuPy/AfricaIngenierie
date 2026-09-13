@@ -16,14 +16,18 @@
     "migrate:create": "payload migrate:create",
     "migrate:status": "payload migrate:status",
     "bootstrap:users": "tsx src/scripts/bootstrap-users.ts",
+    "retention:cleanup": "tsx src/scripts/retention-cleanup.ts",
     "seed:demo": "tsx src/scripts/seed-demo.ts",
     "test": "tsx src/scripts/prepare-test-db.ts && vitest run",
     "test:db": "tsx src/scripts/prepare-test-db.ts",
     "db:clean-tests": "tsx src/scripts/clean-test-data.ts",
+    "db:repair-audit": "tsx src/scripts/repair-audit-findings.ts",
     "test:e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "dependencies": {
     "@africa-ingenierie/validation": "workspace:*",
+    "@fontsource-variable/playfair-display": "5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
     "@payloadcms/db-postgres": "3.88.0",
     "@payloadcms/email-nodemailer": "3.88.0",
     "@payloadcms/next": "3.88.0",

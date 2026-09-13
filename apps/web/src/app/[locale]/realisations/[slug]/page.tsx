@@ -78,6 +78,7 @@ export default async function Page({
           { key: 'realisations', label: header?.title ?? doc.title },
           doc.title,
         )}
+        crumbLabel={strings.breadcrumb}
       >
         <div className="row g8" style={{ marginTop: 18 }}>
           {doc.clientName ? <Badge tone="outline">{doc.clientName}</Badge> : null}

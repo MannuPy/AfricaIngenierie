@@ -33,11 +33,12 @@ export const Navigation: GlobalConfig = {
     {
       name: 'mainMenu',
       type: 'array',
+      maxRows: 9,
       label: { fr: 'Menu principal', en: 'Main menu' },
       admin: {
         description: {
-          fr: 'Chaque entrée doit pointer vers une adresse réelle du site : jamais « # ».',
-          en: 'Every entry must point to a real site address: never “#”.',
+          fr: 'Ajoutez une entrée, choisissez sa destination, renseignez son libellé dans les deux langues puis activez Visible. La modification est répercutée dans l’en-tête et le pied de page après enregistrement.',
+          en: 'Add an entry, choose its destination, fill in its label in both languages, then enable Visible. The change appears in the header and footer after saving.',
         },
       },
       fields: [
@@ -68,6 +69,22 @@ export const Navigation: GlobalConfig = {
       localized: true,
       defaultValue: 'Contact',
       label: { fr: 'Libellé du bouton Contact', en: 'Contact button label' },
+    },
+    {
+      name: 'testimonialLabel',
+      type: 'text',
+      localized: true,
+      defaultValue: 'Laisser un témoignage',
+      label: {
+        fr: 'Libellé du bouton « Laisser un témoignage »',
+        en: '“Leave a testimonial” button label',
+      },
+      admin: {
+        description: {
+          fr: 'Bouton affiché dans le pied de page. Videz le champ pour le retirer du site. Un témoignage envoyé par un client n’est jamais publié automatiquement : il arrive dans Messages de contact et vous décidez de le publier ou non depuis Témoignages.',
+          en: 'Button shown in the footer. Clear the field to remove it from the site. A testimonial sent by a client is never published automatically: it lands in Contact messages and you decide whether to publish it from Testimonials.',
+        },
+      },
     },
   ],
 }

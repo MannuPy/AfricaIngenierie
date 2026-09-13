@@ -84,6 +84,7 @@ export default async function Page({
           { key: 'expertises', label: header?.title ?? doc.title },
           doc.title,
         )}
+        crumbLabel={strings.breadcrumb}
       />
 
       <section className="sec">

@@ -7,7 +7,10 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  /* Rouge fonce de la charte plutot que --accent : sur les sections teintees
+     (--surface #f4f7fc) l'accent ne donnait que 4,39 : 1, sous le seuil AA de
+     4,5 : 1. --accent-700 donne 6,66 : 1 sur blanc et 6,14 : 1 sur teinte. */
+  color: var(--accent-700);
   margin: 0 0 14px;
   display: flex;
   align-items: center;

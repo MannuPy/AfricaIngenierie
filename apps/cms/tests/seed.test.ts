@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { mediaPack } from '../src/seed/data/media'
+import { products as productPack } from '../src/seed/data/products'
 import { seedDemo, type SeedReport } from '../src/seed/run'
 import { getTestPayload } from './helpers'
 import type { CollectionSlug, Payload } from 'payload'
@@ -84,11 +85,22 @@ describe('Jeu de démonstration', () => {
         expect(doc, `média ${media.key}`).toBeDefined()
         expect(doc?.altFr?.length ?? 0).toBeGreaterThan(5)
         expect(doc?.altEn?.length ?? 0).toBeGreaterThan(5)
-        expect(doc?.mimeType).toBe('image/jpeg')
+        const isPng = media.filename.endsWith('.png') || media.assetFile?.toLowerCase().endsWith('.png')
+        const expectedMimeType = media.mimeType ?? (isPng ? 'image/png' : 'image/jpeg')
+        expect(doc?.mimeType, `type MIME du média ${media.key}`).toBe(expectedMimeType)
         expect(doc?.filesize ?? 0).toBeGreaterThan(0)
-        expect(doc?.width).toBe(media.width)
-        expect(doc?.rightsNote ?? '').toContain('démonstration')
-        expect(doc?.isDemo).toBe(true)
+        if (media.mimeType === 'application/pdf') {
+          expect(doc?.width).toBeNull()
+        } else {
+          expect(doc?.width).toBe(media.width)
+        }
+        if (media.approvedAsset) {
+          expect(doc?.rightsNote ?? '').toContain('fourni')
+          expect(doc?.isDemo).toBe(false)
+        } else {
+          expect(doc?.rightsNote ?? '').toContain('démonstration')
+          expect(doc?.isDemo).toBe(true)
+        }
       }
     })
 
@@ -195,16 +207,17 @@ describe('Jeu de démonstration', () => {
 
   describe('Protection des contenus réels', () => {
     it('laisse intact un document qui n’est plus marqué « démonstration »', async () => {
+      const protectedProduct = productPack[0]
       const found = await payload.find({
         collection: 'products',
-        where: { reference: { equals: 'AI-PR-004' } },
+        where: { slug: { equals: protectedProduct.slug } },
         limit: 1,
         locale: 'fr',
         overrideAccess: true,
       })
 
       const doc = found.docs[0] as { id: number | string }
-      const realTitle = 'Tableaux électriques  -  texte réel du Client'
+      const realTitle = 'Produit réel du Client  -  contenu à préserver'
 
       await payload.update({
         collection: 'products',
@@ -225,7 +238,7 @@ describe('Jeu de démonstration', () => {
 
       expect(after.title).toBe(realTitle)
       expect(after.isDemo).toBeFalsy()
-      expect(report.protectedDocuments).toContain('products:tableaux-electriques')
+      expect(report.protectedDocuments).toContain(`products:${protectedProduct.slug}`)
 
       // Remise en état pour ne pas polluer les exécutions suivantes.
       await payload.update({

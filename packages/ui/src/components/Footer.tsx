@@ -2,12 +2,13 @@ import type { ReactNode } from 'react'
 
 import { Icon } from './Icon'
 import { Link } from './Link'
+import { MapFrame } from './MapFrame'
 import type { IconName } from '../icon-paths'
 import type { NavItem } from './Header'
 
 export type SocialLink = {
   /** Réseau : détermine l'icône. */
-  network: Extract<IconName, 'li' | 'fb' | 'yt'>
+  network: Extract<IconName, 'wa' | 'li' | 'fb' | 'yt'>
   name: string
   /** Une entrée sans URL n'est jamais rendue  -  aucun lien mort. */
   url?: string
@@ -30,8 +31,14 @@ export type FooterProps = {
     phone?: { label: string; href: string }
     email?: string
     whatsapp?: { label: string; href: string }
+    map?: { title: string; embedUrl: string; linkUrl: string; openLabel: string }
   }
   socials?: SocialLink[]
+  /**
+   * Appel a temoignage du pied de page.
+   * Optionnel : si le Client vide le libelle dans le CMS, le bouton disparait.
+   */
+  testimonialCta?: { label: string; href: string }
   legalLinks: NavItem[]
   /** Année du copyright. Passée par l'application pour rester rendue côté serveur. */
   year: number
@@ -58,6 +65,7 @@ export function Footer({
   columns,
   contact,
   socials,
+  testimonialCta,
   legalLinks,
   year,
   brandIcon,
@@ -72,16 +80,21 @@ export function Footer({
         <div className="ft-grid">
           <div className="stack">
             <Link className="brandmark" href={homeHref} style={{ color: '#fff' }}>
-              <span className="mk" style={{ background: 'rgba(255,255,255,.12)' }}>
+              <span
+                className={brandIcon ? 'mk mk--custom' : 'mk'}
+                style={brandIcon ? undefined : { background: 'rgba(255,255,255,.12)' }}
+              >
                 {brandIcon ?? <Icon name="gear" size={22} />}
               </span>
-              <span>
-                <span className="nm" style={{ color: '#fff' }}>
-                  {siteName}
+              {!brandIcon ? (
+                <span>
+                  <span className="nm" style={{ color: '#fff' }}>
+                    {siteName}
+                  </span>
+                  <br />
+                  <span className="tg">{tagline}</span>
                 </span>
-                <br />
-                <span className="tg">{tagline}</span>
-              </span>
+              ) : null}
             </Link>
 
             <p
@@ -90,10 +103,23 @@ export function Footer({
               {baseline}
             </p>
 
+            {testimonialCta && testimonialCta.label ? (
+              <Link className="ft-cta" href={testimonialCta.href}>
+                <Icon name="mail" size={17} />
+                {testimonialCta.label}
+              </Link>
+            ) : null}
+
             {visibleSocials.length > 0 ? (
               <div className="soc" style={{ marginTop: 18 }}>
-                {visibleSocials.map((social) => (
-                  <a key={social.network} href={social.url} aria-label={social.name}>
+                {visibleSocials.map((social, index) => (
+                  <a
+                    key={`${social.network}-${index}`}
+                    href={social.url}
+                    aria-label={social.name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Icon name={social.network} size={17} />
                   </a>
                 ))}
@@ -132,7 +158,15 @@ export function Footer({
               {contact.phone ? (
                 <li style={{ display: 'flex', gap: 10 }}>
                   <Icon name="phone" size={17} />
-                  <a href={`tel:${contact.phone.href}`}>{contact.phone.label}</a>
+                  <a
+                    href={
+                      contact.phone.href.toLowerCase().startsWith('tel:')
+                        ? contact.phone.href
+                        : `tel:${contact.phone.href}`
+                    }
+                  >
+                    {contact.phone.label}
+                  </a>
                 </li>
               ) : null}
 
@@ -150,6 +184,7 @@ export function Footer({
                 </li>
               ) : null}
             </ul>
+            {contact.map ? <MapFrame {...contact.map} compact /> : null}
           </div>
         </div>
 

@@ -8,7 +8,7 @@ import { GROUPS } from './factory'
  * Médiathèque  -  docs/regles-de-gestion.md §7.
  *
  * Règles appliquées :
- *   • types acceptés : JPEG, PNG, WebP, AVIF et PDF ;
+ *   • types acceptés : JPEG, PNG, WebP, AVIF, MP4, WebM, OGG et PDF ;
  *   • 20 Mo maximum par fichier ;
  *   • texte alternatif français obligatoire, anglais requis si le média est
  *     exposé sur la version anglaise ;
@@ -25,7 +25,16 @@ import { GROUPS } from './factory'
  * support de stockage. Le seed retrouvait donc un pack absent et réimportait
  * 26 visuels à chaque exécution  -  bug détecté par le test d'idempotence.
  */
-const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'application/pdf']
+const ACCEPTED_MIME = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'video/mp4',
+  'video/webm',
+  'video/ogg',
+  'application/pdf',
+]
 
 export const MediaAssets: CollectionConfig = {
   slug: 'media-assets',
@@ -34,7 +43,9 @@ export const MediaAssets: CollectionConfig = {
     plural: { fr: 'Médiathèque', en: 'Media library' },
   },
   access: {
-    read: () => true,
+    // Un média n'est public que lorsqu'il a été explicitement autorisé. Les
+    // fichiers nouvellement importés restent privés jusqu'à validation.
+    read: ({ req }) => (req.user ? true : { isPublic: { equals: true } }),
     create: isAuthenticated,
     update: isAuthenticated,
     delete: deleteOnlyAdmin,
@@ -81,8 +92,8 @@ export const MediaAssets: CollectionConfig = {
       label: { fr: 'Texte alternatif (français)', en: 'Alt text (French)' },
       admin: {
         description: {
-          fr: 'Décrit ce que montre l’image, pour les lecteurs d’écran et le référencement. Obligatoire.',
-          en: 'Describes what the image shows, for screen readers and search engines. Required.',
+          fr: 'Décrit ce que montre l’image ou la vidéo, pour l’accessibilité et le référencement. Obligatoire.',
+          en: 'Describes what the image or video shows, for accessibility and search engines. Required.',
         },
       },
     },
@@ -140,6 +151,18 @@ export const MediaAssets: CollectionConfig = {
         description: {
           fr: 'Doit être remplacé par un visuel réel avant la mise en production.',
           en: 'Must be replaced by a real visual before going live.',
+        },
+      },
+    },
+    {
+      name: 'isPublic',
+      type: 'checkbox',
+      defaultValue: false,
+      label: { fr: 'Média public', en: 'Public media' },
+      admin: {
+        description: {
+          fr: 'Autorise la lecture anonyme du fichier. Laisser désactivé pour les fichiers internes ou en attente de validation.',
+          en: 'Allows anonymous access to the file. Keep disabled for internal or pending files.',
         },
       },
     },

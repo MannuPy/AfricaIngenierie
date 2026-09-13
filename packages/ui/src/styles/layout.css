@@ -90,7 +90,10 @@
 
 .split {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  /* minmax(0, …) autorise réellement chaque colonne à se réduire :
+     un texte long ou une image ne peut donc pas pousser la seconde colonne
+     par-dessus son voisin. */
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 64px;
   align-items: center;
 }

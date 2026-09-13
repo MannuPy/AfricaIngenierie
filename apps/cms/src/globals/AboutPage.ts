@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { isAdminOrPublisher } from '../access'
-import { revalidationAfterGlobalChange } from '../hooks'
+import { revalidationAfterGlobalChange, writeAuditLog } from '../hooks'
 
 /**
  * Qui sommes-nous  -  présentation, vision, valeurs et piliers.
@@ -15,7 +15,21 @@ export const AboutPage: GlobalConfig = {
   access: { read: () => true, update: isAdminOrPublisher },
   admin: { group: { fr: 'Contenus publics', en: 'Public content' } },
   versions: { drafts: false, max: 30 },
-  hooks: { afterChange: [revalidationAfterGlobalChange('about-page', ['/fr', '/en', '/fr/a-propos', '/en/about'])] },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        await writeAuditLog(req, {
+          action: 'update',
+          entityType: 'about-page',
+          actorId: (req.user as { id?: string | number } | null)?.id ?? null,
+          before: previousDoc,
+          after: doc,
+        })
+        return doc
+      },
+      revalidationAfterGlobalChange('about-page', ['/fr', '/en', '/fr/a-propos', '/en/about']),
+    ],
+  },
   fields: [
     {
       name: 'presentation',
@@ -52,6 +66,47 @@ export const AboutPage: GlobalConfig = {
       type: 'upload',
       relationTo: 'media-assets',
       label: { fr: 'Visuel', en: 'Visual' },
+      admin: {
+        description: {
+          fr: 'Choisissez un média existant ou cliquez sur « Ajouter un média ». Les textes alternatifs FR et EN sont obligatoires.',
+          en: 'Choose an existing media item or click “Add media”. French and English alt text are required.',
+        },
+      },
+    },
+    {
+      name: 'videoMedia',
+      type: 'upload',
+      relationTo: 'media-assets',
+      label: { fr: 'Vidéo téléversée', en: 'Uploaded video' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Une vidéo MP4, WebM ou OGG remplace le visuel sur la page d’accueil. Si vous utilisez une vidéo, prévoyez aussi une URL YouTube de secours si nécessaire.',
+          en: 'Optional. An MP4, WebM or OGG video replaces the visual on the homepage. Add a YouTube URL as a fallback if needed.',
+        },
+      },
+    },
+    {
+      name: 'videoUrl',
+      type: 'text',
+      label: { fr: 'Lien YouTube de la vidéo', en: 'YouTube video URL' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Collez un lien youtube.com/watch?v=… ou youtu.be/… . La vidéo téléversée est prioritaire.',
+          en: 'Optional. Paste a youtube.com/watch?v=… or youtu.be/… URL. The uploaded video takes priority.',
+        },
+      },
+      validate: (value: unknown) => {
+        if (!value) return true
+        if (typeof value !== 'string') return 'Indiquez une URL YouTube valide.'
+        try {
+          const url = new URL(value)
+          return url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com' || url.hostname === 'youtu.be'
+            ? true
+            : 'Utilisez une URL youtube.com ou youtu.be.'
+        } catch {
+          return 'Indiquez une URL YouTube valide.'
+        }
+      },
     },
   ],
 }

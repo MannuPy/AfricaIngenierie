@@ -26,8 +26,29 @@ import type { Locale } from '@africa-ingenierie/validation/routes'
 export interface UiStrings {
   skipToContent: string
   breadcrumb: string
+  carouselRegion: string
+  carouselPrevious: string
+  carouselNext: string
+  carouselGoTo: string
+  mainNavigation: string
+  openMenu: string
+  closeMenu: string
   home: string
+  explore: string
   languageSwitch: string
+  testimonialCta: string
+  testimonialPageTitle: string
+  testimonialPageIntro: string
+  testimonialName: string
+  testimonialRole: string
+  testimonialCompany: string
+  testimonialQuote: string
+  testimonialConsent: string
+  testimonialSubmit: string
+  testimonialSending: string
+  testimonialSuccess: string
+  testimonialError: string
+  testimonialReviewNotice: string
   rightsReserved: string
   context: string
   solution: string
@@ -56,14 +77,22 @@ export interface UiStrings {
   availability: string
   leadTime: string
   specifications: string
+  unitPrice: string
+  downloadProductSheet: string
+  presentationVideo: string
+  gallery360: string
   projectState: string
   projectStates: Record<'planned' | 'ongoing' | 'done', string>
   contactDetails: string
+  mapTitle: string
+  mapOpen: string
   openingHours: string
   formName: string
   formEmail: string
+  formPhone: string
   formCompany: string
   formNeed: string
+  formNeedHint: string
   formMessage: string
   formConsent: string
   formSubmit: string
@@ -80,8 +109,34 @@ const STRINGS: Record<Locale, UiStrings> = {
   fr: {
     skipToContent: 'Aller au contenu',
     breadcrumb: "Fil d'Ariane",
+    carouselRegion: 'Témoignages de clients',
+    carouselPrevious: 'Témoignage précédent',
+    carouselNext: 'Témoignage suivant',
+    carouselGoTo: 'Afficher le témoignage',
+    mainNavigation: 'Navigation principale',
+    openMenu: 'Ouvrir le menu',
+    closeMenu: 'Fermer le menu',
     home: 'Accueil',
+    explore: 'Découvrir',
     languageSwitch: 'Langue',
+    testimonialCta: 'Laisser un témoignage',
+    testimonialPageTitle: 'Partager votre témoignage',
+    testimonialPageIntro:
+      'Votre retour nous aide à améliorer nos interventions. Il sera relu par notre équipe avant toute publication.',
+    testimonialName: 'Nom et prénom',
+    testimonialRole: 'Fonction',
+    testimonialCompany: 'Entreprise',
+    testimonialQuote: 'Votre témoignage',
+    testimonialConsent:
+      'J’autorise Africa Ingénierie à relire et à publier ce témoignage avec mon nom et les informations indiquées.',
+    testimonialSubmit: 'Envoyer le témoignage',
+    testimonialSending: 'Envoi en cours…',
+    testimonialSuccess:
+      'Merci pour votre témoignage. Il a bien été reçu et sera examiné par notre équipe.',
+    testimonialError:
+      'L’envoi a échoué. Réessayez dans quelques instants.',
+    testimonialReviewNotice:
+      'Votre témoignage reste privé tant qu’un administrateur ne l’a pas validé. Vous pouvez fermer cette page après l’envoi.',
     rightsReserved: 'Tous droits réservés.',
     // Intitulés de champs  -  miroir des `label.fr` du modèle Payload.
     context: 'Contexte',
@@ -111,15 +166,23 @@ const STRINGS: Record<Locale, UiStrings> = {
     availability: 'Disponibilité',
     leadTime: 'Délai indicatif',
     specifications: 'Caractéristiques techniques',
+    unitPrice: 'Prix unitaire',
+    downloadProductSheet: 'Télécharger la fiche PDF',
+    presentationVideo: 'Vidéo de présentation',
+    gallery360: 'Présentation 360°',
     projectState: 'Avancement',
     projectStates: { planned: 'Planifié', ongoing: 'En cours', done: 'Achevé' },
     // Contact.
     contactDetails: 'Coordonnées',
+    mapTitle: 'Nous trouver',
+    mapOpen: 'Ouvrir la carte',
     openingHours: 'Horaires',
     formName: 'Nom et prénom',
     formEmail: 'Adresse e-mail',
+    formPhone: 'Numéro de téléphone',
     formCompany: 'Entreprise',
     formNeed: 'Votre besoin',
+    formNeedHint: 'Sélectionnez un ou plusieurs domaines d’intervention.',
     formMessage: 'Décrivez votre demande',
     formConsent:
       'J’accepte que ces informations soient utilisées pour traiter ma demande.',
@@ -137,8 +200,33 @@ const STRINGS: Record<Locale, UiStrings> = {
   en: {
     skipToContent: 'Skip to content',
     breadcrumb: 'Breadcrumb',
+    carouselRegion: 'Client testimonials',
+    carouselPrevious: 'Previous testimonial',
+    carouselNext: 'Next testimonial',
+    carouselGoTo: 'Show testimonial',
+    mainNavigation: 'Main navigation',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
     home: 'Home',
+    explore: 'Explore',
     languageSwitch: 'Language',
+    testimonialCta: 'Leave a testimonial',
+    testimonialPageTitle: 'Share your testimonial',
+    testimonialPageIntro:
+      'Your feedback helps us improve our work. Our team will review it before anything is published.',
+    testimonialName: 'Full name',
+    testimonialRole: 'Role',
+    testimonialCompany: 'Company',
+    testimonialQuote: 'Your testimonial',
+    testimonialConsent:
+      'I allow Africa Ingénierie to review and publish this testimonial with my name and the information provided.',
+    testimonialSubmit: 'Send testimonial',
+    testimonialSending: 'Sending…',
+    testimonialSuccess:
+      'Thank you for your testimonial. It has been received and will be reviewed by our team.',
+    testimonialError: 'Sending failed. Please try again shortly.',
+    testimonialReviewNotice:
+      'Your testimonial remains private until an administrator approves it. You may close this page after sending.',
     rightsReserved: 'All rights reserved.',
     context: 'Context',
     solution: 'Solution',
@@ -167,14 +255,22 @@ const STRINGS: Record<Locale, UiStrings> = {
     availability: 'Availability',
     leadTime: 'Indicative lead time',
     specifications: 'Technical specifications',
+    unitPrice: 'Unit price',
+    downloadProductSheet: 'Download the PDF sheet',
+    presentationVideo: 'Presentation video',
+    gallery360: '360° presentation',
     projectState: 'Progress',
     projectStates: { planned: 'Planned', ongoing: 'Ongoing', done: 'Completed' },
     contactDetails: 'Contact details',
+    mapTitle: 'Find us',
+    mapOpen: 'Open map',
     openingHours: 'Opening hours',
     formName: 'Full name',
     formEmail: 'Email address',
+    formPhone: 'Phone number',
     formCompany: 'Company',
     formNeed: 'Your need',
+    formNeedHint: 'Select one or more areas of intervention.',
     formMessage: 'Describe your request',
     formConsent: 'I agree that this information may be used to handle my request.',
     formSubmit: 'Send request',

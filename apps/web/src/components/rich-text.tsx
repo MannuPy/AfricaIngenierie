@@ -44,6 +44,14 @@ function renderChildren(nodes: LexicalNode[] | undefined, prefix: string): React
   return (nodes ?? []).map((node, index) => renderNode(node, `${prefix}-${index}`))
 }
 
+function safeHref(value: string): string | null {
+  const href = value.trim()
+  if (!href || href.startsWith('//')) return null
+  if (href.startsWith('/') || href.startsWith('#')) return href
+  if (/^(https?:|mailto:|tel:)/i.test(href)) return href
+  return null
+}
+
 function renderNode(node: LexicalNode, key: string): ReactNode {
   switch (node.type) {
     case 'text':
@@ -91,9 +99,9 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 
     case 'link':
     case 'autolink': {
-      const href = node.fields?.url ?? node.url
+      const href = safeHref(node.fields?.url ?? node.url ?? '')
       if (!href) return <span key={key}>{renderChildren(node.children, key)}</span>
-      const external = /^https?:\/\//.test(href)
+      const external = /^https?:\/\//i.test(href)
       return (
         <a
           className="tlink"

@@ -111,12 +111,16 @@ export function Header({
 
   const brand = (
     <Link className="brandmark" href={homeHref} aria-label={`${siteName}  -  ${labels.home}`}>
-      <span className="mk">{brandIcon ?? <Icon name="gear" size={22} />}</span>
-      <span>
-        <span className="nm">{siteName}</span>
-        <br />
-        <span className="tg">{tagline}</span>
+      <span className={brandIcon ? 'mk mk--custom' : 'mk'}>
+        {brandIcon ?? <Icon name="gear" size={22} />}
       </span>
+      {!brandIcon ? (
+        <span>
+          <span className="nm">{siteName}</span>
+          <br />
+          <span className="tg">{tagline}</span>
+        </span>
+      ) : null}
     </Link>
   )
 

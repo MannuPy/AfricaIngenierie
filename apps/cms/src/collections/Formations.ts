@@ -22,7 +22,7 @@ export const Formations = contentCollection({
     'seo.title',
     'seo.description',
   ],
-  defaultColumns: ['title', 'theme', 'editorialStatus', 'updatedAt'],
+  defaultColumns: ['title', 'media', 'theme', 'editorialStatus', 'updatedAt'],
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, label: { fr: 'Titre', en: 'Title' } },
     {
@@ -67,7 +67,21 @@ export const Formations = contentCollection({
       maxRows: 8,
       label: { fr: 'Objectifs pédagogiques', en: 'Learning objectives' },
       admin: { description: { fr: 'Un objectif par ligne, formulé comme une action.', en: 'One objective per line, phrased as an action.' } },
-      fields: [{ name: 'text', type: 'text', required: true, label: { fr: 'Objectif', en: 'Objective' } }],
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          required: true,
+          minLength: 3,
+          label: { fr: 'Objectif', en: 'Objective' },
+          admin: {
+            placeholder: {
+              fr: 'Ex. Diagnostiquer une panne sur une ligne de production',
+              en: 'E.g. Diagnose a fault on a production line',
+            },
+          },
+        },
+      ],
     },
     {
       name: 'prerequisites',

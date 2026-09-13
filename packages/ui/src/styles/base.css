@@ -63,7 +63,7 @@ ol {
 :focus-visible {
   outline: 3px solid var(--brand-600);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
 }
 
 /* Motif blueprint  -  seul motif décoratif du site */

@@ -2,7 +2,7 @@
 set -eu
 
 PROJECT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-ENV_FILE=${ENV_FILE:-"${PROJECT_DIR}/.env.oracle"}
+ENV_FILE=${ENV_FILE:-"${PROJECT_DIR}/.env.ovh.test"}
 COMPOSE="docker compose --env-file ${ENV_FILE} -f ${PROJECT_DIR}/docker-compose.prod.yml"
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -24,7 +24,7 @@ case "${1:-}" in
     $COMPOSE --profile ops run --rm certbot certonly --webroot \
       --webroot-path /var/www/certbot \
       --email "$CERTBOT_EMAIL" --agree-tos --no-eff-email \
-      -d "$PUBLIC_DOMAIN" -d "$ADMIN_DOMAIN"
+      -d "$PUBLIC_DOMAIN" -d "www.${PUBLIC_DOMAIN}" -d "$ADMIN_DOMAIN"
     TLS_BOOTSTRAP=false $COMPOSE up -d nginx
     ;;
   renew)

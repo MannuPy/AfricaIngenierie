@@ -68,6 +68,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         eyebrow={strings.home}
         title={doc.title}
         crumbs={[{ label: strings.home, href: homePath(locale) }, { label: doc.title }]}
+        crumbLabel={strings.breadcrumb}
       />
 
       <section className="sec">

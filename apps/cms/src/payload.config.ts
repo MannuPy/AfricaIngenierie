@@ -88,7 +88,11 @@ export default buildConfig({
     },
     components: {
       // Bandeau imposant le changement du mot de passe initial.
-      beforeDashboard: ['@/components/MustChangePasswordBanner#MustChangePasswordBanner'],
+      beforeDashboard: [
+        '@/components/MustChangePasswordBanner#MustChangePasswordBanner',
+        '@/components/AdminDashboardSummary#AdminDashboardSummary',
+      ],
+      beforeNav: ['@/components/AdminBrand#AdminBrand'],
       graphics: {
         Logo: '@/components/AdminLogo#AdminLogo',
         Icon: '@/components/AdminLogo#AdminLogoIcon',
@@ -197,7 +201,10 @@ export default buildConfig({
 
   sharp,
 
-  graphQL: { disable: false },
+  // L’API contractuelle des événements est exposée par apps/web. GraphQL
+  // n’est pas requis par le cahier des charges et resterait une surface
+  // publique supplémentaire sans contrôle de profondeur/complexité.
+  graphQL: { disable: true },
 
   // La limitation de débit sur la connexion est appliquée par Nginx
   // (infra/nginx/conf.d/20-admin.conf) et complétée par le verrouillage

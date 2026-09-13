@@ -15,6 +15,32 @@ services:
       # psql / pgAdmin depuis le poste, jamais depuis l'extérieur.
       - '127.0.0.1:${POSTGRES_DEV_PORT:-5432}:5432'
 
+  # IDE PostgreSQL local, activé uniquement à la demande avec le profil
+  # `db-tools`. Il reste volontairement hors de la configuration production.
+  pgadmin:
+    # Empreinte relevée localement le 05/09/2026.
+    image: dpage/pgadmin4:latest@sha256:2f4ce946ddf8360680d7eff4eaba1d91859eb6b4003e6623bad5c63a322c2f4d
+    container_name: ai-pgadmin
+    profiles: ['db-tools']
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@africa-ingenierie.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-change-me-local-pgadmin-password}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+      PGADMIN_DISABLE_POSTFIX: 'True'
+      TZ: ${TZ:-UTC}
+    ports:
+      # Accès local uniquement : ne jamais publier cet outil sur Internet.
+      - '127.0.0.1:${PGADMIN_DEV_PORT:-5050}:80'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - backend_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   minio:
     ports:
       - '127.0.0.1:${MINIO_DEV_PORT:-9000}:9000'

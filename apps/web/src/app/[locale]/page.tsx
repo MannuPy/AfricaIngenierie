@@ -15,17 +15,22 @@ import {
 } from '@africa-ingenierie/validation/routes'
 
 import { CmsImage } from '../../components/cms-image'
+import { AboutMedia } from '../../components/about-media'
+import { HeroMediaCarousel } from '../../components/hero-media-carousel'
+import { StoryTabs } from '../../components/story-tabs'
+import { TestimonialsCarousel } from '../../components/testimonials-carousel'
 import {
   EventCard,
   ExpertiseCard,
   FormationCard,
   ProductCard,
   RealisationCard,
-  TestimonialCard,
 } from '../../components/cards'
-import { findGlobal, findPublished } from '../../lib/cms'
+import { findGlobal, findPublished, mediaUrl } from '../../lib/cms'
 import { alternatePaths } from '../../lib/paths'
 import { pageMetadata } from '../../lib/seo'
+import { sortEventsByUpcoming } from '../../lib/events-order'
+import { ui } from '../../lib/ui-strings'
 import type {
   AboutPageDoc,
   CeoMessageDoc,
@@ -34,12 +39,14 @@ import type {
   FormationDoc,
   HomepageDoc,
   HomepageSectionKey,
+  MediaDoc,
   PartnerDoc,
   ProductDoc,
   RealisationDoc,
   SiteSettingsDoc,
   TestimonialDoc,
 } from '../../lib/types'
+import { populated } from '../../lib/types'
 
 export const revalidate = 300
 
@@ -82,8 +89,13 @@ async function loadHome(locale: Locale) {
       where: { 'where[isFeatured][equals]': true },
     }),
     findPublished<FormationDoc>('formations', locale, { limit: 3 }),
-    findPublished<EventDoc>('events', locale, { limit: 3, sort: '-startsAt' }),
-    findPublished<TestimonialDoc>('testimonials', locale, { limit: 3 }),
+    findPublished<EventDoc>('events', locale, { sort: 'startsAt' }),
+    // Cinq témoignages publiés au maximum : les plus récents remplacent les
+    // anciens dans la vitrine sans jamais dépasser la limite publique.
+    findPublished<TestimonialDoc>('testimonials', locale, {
+      limit: 5,
+      sort: '-publishedAt',
+    }),
     findPublished<PartnerDoc>('partners', locale, { sort: 'position', limit: 8, depth: 1 }),
   ])
 
@@ -96,7 +108,7 @@ async function loadHome(locale: Locale) {
     products,
     realisations,
     formations,
-    events,
+    events: sortEventsByUpcoming(events).slice(0, 3),
     testimonials,
     partners,
   }
@@ -128,6 +140,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale: raw } = await params
   if (!(LOCALES as readonly string[]).includes(raw)) notFound()
   const locale = raw as Locale
+  const strings = ui(locale)
 
   const data = await loadHome(locale)
   const home = data.homepage
@@ -148,32 +161,53 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     trust: () => {
       const section = head('trust')
       if (!section || data.partners.length === 0) return null
+      const partnerName = (partner: PartnerDoc) =>
+        locale === 'en' ? partner.nameEn?.trim() || partner.name : partner.name
       return (
-        <section className="sec-sm tint" key="trust">
+        <section className="sec-sm trust-band" key="trust">
           <div className="wrap stack g24">
-            {section.title ? <p className="eyebrow">{section.title}</p> : null}
-            <div className="row g32" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-              {data.partners.map((partner) =>
-                partner.externalUrl ? (
-                  <a
-                    className="h4"
-                    href={partner.externalUrl}
-                    key={partner.id}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {partner.name}
-                  </a>
-                ) : (
-                  // Sans URL, le partenaire est affiché SANS lien : le
-                  // prototype pose comme principe qu'aucun lien mort
-                  // n'apparaît jamais.
-                  <span className="h4" key={partner.id}>
-                    {partner.name}
-                  </span>
-                ),
-              )}
-            </div>
+            {section.eyebrow ? <p className="eyebrow trust-band-eyebrow">{section.eyebrow}</p> : null}
+            {section.title ? <h2 className="h2 trust-band-title">{section.title}</h2> : null}
+            <ul className="trust-items" aria-label={section.title ?? undefined}>
+              {data.partners.map((partner) => (
+                <li key={partner.id}>
+                  {(() => {
+                    const displayName = partnerName(partner)
+                    return partner.externalUrl ? (
+                    <a
+                      className={['trust-item', partner.logo ? 'trust-item-logo' : null].filter(Boolean).join(' ')}
+                      aria-label={displayName}
+                      title={displayName}
+                      href={partner.externalUrl}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      {partner.logo ? (
+                        <CmsImage media={partner.logo} locale={locale} fallbackLabel={displayName} ratio="1/1" fit="contain" removeBackground className="trust-logo" />
+                      ) : (
+                        <span>{displayName}</span>
+                      )}
+                    </a>
+                  ) : (
+                    // Sans URL, le partenaire est affiché SANS lien : le
+                    // prototype pose comme principe qu'aucun lien mort
+                    // n'apparaît jamais.
+                    <span
+                      className={['trust-item', partner.logo ? 'trust-item-logo' : null].filter(Boolean).join(' ')}
+                      aria-label={displayName}
+                      title={displayName}
+                    >
+                      {partner.logo ? (
+                        <CmsImage media={partner.logo} locale={locale} fallbackLabel={displayName} ratio="1/1" fit="contain" removeBackground className="trust-logo" />
+                      ) : (
+                        displayName
+                      )}
+                    </span>
+                  )
+                  })()}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )
@@ -185,23 +219,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       const aboutHref = listPath('aPropos', locale)
       return (
         <section className="sec" key="about">
-          <div className="wrap split">
-            <div className="stack g16">
+          <div className="wrap split story-section">
+            <AboutMedia about={data.about} locale={locale} fallbackLabel={section.title ?? ''} />
+            <div className="stack g24">
               {section.eyebrow ? <p className="eyebrow">{section.eyebrow}</p> : null}
               {section.title ? <h2 className="h2">{section.title}</h2> : null}
-              <p className="lead measure">{data.about.presentation}</p>
-              {section.ctaLabel ? (
-                <Button href={aboutHref} variant="outline">
-                  {section.ctaLabel}
-                </Button>
-              ) : null}
+              <StoryTabs
+                locale={locale}
+                identity={data.about.presentation}
+                vision={data.about.vision}
+                commitments={data.about.pillars}
+              />
+              {section.ctaLabel ? <Button href={aboutHref} variant="outline">{section.ctaLabel}</Button> : null}
             </div>
-            <CmsImage
-              media={data.about.media}
-              locale={locale}
-              fallbackLabel={section.title ?? ''}
-              ratio="4/3"
-            />
           </div>
         </section>
       )
@@ -261,19 +291,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
     figures: () => {
       const section = head('figures')
-      const figures = home.keyFigures ?? []
+      const figures = (home.keyFigures ?? []).filter((figure) => figure.isVisible !== false)
       if (!section || figures.length === 0) return null
       return (
-        <section className="sec brand" key="figures">
+        <section className="sec key-figures-section" key="figures">
           <div className="wrap stack g32">
-            {section.title ? (
-              <h2 className="h2" style={{ color: 'var(--on-brand)' }}>
-                {section.title}
-              </h2>
-            ) : null}
+            {section.eyebrow ? <p className="eyebrow">{section.eyebrow}</p> : null}
+            {section.title ? <h2 className="h2">{section.title}</h2> : null}
             {/* `Stats` ne rend jamais une valeur nulle ou zéro : aucune
                 statistique non renseignée n'apparaît. */}
             <Stats
+              className="key-figures"
+              onLight
               items={figures.map((figure) => ({
                 value: figure.value ?? null,
                 suffix: figure.suffix ?? undefined,
@@ -377,12 +406,30 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       return (
         <section className="sec tint" key="testimonials">
           <div className="wrap stack g32">
-            {section.title ? <h2 className="h2">{section.title}</h2> : null}
-            <div className="grid c3">
-              {data.testimonials.map((doc) => (
-                <TestimonialCard doc={doc} key={doc.id} />
-              ))}
-            </div>
+            {section.eyebrow ? <p className="eyebrow">{section.eyebrow}</p> : null}
+            {section.title ? <h2 className="h2 tmo-title">{section.title}</h2> : null}
+            {section.intro ? <p className="lead measure">{section.intro}</p> : null}
+            <TestimonialsCarousel
+              items={data.testimonials.map((doc) => {
+                const portrait = populated<MediaDoc>(doc.portrait)
+                const portraitSrc = mediaUrl(portrait?.url)
+                const portraitAlt = locale === 'en' ? portrait?.altEn : portrait?.altFr
+                return {
+                  id: String(doc.id),
+                  quote: doc.quote,
+                  personName: doc.personName,
+                  role: doc.role,
+                  company: locale === 'en' ? doc.companyEn || doc.company : doc.company,
+                  portrait: portraitSrc && portraitAlt ? { src: portraitSrc, alt: portraitAlt } : null,
+                }
+              })}
+              labels={{
+                previous: strings.carouselPrevious,
+                next: strings.carouselNext,
+                goTo: strings.carouselGoTo,
+                region: strings.carouselRegion,
+              }}
+            />
           </div>
         </section>
       )
@@ -394,6 +441,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       return (
         <section className="sec brand-deep" key="cta">
           <div className="wrap stack g24" style={{ textAlign: 'center', alignItems: 'center' }}>
+            {section.eyebrow ? <p className="eyebrow" style={{ color: 'var(--on-brand-soft)' }}>{section.eyebrow}</p> : null}
             {section.title ? (
               <h2 className="h2" style={{ color: 'var(--on-brand)' }}>
                 {section.title}
@@ -413,28 +461,26 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     },
   }
 
-  const heroTitle = home.heroHighlight
-    ? home.heroTitle.split(home.heroHighlight)
-    : [home.heroTitle]
+  const heroSlides = (home.heroMediaCarousel ?? [])
+    .slice(0, 3)
+    .map((entry, index) => {
+      const media = populated<import('../../lib/types').MediaDoc>(entry.media)
+      const src = mediaUrl(media?.url)
+      const alt = locale === 'en' ? media?.altEn : media?.altFr
+      return src && alt
+        ? { id: entry.id ?? `hero-slide-${index}`, src, alt }
+        : null
+    })
+    .filter((slide): slide is { id: string; src: string; alt: string } => Boolean(slide))
 
   return (
     <>
       <section className="sec brand" style={{ paddingTop: 72 }}>
         <div className="wrap split">
           <div className="stack g16">
-            {home.heroEyebrow ? (
-              <p className="eyebrow on-brand">{home.heroEyebrow}</p>
-            ) : null}
-            <h1 className="h1" style={{ color: 'var(--on-brand)' }}>
-              {heroTitle.length === 2 ? (
-                <>
-                  {heroTitle[0]}
-                  <span className="serif-it">{home.heroHighlight}</span>
-                  {heroTitle[1]}
-                </>
-              ) : (
-                home.heroTitle
-              )}
+            {home.heroEyebrow ? <p className="eyebrow" style={{ color: 'var(--on-brand-soft)' }}>{home.heroEyebrow}</p> : null}
+            <h1 className="h1 hero-message" style={{ color: 'var(--on-brand)' }}>
+              {home.heroTitle}
             </h1>
             {home.heroLead ? (
               <p className="lead measure" style={{ color: 'var(--on-brand-soft)' }}>
@@ -450,13 +496,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </Button>
             </div>
           </div>
-          <CmsImage
-            media={home.heroMedia}
-            locale={locale}
-            fallbackLabel={home.heroTitle}
-            ratio="4/3"
-            priority
-          />
+          {heroSlides.length > 0 ? (
+            <HeroMediaCarousel slides={heroSlides} label={locale === 'en' ? 'Hero visuals' : 'Visuels de la bannière'} />
+          ) : (
+            <CmsImage
+              media={home.heroMedia}
+              locale={locale}
+              fallbackLabel={home.heroTitle}
+              ratio="4/3"
+              priority
+            />
+          )}
         </div>
       </section>
 

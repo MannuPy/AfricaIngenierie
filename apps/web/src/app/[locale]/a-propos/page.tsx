@@ -11,6 +11,7 @@ import { alternatePaths } from '../../../lib/paths'
 import { assertLocale, loadSectionPage, sectionCrumbs } from '../../../lib/page-shell'
 import { pageMetadata } from '../../../lib/seo'
 import type { AboutPageDoc, CeoMessageDoc, TeamMemberDoc } from '../../../lib/types'
+import { ui } from '../../../lib/ui-strings'
 
 export const revalidate = 300
 
@@ -68,6 +69,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         title={header.title}
         intro={header.intro ?? undefined}
         crumbs={sectionCrumbs(locale, { key: SECTION, label: header.title })}
+        crumbLabel={ui(locale).breadcrumb}
       />
 
       {about?.presentation ? (

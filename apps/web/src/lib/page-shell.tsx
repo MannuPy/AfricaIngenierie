@@ -82,9 +82,19 @@ export function SectionShell({
         title={header.title}
         intro={header.intro ?? undefined}
         crumbs={sectionCrumbs(locale, { key: sectionKey, label: header.title })}
+        crumbLabel={ui(locale).breadcrumb}
       />
-      <section className="sec">
+      {/*
+        Le titre ci-dessous n'est pas visible mais restaure la hierarchie :
+        sans lui, la page enchainait le H1 du heros directement sur les H3 des
+        cartes, soit un saut de niveau (WCAG 1.3.1) et une region sans nom. Le
+        texte reste issu du CMS  -  aucun libelle en dur.
+      */}
+      <section className="sec" aria-labelledby={`${sectionKey}-liste`}>
         <div className="wrap">
+          <h2 className="sr-only" id={`${sectionKey}-liste`}>
+            {header.eyebrow}
+          </h2>
           {isEmpty ? (
             <EmptyState
               title={header.emptyStateTitle ?? header.title}

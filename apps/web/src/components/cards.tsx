@@ -30,8 +30,15 @@ function icon(value: string | null | undefined): IconName {
 
 export function ExpertiseCard({ doc, locale }: { doc: ExpertiseDoc; locale: Locale }) {
   return (
-    <Card href={detailPath('expertises', doc.slug, locale)} ruled padding="md">
-      <div className="stack g16">
+    <Card href={detailPath('expertises', doc.slug, locale)} ruled>
+      <CmsImage
+        media={doc.media}
+        locale={locale}
+        fallbackLabel={doc.title}
+        ratio="4/3"
+        className="collection-card-media"
+      />
+      <div className="stack g16 card-pad">
         <span className="ic-badge">
           <Icon name={icon(doc.iconKey)} size={22} />
         </span>
@@ -43,6 +50,11 @@ export function ExpertiseCard({ doc, locale }: { doc: ExpertiseDoc; locale: Loca
 }
 
 export function RealisationCard({ doc, locale }: { doc: RealisationDoc; locale: Locale }) {
+  // Une traduction absente ne doit pas créer une carte vide ou un lien
+  // impossible à identifier. Le document restera disponible dans le CMS
+  // jusqu'à ce que son titre soit renseigné dans la langue concernée.
+  if (!doc.title?.trim()) return null
+
   return (
     <Card href={detailPath('realisations', doc.slug, locale)} ruled>
       <CmsImage
@@ -106,8 +118,15 @@ export function ProductCard({ doc, locale }: { doc: ProductDoc; locale: Locale }
 
 export function FormationCard({ doc, locale }: { doc: FormationDoc; locale: Locale }) {
   return (
-    <Card href={detailPath('formations', doc.slug, locale)} ruled padding="md">
-      <div className="stack g8">
+    <Card href={detailPath('formations', doc.slug, locale)} ruled>
+      <CmsImage
+        media={doc.media}
+        locale={locale}
+        fallbackLabel={doc.title}
+        ratio="4/3"
+        className="collection-card-media"
+      />
+      <div className="stack g8 card-pad">
         <div className="row g8">
           <Badge tone="outline">{doc.duration}</Badge>
           <Badge tone="neutral">{doc.format}</Badge>
@@ -121,8 +140,15 @@ export function FormationCard({ doc, locale }: { doc: FormationDoc; locale: Loca
 
 export function EventCard({ doc, locale }: { doc: EventDoc; locale: Locale }) {
   return (
-    <Card href={detailPath('evenements', doc.slug, locale)} ruled padding="md">
-      <div className="stack g8">
+    <Card href={detailPath('evenements', doc.slug, locale)} ruled>
+      <CmsImage
+        media={doc.media}
+        locale={locale}
+        fallbackLabel={doc.title}
+        ratio="4/3"
+        className="collection-card-media"
+      />
+      <div className="stack g8 card-pad">
         <div className="row g8">
           <Badge tone="brand">{doc.eventType}</Badge>
           <Badge tone="neutral">{formatDate(doc.startsAt, locale)}</Badge>
@@ -137,18 +163,52 @@ export function EventCard({ doc, locale }: { doc: EventDoc; locale: Locale }) {
   )
 }
 
-export function TestimonialCard({ doc }: { doc: TestimonialDoc }) {
+function initials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
+export function TestimonialCard({ doc, locale }: { doc: TestimonialDoc; locale: Locale }) {
   return (
-    <Card padding="md" hoverable>
-      <figure className="stack g16" style={{ margin: 0 }}>
-        <Icon name="quote" size={26} />
-        <blockquote className="lead" style={{ margin: 0 }}>
+    <Card padding="md" hoverable className="testimonial-card">
+      {/*
+        Les cinq etoiles affichees ici pour chaque temoignage etaient codees en
+        dur : elles affirmaient une note que personne n'avait donnee, et aucun
+        champ du CMS ne la portait. Retirees. L'ornement typographique est
+        desormais le guillemet ouvrant, pose en CSS et hors du flux.
+      */}
+      <figure className="stack g24" style={{ margin: 0 }}>
+        <blockquote className="lead serif-it" style={{ margin: 0 }}>
           {doc.quote}
         </blockquote>
-        <figcaption className="meta">
-          <strong>{doc.personName}</strong>
-          {doc.role ? `  -  ${doc.role}` : ''}
-          {doc.company ? `, ${doc.company}` : ''}
+        <figcaption className="testimonial-person">
+          {doc.portrait ? (
+            <CmsImage
+              media={doc.portrait}
+              locale={locale}
+              fallbackLabel={doc.personName}
+              ratio="1/1"
+              className="testimonial-avatar"
+            />
+          ) : (
+            <span className="testimonial-avatar testimonial-avatar-fallback" aria-hidden="true">
+              {initials(doc.personName)}
+            </span>
+          )}
+          <span className="stack g4">
+            <strong>{doc.personName}</strong>
+            {doc.role || doc.company || doc.companyEn ? (
+              <span className="meta">
+                {[doc.role, locale === 'en' ? doc.companyEn || doc.company : doc.company]
+                  .filter(Boolean)
+                  .join(', ')}
+              </span>
+            ) : null}
+          </span>
         </figcaption>
       </figure>
     </Card>

@@ -201,6 +201,336 @@ a.card.ruled:hover::after,
   padding: 20px;
 }
 
+/* Témoignages : lecture courte, signature visuelle et portrait optionnel. */
+/* La grille ne suppose plus qu'il y a exactement quatre temoignages : avec un
+   seul publie, une grille en quatre colonnes fixes donnait une carte etroite
+   perdue dans le vide. auto-fit repartit ce qui existe, de 1 a 4 cartes. */
+.testimonials-grid {
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  align-items: stretch;
+}
+.testimonial-card {
+  min-height: 330px;
+  display: flex;
+  padding-top: 34px;
+  border: 1px solid var(--line-soft);
+  box-shadow: 0 16px 38px rgba(15, 23, 32, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.testimonial-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 48px rgba(15, 23, 32, 0.1);
+}
+.testimonial-card figure {
+  flex: 1;
+}
+.testimonial-card blockquote {
+  position: relative;
+  padding-top: 8px;
+}
+/* Le guillemet remplace les cinq etoiles qui etaient codees en dur dans le
+   composant : une note que personne n'avait donnee. Ornement, pas information :
+   il reste donc hors du flux et invisible des lecteurs d'ecran. */
+.testimonial-card blockquote::before {
+  content: '“';
+  position: absolute;
+  top: -46px;
+  left: -6px;
+  color: var(--brand-200);
+  font-family: var(--f-display);
+  font-size: 88px;
+  line-height: 1;
+  pointer-events: none;
+}
+.testimonial-card blockquote {
+  font-size: 18px;
+  line-height: 1.62;
+}
+.testimonial-person {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: auto;
+  color: var(--ink);
+}
+.testimonial-avatar {
+  width: 56px;
+  height: 56px;
+  aspect-ratio: 1;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--brand-100);
+}
+.testimonial-avatar-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--brand);
+  font-weight: 800;
+}
+
+/* Bandeau de confiance : compact, horizontal et lisible sur mobile. */
+.trust-band {
+  /* Bandeau de preuve : teinte neutre de la charte, encadrée de deux filets.
+     Le contraste vient de la valeur (bleu profond du héros -> presque blanc),
+     pas d'une teinte étrangère. Les logos clients, multicolores, se posent
+     sans caisson blanc. */
+  background: var(--surface);
+  color: var(--ink);
+  border-block: 1px solid var(--line);
+  overflow: hidden;
+}
+.trust-band-eyebrow {
+  color: var(--ink);
+  margin-bottom: 0;
+}
+.trust-band-title {
+  color: var(--ink);
+  margin: 0;
+  text-align: center;
+}
+.trust-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 34px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  list-style: none;
+  padding: 8px 2px 12px;
+}
+.trust-items > li {
+  flex: 0 0 auto;
+}
+.trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 14px 26px;
+  font-size: 16px;
+  border: 1px solid rgba(15, 23, 32, 0.12);
+  border-radius: var(--r-pill);
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.trust-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.55);
+}
+/* Un partenaire qui fournit son logo n'affiche QUE son logo : pas de pastille,
+   pas de cadre, pas de fond. Rien ne doit concurrencer la marque du client. */
+.trust-item-logo,
+.trust-item-logo:hover {
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  transform: none;
+}
+.trust-item-logo:hover .trust-logo {
+  transform: translateY(-3px);
+}
+
+.trust-logo {
+  /* Le logo est la preuve : il doit se lire d'un coup d'oeil. Le fond reste
+     identique à celui du bandeau : le proxy CMS fournit la transparence et
+     aucune pastille blanche ne vient créer un rectangle artificiel autour du
+     visuel. */
+  width: clamp(164px, 17vw, 240px);
+  height: auto;
+  aspect-ratio: 1;
+  padding: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(15, 23, 32, 0.12);
+  background: var(--surface);
+  box-shadow: none;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.trust-logo img {
+  /* Un logo ne se recadre jamais : il se contient. */
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+.trust-item-logo:hover .trust-logo {
+  box-shadow: 0 8px 20px rgba(15, 23, 32, 0.12);
+}
+
+/* Bloc histoire : onglets sans JavaScript pour préserver la fluidité. */
+.story-section {
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  overflow: hidden;
+}
+.story-section > * {
+  min-width: 0;
+}
+.story-section .story-image {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.story-image {
+  min-height: 420px;
+}
+.story-video-element {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+  background: #0f1720;
+}
+.story-video iframe.story-video-element {
+  aspect-ratio: 4 / 3;
+}
+
+/* Héros : la promesse éditoriale remplace l'ancien sur-titre sans reprendre
+   la taille d'un titre publicitaire. Le champ reste administrable comme titre. */
+.hero-message {
+  max-width: 30ch;
+  font-family: var(--f-ui);
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.hero-media-carousel {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  background: var(--surface-2);
+  aspect-ratio: 4 / 3;
+}
+.hero-media-slide,
+.hero-media-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hero-media-slide img {
+  object-fit: cover;
+}
+.hero-media-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 32, 0.58);
+  backdrop-filter: blur(6px);
+}
+.hero-media-controls button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.hero-media-controls button.is-active {
+  background: #fff;
+}
+.story-tabs fieldset {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.story-tab-control {
+  flex: 1 1 0;
+}
+.story-tab-control input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.story-tab-control label {
+  display: grid;
+  min-height: 52px;
+  place-items: center;
+  padding: 8px 12px;
+  border-radius: var(--r-btn);
+  color: var(--ink-700);
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+.story-tab-control input:focus-visible + label {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.story-tab-control input:checked + label {
+  background: var(--brand-600);
+  color: #fff;
+}
+.story-panels {
+  min-height: 180px;
+  padding-top: 24px;
+}
+.story-panel {
+  display: none;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.story-panel-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-100);
+  color: var(--brand);
+}
+.story-panel .lead {
+  margin: 0;
+}
+.story-commitments {
+  display: grid;
+  gap: 12px;
+}
+.story-commitment {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.story-commitment strong,
+.story-commitment small {
+  display: block;
+}
+.story-commitment small {
+  margin-top: 3px;
+  color: var(--ink-500);
+  line-height: 1.5;
+}
+.story-tabs:has(#story-fr-identity:checked) .story-panel[data-tab='identity'],
+.story-tabs:has(#story-fr-vision:checked) .story-panel[data-tab='vision'],
+.story-tabs:has(#story-fr-commitments:checked) .story-panel[data-tab='commitments'],
+.story-tabs:has(#story-en-identity:checked) .story-panel[data-tab='identity'],
+.story-tabs:has(#story-en-vision:checked) .story-panel[data-tab='vision'],
+.story-tabs:has(#story-en-commitments:checked) .story-panel[data-tab='commitments'] {
+  display: grid;
+  animation: story-panel-in 0.24s ease both;
+}
+@keyframes story-panel-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Plaque blueprint (emplacement photo) ─────────────────── */
 .plate {
   position: relative;
@@ -231,7 +561,7 @@ a.card.ruled:hover::after,
   position: absolute;
   inset: 14px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 4px;
+  border-radius: var(--r-xs);
 }
 .plate-lbl {
   position: relative;
@@ -307,12 +637,30 @@ a.card.ruled:hover::after,
 .brandmark .mk {
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: var(--r-btn);
   flex: none;
   background: linear-gradient(140deg, var(--brand), var(--brand-deep));
   display: grid;
   place-items: center;
   color: #fff;
+}
+.brandmark .mk .brandmark-logo {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+.brandmark .mk--custom {
+  width: min(190px, 100%);
+  height: auto;
+  min-height: 0;
+  border-radius: 0;
+  background: transparent !important;
+}
+.brandmark .mk--custom .brandmark-logo {
+  width: 100%;
+  height: auto;
+  max-height: 64px;
 }
 .brandmark .nm {
   font-family: var(--f-display);
@@ -327,7 +675,11 @@ a.card.ruled:hover::after,
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-400);
+  /* Contraste AA minimum pour le sous-titre de marque sur fond blanc. */
+  color: var(--ink-500);
+}
+.site-ft .brandmark .tg {
+  color: var(--on-brand-soft);
 }
 
 .mainnav {
@@ -340,7 +692,7 @@ a.card.ruled:hover::after,
 .mainnav a {
   position: relative;
   padding: 9px 11px;
-  border-radius: 6px;
+  border-radius: var(--r-btn);
   font-size: 14.5px;
   font-weight: 600;
   color: var(--ink-700);
@@ -366,7 +718,7 @@ a.card.ruled:hover::after,
   bottom: 2px;
   height: 2.5px;
   background: var(--accent);
-  border-radius: 2px;
+  border-radius: var(--r-xs);
 }
 
 .hd-tools {
@@ -378,7 +730,7 @@ a.card.ruled:hover::after,
 .icon-btn {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--r-btn);
   border: 1px solid var(--line);
   background: transparent;
   display: grid;
@@ -394,14 +746,20 @@ a.card.ruled:hover::after,
 }
 .lang {
   display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
 }
 .lang a,
 .lang button {
-  padding: 0 11px;
-  height: 40px;
+  min-width: 42px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
   border: 0;
   background: transparent;
   font-size: 13px;
@@ -411,12 +769,26 @@ a.card.ruled:hover::after,
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 }
 .lang a[aria-current='true'],
 .lang button[aria-pressed='true'] {
   background: var(--brand);
   color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 48, 135, 0.2);
+}
+.lang a:hover:not([aria-current='true']),
+.lang button:hover:not([aria-pressed='true']) {
+  background: var(--ground);
+  color: var(--brand);
+}
+.lang a:active,
+.lang button:active {
+  transform: translateY(1px);
 }
 .burger {
   display: none;
@@ -535,6 +907,19 @@ a.card.ruled:hover::after,
   resize: vertical;
   line-height: 1.6;
 }
+.select[multiple] {
+  min-height: 148px;
+  padding: 8px;
+  background-image: none;
+}
+.select[multiple] option {
+  padding: 9px 10px;
+  border-radius: 6px;
+}
+.select[multiple] option:checked {
+  background: var(--brand-600) linear-gradient(0deg, var(--brand-600), var(--brand-600));
+  color: #fff;
+}
 .field.invalid .input,
 .field.invalid .textarea,
 .field.invalid .select {
@@ -579,7 +964,7 @@ a.card.ruled:hover::after,
   display: flex;
   gap: 13px;
   padding: 16px 18px;
-  border-radius: 12px;
+  border-radius: var(--r-md);
   border: 1px solid;
   align-items: flex-start;
 }
@@ -629,7 +1014,7 @@ a.card.ruled:hover::after,
 .empty .ic {
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: var(--r-card);
   background: var(--brand-100);
   color: var(--brand);
   display: grid;
@@ -646,7 +1031,7 @@ a.card.ruled:hover::after,
   }
 }
 .skel {
-  border-radius: 7px;
+  border-radius: var(--r-btn);
   background: linear-gradient(90deg, var(--surface-2) 25%, var(--line-soft) 50%, var(--surface-2) 75%);
   background-size: 840px 100%;
   animation: shim 1.35s linear infinite;
@@ -697,6 +1082,86 @@ a.card.ruled:hover::after,
   color: var(--ink-500);
 }
 
+/* ── Chiffres clés : repère visuel validé ─────────────────── */
+.key-figures-section {
+  background: var(--ground);
+}
+.key-figures-section .wrap {
+  align-items: center;
+  gap: clamp(28px, 4vw, 44px);
+}
+.key-figures-section .h2 {
+  color: var(--ink);
+  text-align: center;
+}
+.key-figures {
+  /* Stats rend une grille c4 par défaut. Avec trois chiffres, cela laissait
+     une quatrième colonne vide et décalait visuellement le groupe vers la
+     gauche. Une grille adaptative recentre automatiquement 3 ou 4 éléments. */
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: clamp(28px, 5vw, 76px);
+  width: min(100%, 1080px);
+  margin-inline: auto;
+  justify-items: center;
+}
+.key-figures .stat {
+  position: relative;
+  min-width: 0;
+  padding-top: 16px;
+  animation: figures-rise 500ms both;
+  width: min(100%, 210px);
+  text-align: center;
+}
+.key-figures .stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(48px, 6vw, 82px);
+  height: 2px;
+  background: #dbe78e;
+}
+.key-figures .stat:nth-child(2) { animation-delay: 70ms; }
+.key-figures .stat:nth-child(3) { animation-delay: 140ms; }
+.key-figures .stat:nth-child(4) { animation-delay: 210ms; }
+.key-figures .stat .v {
+  color: var(--ink);
+  font-size: clamp(40px, 5vw, 60px);
+}
+.key-figures .stat .v sup {
+  color: var(--accent);
+}
+.key-figures .stat .k {
+  color: var(--ink-500);
+  font-size: clamp(12px, 1.2vw, 14px);
+  line-height: 1.45;
+}
+@keyframes figures-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .key-figures .stat {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .trust-items {
+    justify-content: flex-start;
+  }
+
+  .key-figures {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .key-figures .stat {
+    width: 100%;
+  }
+}
+
 /* ── Tableaux ─────────────────────────────────────────────── */
 .tbl-wrap {
   overflow-x: auto;
@@ -736,7 +1201,7 @@ tbody tr:hover {
 /* ── Accordéon ────────────────────────────────────────────── */
 .acc {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--r-md);
   background: var(--card);
   overflow: hidden;
 }
@@ -807,7 +1272,7 @@ tbody tr:hover {
   margin-inline: 16px;
   appearance: none;
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--r-xs);
   background: rgba(255, 255, 255, 0.45);
   cursor: ew-resize;
   z-index: 3;
@@ -907,6 +1372,40 @@ tbody tr:hover {
   color: #fff;
   text-decoration: underline;
 }
+.map-frame {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+.map-frame__iframe {
+  display: block;
+  width: 100%;
+  min-height: 300px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface-2);
+}
+.map-frame--compact .map-frame__iframe {
+  min-height: 150px;
+  border-color: var(--on-brand-line);
+  border-radius: var(--r-md);
+}
+.map-frame__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.site-ft .map-frame__link {
+  color: var(--on-brand-soft);
+}
+.map-frame__link:hover {
+  text-decoration: underline;
+}
 .ft-bar {
   margin-top: 56px;
   border-top: 1px solid var(--on-brand-line);
@@ -932,7 +1431,7 @@ tbody tr:hover {
 .soc a {
   width: 38px;
   height: 38px;
-  border-radius: 9px;
+  border-radius: var(--r-btn);
   border: 1px solid var(--on-brand-line);
   display: grid;
   place-items: center;
@@ -999,6 +1498,28 @@ tbody tr:hover {
   padding: 22px;
   max-width: 660px;
   margin-inline: auto;
+}
+.cookiebar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.cookie-preferences {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 94;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--sh-2);
+  padding: 9px 13px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
 }
 .toast {
   position: fixed;
@@ -1092,6 +1613,55 @@ tbody tr:hover {
   object-fit: cover;
 }
 
+/* Médias complémentaires des fiches produit. Le cadre vidéo conserve un
+   ratio stable et la galerie reste utilisable au clavier et au toucher sur
+   les petits écrans. */
+.product-video-block {
+  width: 100%;
+  margin-top: 4px;
+}
+.product-video,
+.product-video-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: #0f1720;
+}
+.product-video {
+  object-fit: contain;
+}
+.product-video-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.product-gallery360 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.product-gallery360-item {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--card);
+}
+.product-gallery360-item .media {
+  background: var(--card);
+}
+
+/* Les cartes éditoriales partagent le même ratio pour éviter les sauts de
+   hauteur quand une rubrique mélange expertises, formations et événements. */
+.collection-card-media {
+  border-bottom: 1px solid var(--line-soft);
+}
+
 /* Pastille d'icône en tête de carte  -  même dessin que l'état vide. */
 .ic-badge {
   display: grid;
@@ -1150,5 +1720,145 @@ tbody tr:hover {
   }
   .kv dd {
     margin-bottom: 10px;
+  }
+}
+
+/* Appel a temoignage, dans le pied de page.
+   Bouton clair sur le bleu profond du pied : c'est la seule action du bloc de
+   marque, elle doit se distinguer des liens de navigation qui l'entourent. */
+.ft-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  margin-top: 20px;
+  padding: 13px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: var(--r-btn);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.ft-cta:hover,
+.ft-cta:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Carrousel des temoignages ─────────────────────────────
+   Un seul temoignage a l'ecran, centre. La grille en quatre colonnes laissait
+   une carte isolee a gauche quand un seul temoignage etait publie ; ici la
+   largeur est bornee et le bloc reste centre quel que soit le nombre. */
+.tmo-title {
+  text-align: center;
+}
+
+.tmo-carousel {
+  display: grid;
+  gap: 26px;
+  justify-items: center;
+  width: 100%;
+}
+
+.tmo-viewport {
+  width: min(100%, 680px);
+  display: grid;
+}
+
+/* Les diapositives se superposent dans la meme cellule de grille : la hauteur
+   du bloc est celle de la plus haute, donc rien ne saute au changement. */
+.tmo-slide {
+  grid-area: 1 / 1;
+  display: none;
+}
+.tmo-slide[data-active='true'] {
+  display: block;
+  animation: tmo-in 0.45s ease both;
+}
+
+@keyframes tmo-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tmo-carousel .testimonial-card {
+  min-height: 0;
+  text-align: left;
+}
+
+.tmo-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.tmo-arrow {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--brand);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.tmo-arrow svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tmo-arrow:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-600);
+  transform: translateY(-1px);
+}
+
+.tmo-dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* La puce visible fait 10 px, mais sa zone de clic en fait 24 : le rembourrage
+   transparent porte la cible tactile sans epaissir le point. */
+.tmo-dot {
+  width: 24px;
+  height: 24px;
+  padding: 7px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.tmo-dot::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--line);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+.tmo-dot[data-active='true']::before {
+  background: var(--brand);
+  transform: scale(1.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tmo-slide[data-active='true'] {
+    animation: none;
+  }
+  .tmo-arrow,
+  .tmo-dot::before {
+    transition: none;
   }
 }

@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionAfterChangeHook, CollectionConfig, Field } from 'payload'
 
 import { deleteOnlyAdmin, isAuthenticated, publishedOrAuthenticated } from '../access'
 import {
@@ -50,10 +50,14 @@ export function contentCollection(config: {
   media?: Field[]
   /** Champs de la colonne latérale (mise en avant, ordre d'affichage…). */
   sidebar?: Field[]
+  /** Autorise une entrée publique contrôlée, toujours derrière un secret serveur. */
+  publicCreate?: typeof isAuthenticated
   /** Chemins requis dans les deux langues avant publication (RG-011). */
   requiredForPublish: string[]
   /** Colonnes de la liste d'administration. */
   defaultColumns?: string[]
+  /** Hooks métier complémentaires propres à la collection. */
+  afterChange?: CollectionAfterChangeHook[]
   /** Construit l'URL publique, pour la prévisualisation et les redirections. */
   publicPath?: (slug: string, locale: string) => string
   /** Collections institutionnelles sans slug (témoignages, partenaires…). */
@@ -69,7 +73,7 @@ export function contentCollection(config: {
     labels: config.labels,
     access: {
       read: publishedOrAuthenticated,
-      create: isAuthenticated,
+      create: config.publicCreate ?? isAuthenticated,
       update: isAuthenticated,
       // RG-007 : une suppression métier est d'abord un archivage.
       delete: deleteOnlyAdmin,
@@ -109,6 +113,10 @@ export function contentCollection(config: {
       afterChange: [
         auditAfterChange,
         ...(withSlug && publicPath ? [createSlugRedirect(publicPath)] : []),
+        ...(config.afterChange ?? []),
+        // Les hooks métier terminent d'abord la mutation (par exemple la
+        // limite des cinq témoignages). La revalidation doit annoncer l'état
+        // final au site public, jamais un état intermédiaire.
         revalidationAfterChange({ collection: config.slug, publicPath }),
       ],
       afterDelete: [auditAfterDelete, revalidationAfterDelete({ collection: config.slug, publicPath })],

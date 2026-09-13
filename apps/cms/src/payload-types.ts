@@ -207,7 +207,7 @@ export interface User {
 export interface MediaAsset {
   id: number;
   /**
-   * Describes what the image shows, for screen readers and search engines. Required.
+   * Describes what the image or video shows, for accessibility and search engines. Required.
    */
   altFr: string;
   /**
@@ -227,6 +227,10 @@ export interface MediaAsset {
    * Must be replaced by a real visual before going live.
    */
   isDemo?: boolean | null;
+  /**
+   * Allows anonymous access to the file. Keep disabled for internal or pending files.
+   */
+  isPublic?: boolean | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -438,6 +442,9 @@ export interface Project {
    * Advanced option kept for existing entries and public links.
    */
   expertise?: (number | null) | Expertise;
+  /**
+   * Choose an existing media item or click “Add media”. French and English alt text are required.
+   */
   media?: (number | null) | MediaAsset;
   /**
    * Unique to this page and to each language. Generic values are rejected.
@@ -730,6 +737,10 @@ export interface Product {
    * Unique. Used to identify the product in a quotation.
    */
   reference: string;
+  /**
+   * Optional. Leave empty when the product is quoted individually or the price is confidential.
+   */
+  unitPrice?: number | null;
   isFeatured?: boolean | null;
   /**
    * Comes from the demo data set. Replace with real content before going live.
@@ -771,6 +782,27 @@ export interface Product {
    * Main image for the product card and detail page. Use media with both FR and EN alternative text.
    */
   media?: (number | null) | MediaAsset;
+  /**
+   * Optional. Add a technical PDF that visitors can download from the product page.
+   */
+  productSheet?: (number | null) | MediaAsset;
+  /**
+   * Optional. Upload an MP4, WebM or OGG video. It takes priority over the YouTube link.
+   */
+  videoMedia?: (number | null) | MediaAsset;
+  /**
+   * Optional. Paste a youtube.com/watch?v=… or youtu.be/… URL.
+   */
+  videoUrl?: string | null;
+  /**
+   * Optional. Add photos in the desired rotation order. They are presented in a scrollable gallery.
+   */
+  gallery360?:
+    | {
+        image: number | MediaAsset;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Unique to this page and to each language. Generic values are rejected.
    */
@@ -820,6 +852,9 @@ export interface TeamMember {
    * Optional. Left empty, the icon is hidden.
    */
   linkedinUrl?: string | null;
+  /**
+   * Choose an existing media item or add a portrait from the media library. French and English alt text are required.
+   */
   portrait?: (number | null) | MediaAsset;
   /**
    * Unique to this page and to each language. Generic values are rejected.
@@ -865,9 +900,16 @@ export interface Partner {
   publishedAt?: string | null;
   name: string;
   /**
+   * Optional for international brands. Fill this in when the French name is a description that needs translating.
+   */
+  nameEn?: string | null;
+  /**
    * Optional. Left empty, the logo is shown without a link  -  never a dead link.
    */
   externalUrl?: string | null;
+  /**
+   * Click “Choose existing”, then “Add media” to upload the logo. JPEG, PNG, WebP or AVIF, with French and English alt text.
+   */
   logo?: (number | null) | MediaAsset;
   /**
    * Unique to this page and to each language. Generic values are rejected.
@@ -914,10 +956,20 @@ export interface Testimonial {
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   publishedAt?: string | null;
+  /**
+   * Publishing requires both a French and an English quote. Save the draft, then complete the English locale before choosing “Published”.
+   */
   quote: string;
   personName: string;
   role?: string | null;
   company?: string | null;
+  /**
+   * Optional. Fill this in when the company name is descriptive and needs translating.
+   */
+  companyEn?: string | null;
+  /**
+   * Optional. Choose an existing media item or add the portrait from the media library. French and English alt text are required.
+   */
   portrait?: (number | null) | MediaAsset;
   /**
    * Unique to this page and to each language. Generic values are rejected.
@@ -998,6 +1050,10 @@ export interface ContactMessage {
   subject?: string | null;
   fullName: string;
   email: string;
+  /**
+   * Optional. Used only to follow up on this request.
+   */
+  phone?: string | null;
   company?: string | null;
   need: string;
   message: string;
@@ -1036,7 +1092,23 @@ export interface Redirect {
 export interface AuditLog {
   id: number;
   summary?: string | null;
-  action: 'create' | 'update' | 'publish' | 'unpublish' | 'archive' | 'delete' | 'login' | 'logout' | 'settings_change';
+  action:
+    | 'create'
+    | 'update'
+    | 'publish'
+    | 'unpublish'
+    | 'archive'
+    | 'delete'
+    | 'login'
+    | 'logout'
+    | 'settings_change'
+    | 'read'
+    | 'export'
+    | 'preview'
+    | 'login_failed'
+    | 'access_denied'
+    | 'purge'
+    | 'security';
   entityType: string;
   entityId?: string | null;
   actor?: (number | null) | User;
@@ -1059,10 +1131,25 @@ export interface AuditLog {
     | number
     | boolean
     | null;
+  requestId?: string | null;
+  method?: string | null;
+  path?: string | null;
+  statusCode?: number | null;
+  result?: string | null;
   /**
    * Non-reversible hash. The plain address is never stored.
    */
   ipHash?: string | null;
+  userAgentHash?: string | null;
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1240,6 +1327,7 @@ export interface MediaAssetsSelect<T extends boolean = true> {
   rightsNote?: T;
   demoKey?: T;
   isDemo?: T;
+  isPublic?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1539,6 +1627,7 @@ export interface ProductsSelect<T extends boolean = true> {
   editorialStatus?: T;
   archiveReason?: T;
   reference?: T;
+  unitPrice?: T;
   isFeatured?: T;
   isDemo?: T;
   createdBy?: T;
@@ -1559,6 +1648,15 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   ctaLabel?: T;
   media?: T;
+  productSheet?: T;
+  videoMedia?: T;
+  videoUrl?: T;
+  gallery360?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
   seo?:
     | T
     | {
@@ -1615,6 +1713,7 @@ export interface PartnersSelect<T extends boolean = true> {
   updatedBy?: T;
   publishedAt?: T;
   name?: T;
+  nameEn?: T;
   externalUrl?: T;
   logo?: T;
   seo?:
@@ -1646,6 +1745,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
   personName?: T;
   role?: T;
   company?: T;
+  companyEn?: T;
   portrait?: T;
   seo?:
     | T
@@ -1693,6 +1793,7 @@ export interface ContactMessagesSelect<T extends boolean = true> {
   subject?: T;
   fullName?: T;
   email?: T;
+  phone?: T;
   company?: T;
   need?: T;
   message?: T;
@@ -1731,7 +1832,14 @@ export interface AuditLogsSelect<T extends boolean = true> {
   note?: T;
   before?: T;
   after?: T;
+  requestId?: T;
+  method?: T;
+  path?: T;
+  statusCode?: T;
+  result?: T;
   ipHash?: T;
+  userAgentHash?: T;
+  metadata?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1784,17 +1892,35 @@ export interface SiteSetting {
   siteName: string;
   tagline?: string | null;
   baseline: string;
+  /**
+   * Choose the logo from the media library or click “Add media”. Provide French and English alt text.
+   */
   logo?: (number | null) | MediaAsset;
+  /**
+   * Browser icon. Choose a square media item from the library or add a new one.
+   */
   favicon?: (number | null) | MediaAsset;
   addressLine1?: string | null;
   addressLine2?: string | null;
   city?: string | null;
   country?: string | null;
+  /**
+   * Example: 6.3703. The map is shown when latitude and longitude are provided.
+   */
+  mapLatitude?: number | null;
+  /**
+   * Example: 2.3912.
+   */
+  mapLongitude?: number | null;
+  mapZoom?: number | null;
   phone?: string | null;
   /**
    * Digits and + only.
    */
   phoneRaw?: string | null;
+  /**
+   * International format recommended: +229 01 42 54 54 95. Spaces and punctuation are normalized for wa.me.
+   */
   whatsapp?: string | null;
   email?: string | null;
   openingHours?:
@@ -1836,7 +1962,7 @@ export interface SiteSetting {
 export interface Navigation {
   id: number;
   /**
-   * Every entry must point to a real site address: never “#”.
+   * Add an entry, choose its destination, fill in its label in both languages, then enable Visible. The change appears in the header and footer after saving.
    */
   mainMenu?:
     | {
@@ -1856,6 +1982,10 @@ export interface Navigation {
       }[]
     | null;
   contactLabel?: string | null;
+  /**
+   * Button shown in the footer. Clear the field to remove it from the site. A testimonial sent by a client is never published automatically: it lands in Contact messages and you decide whether to publish it from Testimonials.
+   */
+  testimonialLabel?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1872,7 +2002,19 @@ export interface Homepage {
    */
   heroHighlight?: string | null;
   heroLead?: string | null;
+  /**
+   * Choose an existing media item or click “Add media”. French and English alt text are required.
+   */
   heroMedia?: (number | null) | MediaAsset;
+  /**
+   * Add up to three visuals. They rotate automatically every 4 seconds. The first visual is used when the carousel is empty.
+   */
+  heroMediaCarousel?:
+    | {
+        media: number | MediaAsset;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Order and visibility of homepage blocks. A hidden section is not rendered.
    */
@@ -1898,13 +2040,17 @@ export interface Homepage {
       }[]
     | null;
   /**
-   * An empty or zero value is never displayed  -  no “0” should ever appear.
+   * Dedicated section for homepage statistics. Fill in both languages and use “Visible” to publish or remove each figure.
    */
   keyFigures?:
     | {
+        /**
+         * Number displayed on the homepage. Leave empty to hide the metric.
+         */
         value?: number | null;
         suffix?: string | null;
         label: string;
+        isVisible?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -1940,6 +2086,9 @@ export interface CeoMessage {
     };
     [k: string]: unknown;
   };
+  /**
+   * Optional. Choose an existing media item or add the portrait from the media library.
+   */
   portrait?: (number | null) | MediaAsset;
   /**
    * https:// URL of a hosted video. Loaded only after cookie consent.
@@ -1964,7 +2113,18 @@ export interface AboutPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Choose an existing media item or click “Add media”. French and English alt text are required.
+   */
   media?: (number | null) | MediaAsset;
+  /**
+   * Optional. An MP4, WebM or OGG video replaces the visual on the homepage. Add a YouTube URL as a fallback if needed.
+   */
+  videoMedia?: (number | null) | MediaAsset;
+  /**
+   * Optional. Paste a youtube.com/watch?v=… or youtu.be/… URL. The uploaded video takes priority.
+   */
+  videoUrl?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1982,6 +2142,9 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   addressLine2?: T;
   city?: T;
   country?: T;
+  mapLatitude?: T;
+  mapLongitude?: T;
+  mapZoom?: T;
   phone?: T;
   phoneRaw?: T;
   whatsapp?: T;
@@ -2024,6 +2187,7 @@ export interface NavigationSelect<T extends boolean = true> {
         id?: T;
       };
   contactLabel?: T;
+  testimonialLabel?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2038,6 +2202,12 @@ export interface HomepageSelect<T extends boolean = true> {
   heroHighlight?: T;
   heroLead?: T;
   heroMedia?: T;
+  heroMediaCarousel?:
+    | T
+    | {
+        media?: T;
+        id?: T;
+      };
   sections?:
     | T
     | {
@@ -2055,6 +2225,7 @@ export interface HomepageSelect<T extends boolean = true> {
         value?: T;
         suffix?: T;
         label?: T;
+        isVisible?: T;
         id?: T;
       };
   featuredProducts?: T;
@@ -2097,6 +2268,8 @@ export interface AboutPageSelect<T extends boolean = true> {
         id?: T;
       };
   media?: T;
+  videoMedia?: T;
+  videoUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

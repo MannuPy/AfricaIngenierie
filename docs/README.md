@@ -22,20 +22,23 @@ Le cahier des charges reste la source des exigences contractuelles. Le prototype
 - [Plan de recette, sécurité et mise en production](./plan-recette-securite.md)
 - [Étude comparative avec la plateforme en ligne](./etude-comparative-plateformes.md)
 - [Rapport d’audit complet du 28/08/2026](./rapport-audit-complet-2026-08-28.md)
+- [Rapport d’audit local du 01/09/2026](./rapport-audit-local-2026-09-01.md)
 - [Analyse critique architecture, UX/UI, sécurité et performance](./analyse-critique-plateforme-2026-08-28.md)
-- [Guide de déploiement Oracle Cloud](./deploiement-oracle-cloud.md)
-- [Guide de déploiement Render](./deploiement-render.md)
+- [Guide de déploiement OVH](./deploiement-ovh-ingenierieafrica-final.md)
+- [Audit final de préparation OVH du 12/09/2026](./audit-final-ovh-2026-09-12.md)
+- [Guide de déploiement OVH de test](./deploiement-ovh-test.md)
+- [Préparation OVH sans accès client](./preparation-ovh-sans-acces.md)
 
 ## Architecture retenue
 
 - Site public : Next.js, rendu hybride SSR/SSG/ISR.
 - CMS et dashboard : Payload CMS, Node.js, TypeScript.
 - Base de données : PostgreSQL.
-- Médias : MinIO en local, stockage S3-compatible durable recommandé sur Render.
-- Reverse proxy : Nginx en local ; terminaison TLS et routage assurés par Render
+- Médias : MinIO en local et sur le VPS OVH ; une réplication S3-compatible hors
+  VPS est recommandée pour les sauvegardes.
+- Reverse proxy : Nginx sur le VPS OVH ; terminaison TLS et routage gérés par la pile Docker
   en production.
-- Orchestration locale : Docker Compose. Production recommandée : Render
-  Blueprint (`render.yaml`) avec services Node natifs et PostgreSQL managé.
+- Orchestration locale et production OVH : Docker Compose. Le domaine public est `ingenierieafrica.com`.
 - API : REST/GraphQL Payload ; l’API publique événements est disponible en
   lecture seule avec contrat OpenAPI, pagination, cache et export ICS.
 
@@ -51,7 +54,8 @@ La rubrique Formations & événements est regroupée dans le parcours public, ma
 Next.js, Payload, PostgreSQL, MinIO et Nginx. Les collections métier, le
 bilinguisme, le versionnage, l'audit, la prévisualisation sécurisée, la
 revalidation Produit, le contact renforcé et l'API événements sont implémentés.
-Lighthouse/axe-core, le scan CVE/ZAP, le test SMTP réel et un test de
-restauration sur le VPS restent des contrôles à exécuter avant production. Les comptes,
+Lighthouse/axe-core, le scan CVE/ZAP, les tests clavier/focus/contraste et la
+validation de la configuration de production restent des contrôles à exécuter
+avant production. Les comptes,
 mots de passe, secrets SMTP et clés MinIO ne doivent jamais être écrits dans ce
 dépôt.

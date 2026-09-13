@@ -47,7 +47,14 @@ jobs:
         run: pnpm build
 
       - name: Validate Oracle production Compose
-        run: docker compose --env-file .env.oracle.example -f docker-compose.prod.yml config --quiet
+        run: |
+          cp .env.oracle.example .env.oracle
+          docker compose --env-file .env.oracle.example -f docker-compose.prod.yml config --quiet
+
+      - name: Validate OVH production Compose
+        env:
+          PRODUCTION_ENV_FILE: .env.ovh.test.example
+        run: docker compose --env-file .env.ovh.test.example -f docker-compose.prod.yml config --quiet
 
       - name: Prepare local environment
         shell: bash
@@ -56,11 +63,133 @@ jobs:
       - name: Start local dependencies and applications
         run: pnpm up
 
+      - name: Build production web image for Lighthouse
+        run: docker build --tag africa-ingenierie-ci-web --build-arg NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3002 -f infra/docker/web.Dockerfile .
+
       - name: Run CMS, RBAC and OpenAPI tests
         run: pnpm test
 
       - name: Check public routes
         run: pnpm routes:check
+
+      - name: Check HTTP contracts, SEO, redirects and headers
+        run: pnpm http:check
+
+      - name: Install Chromium for visual checks
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run responsive and accessibility checks
+        run: pnpm test:visual
+
+      - name: Upload visual check artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-a11y-results
+          path: apps/web/test-results/visual-a11y
+          if-no-files-found: ignore
+
+      - name: Run Lighthouse mobile on the production web image
+        run: |
+          mkdir -p lighthouse
+          audit_network="$(docker inspect -f '{{json .NetworkSettings.Networks}}' ai-cms | jq -r 'keys[] | select(endswith("_frontend"))')"
+          test -n "$audit_network"
+          cleanup() { docker rm -f ai-web-prod-audit >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          docker run --detach --name ai-web-prod-audit \
+            --network "$audit_network" \
+            --publish 127.0.0.1:3002:3000 \
+            --env-file .env.local \
+            --env NODE_ENV=production \
+            --env CMS_INTERNAL_URL=http://ai-cms:3001 \
+            --env NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3002 \
+            africa-ingenierie-ci-web
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3002/healthz >/dev/null; then break; fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:3002/healthz >/dev/null
+          pnpm dlx lighthouse@12.8.2 http://127.0.0.1:3002/fr \
+            --only-categories=performance,accessibility \
+            --emulated-form-factor=mobile \
+            --throttling-method=simulate \
+            --chrome-flags="--headless --no-sandbox" \
+            --output=json \
+            --output-path=lighthouse/home-fr-mobile.json \
+            --quiet
+          node scripts/assert-lighthouse.mjs lighthouse/home-fr-mobile.json
+
+      - name: Upload Lighthouse artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-mobile
+          path: lighthouse/home-fr-mobile.json
+          if-no-files-found: ignore
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+
+      - name: Scan repository and Docker configuration
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+      - name: Build runtime images for vulnerability scanning
+        run: |
+          docker build --tag africa-ingenierie-ci-cms -f infra/docker/cms.Dockerfile .
+          docker build --tag africa-ingenierie-ci-nginx -f infra/docker/nginx.Dockerfile .
+          docker build --tag africa-ingenierie-ci-postgres -f infra/docker/postgres.Dockerfile .
+          docker build --tag africa-ingenierie-ci-minio -f infra/docker/minio.Dockerfile .
+
+      - name: Scan web image
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: africa-ingenierie-ci-web
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+      - name: Scan CMS image
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: africa-ingenierie-ci-cms
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+      - name: Scan Nginx image
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: africa-ingenierie-ci-nginx
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+      - name: Scan PostgreSQL image
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: africa-ingenierie-ci-postgres
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+      - name: Scan MinIO image
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: africa-ingenierie-ci-minio
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
+          exit-code: '1'
 
       - name: Stop local stack
         if: always()

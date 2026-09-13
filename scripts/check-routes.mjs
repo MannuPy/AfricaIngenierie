@@ -15,6 +15,8 @@
  *   BASE_URL=https://exemple.com ROUTE_TIMEOUT_MS=30000 pnpm routes:check
  */
 
+// `localhost` est l'origine documentée de la pile locale. BASE_URL permet
+// toujours de tester explicitement un autre hôte (par exemple une recette).
 const BASE = (process.env.BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
 const ROUTE_TIMEOUT_MS = Number(process.env.ROUTE_TIMEOUT_MS || 60_000)
 
@@ -40,7 +42,9 @@ const ROUTES = [
   ['/en/events/explorateurs-2026', 200],
   ['/fr/produits', 200],
   ['/en/products', 200],
-  ['/en/products/structures-metalliques', 200],
+  // Produit validé actuellement présent dans le catalogue. L’ancien slug
+  // `structures-metalliques` était une fiche de démonstration retirée du site.
+  ['/en/products/salon-exterieur-bois-metal', 200],
   ['/fr/a-propos', 200],
   ['/en/about', 200],
   ['/fr/contact', 200],

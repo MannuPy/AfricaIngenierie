@@ -9,12 +9,14 @@
 
 export interface MediaDoc {
   id: number
+  updatedAt?: string | null
   url?: string | null
   altFr?: string | null
   altEn?: string | null
   width?: number | null
   height?: number | null
   mimeType?: string | null
+  isPublic?: boolean | null
   sizes?: {
     thumbnail?: MediaVariant | null
     card?: MediaVariant | null
@@ -135,6 +137,11 @@ export interface ProductDoc extends BaseDoc {
   leadTime?: string | null
   specs?: Array<{ id?: string; label: string; value: string }> | null
   media?: MediaDoc | number | null
+  productSheet?: MediaDoc | number | null
+  videoMedia?: MediaDoc | number | null
+  videoUrl?: string | null
+  gallery360?: Array<{ id?: string; image?: MediaDoc | number | null }> | null
+  unitPrice?: number | null
   ctaLabel?: string | null
   isFeatured?: boolean | null
 }
@@ -144,11 +151,13 @@ export interface TestimonialDoc extends BaseDoc {
   personName: string
   role?: string | null
   company?: string | null
+  companyEn?: string | null
   portrait?: MediaDoc | number | null
 }
 
 export interface PartnerDoc extends BaseDoc {
   name: string
+  nameEn?: string | null
   logo?: MediaDoc | number | null
   externalUrl?: string | null
   position?: number | null
@@ -181,6 +190,9 @@ export interface SiteSettingsDoc {
   addressLine2?: string | null
   city?: string | null
   country?: string | null
+  mapLatitude?: number | null
+  mapLongitude?: number | null
+  mapZoom?: number | null
   phone?: string | null
   phoneRaw?: string | null
   whatsapp?: string | null
@@ -203,6 +215,7 @@ export interface NavigationDoc {
     isVisible?: boolean | null
   }> | null
   contactLabel?: string | null
+  testimonialLabel?: string | null
 }
 
 export type HomepageSectionKey =
@@ -223,6 +236,7 @@ export interface HomepageDoc {
   heroHighlight?: string | null
   heroLead?: string | null
   heroMedia?: MediaDoc | number | null
+  heroMediaCarousel?: Array<{ id?: string; media?: MediaDoc | number | null }> | null
   sections?: Array<{
     id?: string
     key: HomepageSectionKey
@@ -237,6 +251,7 @@ export interface HomepageDoc {
     value?: number | null
     suffix?: string | null
     label: string
+    isVisible?: boolean | null
   }> | null
   featuredProducts?: Array<ProductDoc | number> | null
   featuredRealisations?: Array<RealisationDoc | number> | null
@@ -259,6 +274,8 @@ export interface AboutPageDoc {
   vision: string
   pillars?: Array<{ id?: string; icon?: string | null; title: string; text: string }> | null
   media?: MediaDoc | number | null
+  videoMedia?: MediaDoc | number | null
+  videoUrl?: string | null
 }
 
 /** Une relation peuplée par `depth`  -  sinon un identifiant nu, inutilisable. */

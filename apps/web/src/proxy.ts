@@ -30,6 +30,28 @@ import { getCmsInternalUrl } from './lib/cms-url'
 /** En-tête portant le chemin public, lu par les pages via `headers()`. */
 const PATH_HEADER = 'x-pathname'
 
+/**
+ * Routes publiques stables : aucune résolution de redirection CMS n'est
+ * nécessaire pour les liens générés par le menu. Les anciennes adresses et
+ * les slugs dynamiques continuent de passer par le CMS.
+ */
+const STABLE_PUBLIC_PATHS = new Set([
+  '',
+  'expertises',
+  'realisations',
+  'projets',
+  'formations-evenements',
+  'evenements',
+  'produits',
+  'a-propos',
+  'about',
+  'contact',
+  'mentions-legales',
+  'legal-notice',
+  'confidentialite',
+  'privacy-policy',
+])
+
 function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value)
 }
@@ -65,17 +87,27 @@ type RedirectDocument = { to?: unknown; statusCode?: unknown; isActive?: unknown
 
 /** Résout les redirections CMS avant le rendu d'une ancienne adresse. */
 async function findCmsRedirect(pathname: string): Promise<{ to: string; status: 301 | 308 } | null> {
+  const segments = pathname.split('/').filter(Boolean)
+  const routeAfterLocale = segments.slice(1).join('/')
+  if (segments.length === 1 || STABLE_PUBLIC_PATHS.has(routeAfterLocale)) return null
+
   const internal = getCmsInternalUrl()
   const search = new URLSearchParams({ limit: '1', depth: '0' })
   search.set('where', JSON.stringify({ from: { equals: pathname }, isActive: { equals: true } }))
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 800)
 
   try {
     const response = await fetch(`${internal}/api/redirects?${search.toString()}`, {
       headers: {
         accept: 'application/json',
-        'x-cms-internal-read': process.env.CMS_INTERNAL_READ_SECRET || process.env.PAYLOAD_SECRET || '',
+        'x-cms-internal-read':
+          process.env.CMS_INTERNAL_READ_SECRET ||
+          (process.env.NODE_ENV === 'production' ? '' : process.env.PAYLOAD_SECRET || ''),
       },
       next: { revalidate: 60 },
+      cache: 'force-cache',
+      signal: controller.signal,
     })
     if (!response.ok) return null
     const result = (await response.json()) as { docs?: RedirectDocument[] }
@@ -90,6 +122,8 @@ async function findCmsRedirect(pathname: string): Promise<{ to: string; status: 
     // Une panne du CMS ne doit jamais empêcher le site public de servir
     // l'ancienne version déjà disponible.
     return null
+  } finally {
+    clearTimeout(timeout)
   }
 }
 

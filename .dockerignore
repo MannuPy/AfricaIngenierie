@@ -7,7 +7,7 @@
 **/.env.*
 **/.env.local
 !.env.example
-!.env.oracle.example
+!.env.ovh.test.example
 **/.bootstrap-users.local.json
 **/*.pem
 **/*.key

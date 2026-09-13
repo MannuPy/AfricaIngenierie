@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
-import { Footer, Header, Icon } from '@africa-ingenierie/ui'
+import { Footer, Header } from '@africa-ingenierie/ui'
 import { LOCALES, homePath, type Locale } from '@africa-ingenierie/validation/routes'
 
 import { alternatePaths, currentPath } from '../../lib/paths'
@@ -16,6 +16,7 @@ import {
   socialLinks,
 } from '../../lib/site'
 import { ui } from '../../lib/ui-strings'
+import { CookieConsentBanner } from '../../components/CookieConsentBanner'
 
 /**
  * Ossature commune des pages publiques.
@@ -53,7 +54,16 @@ export default async function LocaleLayout({
 
   const nav = mainNav(navigation, locale, path)
   const contactHref = sectionHref('contact', locale)
-  const brandIcon = <Icon name="layers" size={22} />
+  const brandIcon = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className="brandmark-logo"
+      src="/brand/africa-ingenierie-logo.svg"
+      alt="Africa Ingénierie"
+      width="190"
+      height="64"
+    />
+  )
 
   return (
     <>
@@ -73,6 +83,9 @@ export default async function LocaleLayout({
         labels={{
           skipToContent: strings.skipToContent,
           language: strings.languageSwitch,
+          mainNavigation: strings.mainNavigation,
+          openMenu: strings.openMenu,
+          closeMenu: strings.closeMenu,
           home: strings.home.toLowerCase(),
         }}
       />
@@ -87,12 +100,37 @@ export default async function LocaleLayout({
         columns={footerColumns(navigation, locale)}
         contact={footerContact(settings, locale)}
         socials={socialLinks(settings)}
+        // Appel a temoignage : le libelle vient du CMS (Navigation), la
+        // destination est la page Contact. Un temoignage n'est donc jamais
+        // publie sans passer par la moderation de l'administrateur.
+        testimonialCta={(() => {
+          // Une ancienne migration avait rempli la valeur anglaise avec le
+          // défaut français. Le fallback protège immédiatement la vitrine,
+          // tandis que la migration de données corrige la valeur du CMS.
+          const configured = navigation?.testimonialLabel
+          const label =
+            locale === 'en' && configured === 'Laisser un témoignage'
+              ? strings.testimonialCta
+              : configured ?? strings.testimonialCta
+          return contactHref && label ? { label, href: `${contactHref}?sujet=temoignage` } : undefined
+        })()}
         legalLinks={legalLinks(legal, locale)}
         // L'année est calculée côté serveur : rendue dans le navigateur, elle
         // provoquerait une différence d'hydratation au passage de minuit.
         year={new Date().getUTCFullYear()}
         brandIcon={brandIcon}
         labels={{ rightsReserved: strings.rightsReserved }}
+      />
+
+      <CookieConsentBanner
+        locale={locale}
+        title={settings?.cookieTitle ?? (locale === 'en' ? 'Your cookie choices' : 'Votre choix sur les cookies')}
+        text={
+          settings?.cookieText ??
+          (locale === 'en'
+            ? 'We use only the cookies necessary for the site to work.'
+            : 'Nous utilisons uniquement les cookies nécessaires au fonctionnement du site.')
+        }
       />
     </>
   )

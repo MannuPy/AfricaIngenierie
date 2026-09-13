@@ -4,3 +4,10 @@ server {
   location ^~ /.well-known/acme-challenge/ { root /var/www/certbot; default_type text/plain; }
   location / { include /etc/nginx/oracle-proxy.conf; proxy_pass http://web:3000; }
 }
+
+server {
+  listen 80;
+  server_name www.${PUBLIC_DOMAIN};
+  location ^~ /.well-known/acme-challenge/ { root /var/www/certbot; default_type text/plain; }
+  location / { return 301 http://${PUBLIC_DOMAIN}$request_uri; }
+}

@@ -12,6 +12,9 @@
     "dc": "docker compose --env-file .env.local",
     "up": "docker compose --env-file .env.local up -d",
     "up:data": "docker compose --env-file .env.local up -d postgres minio mailpit",
+    "db:ide": "docker compose --env-file .env.local --profile db-tools up -d pgadmin",
+    "db:ide:down": "docker compose --env-file .env.local --profile db-tools stop pgadmin",
+    "db:ide:logs": "docker compose --env-file .env.local --profile db-tools logs -f --tail=100 pgadmin",
     "down": "docker compose --env-file .env.local down",
     "down:hard": "docker compose --env-file .env.local down -v",
     "ps": "docker compose --env-file .env.local ps",
@@ -32,9 +35,12 @@
     "bootstrap:users": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms bootstrap:users",
     "seed:demo": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms seed:demo",
     "db:clean-tests": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms db:clean-tests",
+    "db:repair-audit": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms db:repair-audit",
     "generate:types": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms generate:types",
     "test": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms test",
     "test:e2e": "docker compose --env-file .env.local run --rm cms pnpm --filter @africa-ingenierie/cms test:e2e",
+    "test:visual": "playwright test -c apps/web/playwright.config.ts",
+    "http:check": "node scripts/check-http.mjs",
     "test:host": "pnpm -r test",
     "routes:check": "node scripts/check-routes.mjs",
     "ci": "bash scripts/ci-check.sh"
@@ -42,6 +48,8 @@
   "devDependencies": {
     "eslint": "9.25.1",
     "eslint-config-next": "16.3.3",
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.51.1",
     "typescript": "5.9.3"
   }
 }

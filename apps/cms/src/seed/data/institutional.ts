@@ -28,6 +28,73 @@ export const testimonials: SeedDocument[] = [
       role: 'Client',
     },
   },
+  // Trois temoignages de DEMONSTRATION, au meme titre que les visuels
+  // « demo-* » du jeu d'essai. Ils portent des noms et des fonctions
+  // manifestement fictifs et servent a montrer la section remplie : la grille
+  // en compte quatre, un seul temoignage la laissait a moitie vide. Ils sont
+  // marques isDemo par le semeur et disparaissent avec le reste du jeu de
+  // demonstration. Ils doivent etre remplaces par de vrais temoignages, avec
+  // un consentement reellement recueilli.
+  {
+    slug: 'demo-directrice-production',
+    publish: true,
+    shared: {
+      personName: 'Awa D.',
+      company: 'Unité de production (exemple)',
+      companyEn: 'Production unit (example)',
+      consentReceivedAt: '2026-08-20T00:00:00.000Z',
+    },
+    fr: {
+      quote:
+        "L'arrêt de ligne a été ramené de trois jours à une demi-journée. Le plan de maintenance nous a été remis documenté, en français, et nos équipes savent le tenir sans nous.",
+      role: 'Directrice de production',
+    },
+    en: {
+      quote:
+        'Line downtime went from three days to half a day. The maintenance plan was handed over documented, and our teams can keep it running without us.',
+      role: 'Production manager',
+    },
+  },
+  {
+    slug: 'demo-responsable-maintenance',
+    publish: true,
+    shared: {
+      personName: 'Koffi S.',
+      company: 'Site industriel (exemple)',
+      companyEn: 'Industrial site (example)',
+      consentReceivedAt: '2026-08-21T00:00:00.000Z',
+    },
+    fr: {
+      quote:
+        "Ce que j'ai apprécié, c'est le chiffrage avant travaux. Aucun écart à la fin, et les pièces d'usure étaient en stock local, pas à commander sur trois semaines.",
+      role: 'Responsable maintenance',
+    },
+    en: {
+      quote:
+        'What I valued was the costing before the work started. No overrun at the end, and the wear parts were held locally rather than ordered three weeks out.',
+      role: 'Maintenance lead',
+    },
+  },
+  {
+    slug: 'demo-chef-de-projet',
+    publish: true,
+    shared: {
+      personName: 'Mariam T.',
+      company: 'Filière agro-industrielle (exemple)',
+      companyEn: 'Agro-industrial sector (example)',
+      consentReceivedAt: '2026-08-22T00:00:00.000Z',
+    },
+    fr: {
+      quote:
+        "Nous cherchions une équipe capable d'intervenir sur place, pas de piloter à distance depuis un autre continent. C'est exactement ce que nous avons eu.",
+      role: 'Chef de projet',
+    },
+    en: {
+      quote:
+        'We needed a team able to work on site, not to steer the job remotely from another continent. That is exactly what we got.',
+      role: 'Project manager',
+    },
+  },
 ]
 
 /**
@@ -42,6 +109,7 @@ export const partners: SeedDocument[] = [
   {
     slug: 'sonimex',
     publish: true,
+    mediaKey: 'partner-sonimex-logo',
     shared: { name: 'SONIMEX', position: 1 },
     fr: {},
     en: {},
@@ -51,7 +119,7 @@ export const partners: SeedDocument[] = [
   {
     slug: 'filiere-coton-benin',
     publish: true,
-    shared: { name: 'Filière coton Bénin', position: 4 },
+    shared: { name: 'Filière coton Bénin', nameEn: 'Beninese cotton sector', position: 4 },
     fr: {},
     en: {},
   },
@@ -123,7 +191,7 @@ export const siteSettings = {
     phone: '+229 01 42 54 54 95',
     phoneRaw: '+2290142545495',
     whatsapp: '2290142545495',
-    email: 'contact@africaingenieries.com',
+    email: 'contact@ingenierieafrica.com',
     englishEnabled: true,
     // Les trois réseaux existent sans URL validée : l'icône reste masquée
     // tant que le Client n'a pas fourni l'adresse réelle. Le prototype posait
@@ -179,6 +247,7 @@ export const navigation = {
       { label: 'Contact', section: 'contact', isVisible: true },
     ],
     contactLabel: 'Contact',
+    testimonialLabel: 'Laisser un témoignage',
   },
   en: {
     mainMenu: [
@@ -191,6 +260,7 @@ export const navigation = {
       { label: 'Contact', section: 'contact', isVisible: true },
     ],
     contactLabel: 'Contact',
+    testimonialLabel: 'Leave a testimonial',
   },
 }
 
@@ -224,6 +294,7 @@ export const ceoMessage = {
 export const aboutPage = {
   mediaKey: 'about-visuel',
   fr: {
+    videoUrl: 'https://www.youtube.com/watch?v=Wg-2qoxKGag&t=22s',
     presentation:
       "Africa Ingénierie est une entreprise d'ingénierie industrielle basée à Ouèdo, Abomey-Calavi, au Bénin. Elle accompagne les industriels d'Afrique de l'Ouest sur l'ensemble du cycle de vie de leurs équipements : installation, maintenance, formation des équipes, fourniture de pièces et fabrication métallique.",
     vision:
@@ -247,6 +318,7 @@ export const aboutPage = {
     ],
   },
   en: {
+    videoUrl: 'https://www.youtube.com/watch?v=Wg-2qoxKGag&t=22s',
     presentation:
       'Africa Ingénierie is an industrial engineering company based in Ouèdo, Abomey-Calavi, Benin. It supports West African industry across the entire life cycle of its equipment: installation, maintenance, team training, parts supply and metal fabrication.',
     vision:
@@ -274,19 +346,22 @@ export const aboutPage = {
 /**
  * Page de garde.
  *
- * L'ordre des sections est celui de la maquette validée. La quatrième
- * statistique du prototype vaut `null` : elle est reprise SANS valeur, pour
- * que le comportement « une valeur absente n'est jamais affichée » soit
- * réellement exercé par le jeu de démonstration.
+ * L'ordre et les contenus structurants reprennent les textes visibles du site
+ * de référence. Les valeurs restent administrables depuis Payload.
  */
 export const homepage = {
   mediaKey: 'accueil-banniere',
+  mediaKeys: [
+    'accueil-banniere',
+    'expertise-maintenance-industrielle',
+    'expertise-installation-mise-en-service',
+  ],
   fr: {
-    heroEyebrow: 'Ingénierie industrielle',
-    heroTitle: "Valoriser l'expertise industrielle africaine",
-    heroHighlight: 'africaine',
+    heroEyebrow: 'L’EXCELLENCE INDUSTRIELLE AU SERVICE DU DÉVELOPPEMENT AFRICAIN.',
+    heroTitle:
+      "Des solutions d’ingénierie fiables, innovantes et accessibles pour une industrie africaine plus performante.",
     heroLead:
-      "Maintenance, installation, formation, fourniture d'équipements et fabrication métallique pour les industries d'Afrique de l'Ouest.",
+      "Africa Ingénierie accompagne les entreprises dans l’optimisation et la performance de leurs unités de production grâce à des solutions adaptées en maintenance industrielle, transformation de produits, énergie, automatisation et équipements industriels. Notre approche conjugue innovation, expertise locale et standards internationaux pour offrir des solutions durables, performantes et adaptées aux réalités africaines.",
     sections: [
       { key: 'trust', title: 'Ils nous font confiance', isVisible: true },
       {
@@ -296,12 +371,13 @@ export const homepage = {
         isVisible: true,
         ctaLabel: 'En savoir plus',
       },
+      { key: 'figures', eyebrow: 'EN CHIFFRES', title: 'Notre impact en chiffres', isVisible: true },
       {
         key: 'expertises',
-        eyebrow: 'Expertises',
-        title: "Six domaines d'intervention",
+        eyebrow: 'NOS EXPERTISES',
+        title: "Nos domaines d'expertise",
         intro:
-          "De la maintenance préventive à la fabrication métallique, nos équipes couvrent le cycle de vie complet de vos équipements.",
+          "Des solutions techniques fiables et innovantes pour optimiser vos opérations industrielles.",
         isVisible: true,
         ctaLabel: 'Voir toutes les expertises',
       },
@@ -312,7 +388,6 @@ export const homepage = {
         isVisible: true,
         ctaLabel: 'Voir le catalogue',
       },
-      { key: 'figures', title: 'Chiffres clés', isVisible: true },
       {
         key: 'realisations',
         eyebrow: 'Réalisations',
@@ -322,35 +397,45 @@ export const homepage = {
       },
       {
         key: 'trainingEvents',
-        eyebrow: 'Formations & événements',
-        title: 'Renforcer les compétences sur le terrain',
+        eyebrow: 'ACTUALITÉS',
+        title: 'Actualités & Formations à venir',
+        intro:
+          "Restez informé des dernières innovations, des projets en cours et des opportunités de formation proposées par notre équipe.",
         isVisible: true,
-        ctaLabel: 'Voir le programme',
+        ctaLabel: 'Voir tout',
       },
-      { key: 'leadership', title: 'Mot du Directeur Général', isVisible: true },
-      { key: 'testimonials', title: 'Ce que disent nos clients', isVisible: true },
+      { key: 'leadership', title: 'LEADERSHIP', isVisible: true },
+      {
+        key: 'testimonials',
+        eyebrow: 'TÉMOIGNAGES',
+        title: 'La parole à nos clients',
+        intro:
+          "La satisfaction de nos clients est au cœur de notre démarche. À travers leurs retours, découvrez comment nos solutions techniques, nos interventions sur le terrain et notre approche d'ingénierie ont réellement amélioré la performance de leurs installations.",
+        isVisible: true,
+      },
       {
         key: 'cta',
-        title: 'Un projet industriel à étudier ?',
-        intro: 'Décrivez votre besoin : nous revenons vers vous sous 24 heures ouvrées.',
-        ctaLabel: 'Nous contacter',
+        eyebrow: 'PRÊT À COLLABORER ?',
+        title: "L'excellence industrielle n'est qu'un clic plus loin !",
+        intro:
+          "Pour booster votre performance industrielle et vous rapprocher de l'excellence qu'incarne Africa Ingénierie, choisissez l'ingénierie de précision et l'innovation locale.",
+        ctaLabel: 'Contactez-nous',
         isVisible: true,
       },
     ],
     keyFigures: [
-      { value: 28, suffix: 'ans', label: "D'expérience industrielle" },
-      { value: 6, label: "Domaines d'expertise" },
-      { value: 4, label: "Pays d'intervention" },
-      // Valeur volontairement absente : la statistique ne doit pas s'afficher.
-      { label: 'Gain de productivité', suffix: '%' },
+      { value: 2, suffix: '+', label: 'Projets lancés' },
+      { value: 20, suffix: '+', label: "Ans d'expérience" },
+      { value: 6, suffix: '+', label: 'Pays couverts' },
+      { value: 100, suffix: '%', label: 'Gain de productivité' },
     ],
   },
   en: {
-    heroEyebrow: 'Industrial engineering',
-    heroTitle: 'Building up African industrial expertise',
-    heroHighlight: 'African',
+    heroEyebrow: 'INDUSTRIAL EXCELLENCE AT THE SERVICE OF AFRICAN DEVELOPMENT.',
+    heroTitle:
+      'Reliable, innovative and accessible engineering solutions for a higher-performing African industry.',
     heroLead:
-      'Maintenance, installation, training, equipment supply and metal fabrication for West African industry.',
+      'Africa Ingénierie helps companies optimise the performance of their production units through solutions tailored to industrial maintenance, product processing, energy, automation and industrial equipment. Our approach combines innovation, local expertise and international standards to deliver sustainable, high-performing solutions adapted to African realities.',
     sections: [
       { key: 'trust', title: 'They work with us', isVisible: true },
       {
@@ -360,12 +445,13 @@ export const homepage = {
         isVisible: true,
         ctaLabel: 'Find out more',
       },
+      { key: 'figures', eyebrow: 'IN FIGURES', title: 'Our impact in figures', isVisible: true },
       {
         key: 'expertises',
-        eyebrow: 'Expertises',
-        title: 'Six fields of work',
+        eyebrow: 'OUR EXPERTISE',
+        title: 'Our fields of expertise',
         intro:
-          'From preventive maintenance to metal fabrication, our teams cover the full life cycle of your equipment.',
+          'Reliable and innovative technical solutions to optimise your industrial operations.',
         isVisible: true,
         ctaLabel: 'See all expertises',
       },
@@ -376,7 +462,6 @@ export const homepage = {
         isVisible: true,
         ctaLabel: 'See the catalogue',
       },
-      { key: 'figures', title: 'Key figures', isVisible: true },
       {
         key: 'realisations',
         eyebrow: 'Case studies',
@@ -386,26 +471,37 @@ export const homepage = {
       },
       {
         key: 'trainingEvents',
-        eyebrow: 'Training & events',
-        title: 'Strengthening skills on the ground',
+        eyebrow: 'NEWS',
+        title: 'News & Upcoming Training',
+        intro:
+          'Stay informed about the latest innovations, ongoing projects and training opportunities offered by our team.',
         isVisible: true,
-        ctaLabel: 'See the programme',
+        ctaLabel: 'See all',
       },
-      { key: 'leadership', title: 'A word from the Managing Director', isVisible: true },
-      { key: 'testimonials', title: 'What our clients say', isVisible: true },
+      { key: 'leadership', title: 'LEADERSHIP', isVisible: true },
+      {
+        key: 'testimonials',
+        eyebrow: 'TESTIMONIALS',
+        title: 'What our clients say',
+        intro:
+          'Client satisfaction is at the heart of our approach. Through their feedback, discover how our technical solutions, field interventions and engineering approach have improved the performance of their facilities.',
+        isVisible: true,
+      },
       {
         key: 'cta',
-        title: 'An industrial project to study?',
-        intro: 'Describe what you need: we come back to you within 24 working hours.',
+        eyebrow: 'READY TO COLLABORATE?',
+        title: 'Industrial excellence is just one click away!',
+        intro:
+          'Boost your industrial performance and get closer to the excellence embodied by Africa Ingénierie with precision engineering and local innovation.',
         ctaLabel: 'Contact us',
         isVisible: true,
       },
     ],
     keyFigures: [
-      { value: 28, suffix: 'years', label: 'Of industrial experience' },
-      { value: 6, label: 'Fields of expertise' },
-      { value: 4, label: 'Countries of operation' },
-      { label: 'Productivity gain', suffix: '%' },
+      { value: 2, suffix: '+', label: 'Projects launched' },
+      { value: 20, suffix: '+', label: 'Years of experience' },
+      { value: 6, suffix: '+', label: 'Countries covered' },
+      { value: 100, suffix: '%', label: 'Productivity gain' },
     ],
   },
 }

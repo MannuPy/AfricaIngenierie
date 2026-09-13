@@ -63,8 +63,19 @@ if (-not (Test-Path .env.local)) {
 }
 Ok ".env.local present"
 
-if (Select-String -Path .env.local -Pattern 'change-me' -Quiet) {
-  Ko ".env.local contient encore des valeurs << change-me >> (a remplacer avant le prompt 03)"
+$placeholderKeys = @(
+  Get-Content .env.local | ForEach-Object {
+    if ($_ -match '^\s*([A-Z0-9_]+)=(.*)$') {
+      $key = $Matches[1]
+      $value = $Matches[2]
+      if ($value -match '(?i)change-me|changeme|example|your[-_ ]') {
+        $key
+      }
+    }
+  }
+)
+if ($placeholderKeys.Count -gt 0) {
+  Ko ".env.local contient des valeurs d'exemple pour : $($placeholderKeys -join ', ')"
 } else {
   Ok ".env.local ne contient plus de valeur d'exemple"
 }
@@ -75,8 +86,18 @@ Step "1. docker compose config"
 DC config --quiet
 if ($LASTEXITCODE -eq 0) { Ok "Configuration de developpement valide" } else { Ko "Configuration de developpement invalide" }
 
-DC -f docker-compose.yml -f docker-compose.prod.yml config --quiet
-if ($LASTEXITCODE -eq 0) { Ok "Configuration de production valide" } else { Ko "Configuration de production invalide" }
+$productionEnv = if (Test-Path .env.ovh.test) { '.env.ovh.test' } else { '.env.ovh.test.example' }
+$env:PRODUCTION_ENV_FILE = $productionEnv
+docker compose --env-file $productionEnv -f docker-compose.yml -f docker-compose.prod.yml config --quiet
+if ($LASTEXITCODE -eq 0) {
+  if ($productionEnv -eq '.env.ovh.test') {
+    Ok "Configuration de production valide"
+  } else {
+    Ok "Modèle de configuration de production valide (secrets réels encore requis)"
+  }
+} else {
+  Ko "Configuration de production invalide"
+}
 
 $config = DC config --format json | ConvertFrom-Json
 $exposed = @()

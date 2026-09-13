@@ -446,7 +446,7 @@ export default function DesignSystemPage() {
               'Ouèdo, Abomey-Calavi, Bénin',
             ],
             phone: { label: '+229 01 42 54 54 95', href: '+2290142545495' },
-            email: 'contact@africaingenieries.com',
+            email: 'contact@ingenierieafrica.com',
             whatsapp: { label: 'WhatsApp', href: '/design-system#formulaires' },
           }}
           socials={[

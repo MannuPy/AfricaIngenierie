@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { isAdminOrPublisher } from '../access'
-import { revalidationAfterGlobalChange } from '../hooks'
+import { revalidationAfterGlobalChange, writeAuditLog } from '../hooks'
 
 /**
  * Mot du PDG  -  module du cahier des charges §2, absent du modèle de conception
@@ -16,7 +16,21 @@ export const CeoMessage: GlobalConfig = {
   access: { read: () => true, update: isAdminOrPublisher },
   admin: { group: { fr: 'Contenus publics', en: 'Public content' } },
   versions: { drafts: false, max: 30 },
-  hooks: { afterChange: [revalidationAfterGlobalChange('ceo-message', ['/fr', '/en', '/fr/a-propos', '/en/about'])] },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        await writeAuditLog(req, {
+          action: 'update',
+          entityType: 'ceo-message',
+          actorId: (req.user as { id?: string | number } | null)?.id ?? null,
+          before: previousDoc,
+          after: doc,
+        })
+        return doc
+      },
+      revalidationAfterGlobalChange('ceo-message', ['/fr', '/en', '/fr/a-propos', '/en/about']),
+    ],
+  },
   fields: [
     { name: 'personName', type: 'text', required: true, label: { fr: 'Nom', en: 'Name' } },
     {
@@ -52,6 +66,12 @@ export const CeoMessage: GlobalConfig = {
       type: 'upload',
       relationTo: 'media-assets',
       label: { fr: 'Portrait', en: 'Portrait' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Choisissez un média existant ou ajoutez le portrait depuis la médiathèque.',
+          en: 'Optional. Choose an existing media item or add the portrait from the media library.',
+        },
+      },
     },
     {
       name: 'videoUrl',

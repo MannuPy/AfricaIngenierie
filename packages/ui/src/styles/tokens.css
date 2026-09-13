@@ -13,6 +13,10 @@
   --brand-deep: #001f57;
   --brand-600: #1e5bc6;
   --brand-100: #e7eef9;
+  /* Cran manquant : components.css l'utilisait deja pour le guillemet
+     decoratif des temoignages. Non declare, la couleur etait invalide et
+     le guillemet s'affichait en couleur de texte, enorme et noir. */
+  --brand-200: #c9d9f0;
   --brand-50: #f4f7fc;
 
   /* Accent action (rare, discipliné) */
@@ -55,10 +59,14 @@
   --sh-2: 0 4px 18px rgba(0, 31, 87, 0.08);
   --sh-3: 0 14px 40px rgba(0, 31, 87, 0.13);
 
-  /* Rayons */
+  /* Rayons  -  echelle complete : aucune valeur ne doit etre saisie en dur.
+     Les crans xs et md ont ete ajoutes parce que 4, 6, 9 et 12 px trainaient
+     dans les feuilles sans correspondre a aucun jeton. */
+  --r-xs: 4px;
   --r-btn: 8px;
-  --r-card: 14px;
   --r-field: 8px;
+  --r-md: 12px;
+  --r-card: 14px;
   --r-pill: 999px;
 
   /* Type  -  les familles « Variable » proviennent des paquets

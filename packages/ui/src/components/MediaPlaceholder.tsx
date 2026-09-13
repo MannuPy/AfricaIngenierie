@@ -35,11 +35,13 @@ export function MediaPlaceholder({
   icon = 'img',
   className,
 }: MediaPlaceholderProps) {
+  const accessibleLabel = label.trim() || 'Illustration'
+
   return (
-    <div className={cx('plate', RATIO_CLASS[ratio], className)} role="img" aria-label={label}>
+    <div className={cx('plate', RATIO_CLASS[ratio], className)} role="img" aria-label={accessibleLabel}>
       <div className="plate-lbl">
         <Icon name={icon} size={26} />
-        {label}
+        {accessibleLabel}
       </div>
     </div>
   )

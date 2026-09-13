@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from 'node:fs/promises'
+import { copyFile, mkdtemp, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -133,6 +133,25 @@ export async function generateMediaFile(media: SeedMedia, directory: string): Pr
   if (assetFile) {
     const sourcePath = path.join(SEED_ASSET_DIRECTORY, assetFile)
 
+    // Les PDF sont des fichiers documentaires : ils ne doivent pas passer
+    // dans Sharp, qui ne sait pas les redimensionner comme une image.
+    if (media.mimeType === 'application/pdf' || sourcePath.toLowerCase().endsWith('.pdf')) {
+      try {
+        await copyFile(sourcePath, filePath)
+        return {
+          filePath,
+          bytes: (await stat(filePath)).size,
+          mimeType: 'application/pdf',
+        }
+      } catch (error) {
+        console.warn(
+          `[seed] document « ${assetFile} » illisible, aucun fichier PDF ne sera généré : ` +
+            (error instanceof Error ? error.message : String(error)),
+        )
+        throw error
+      }
+    }
+
     // Un visuel manquant ne doit pas interrompre le seed.
     //
     // Sans ce garde-fou, `sharp` lève sur un fichier absent et TOUTE
@@ -140,13 +159,28 @@ export async function generateMediaFile(media: SeedMedia, directory: string): Pr
     // fichier renommé, LFS non installé  -  et plus aucun contenu n'est écrit.
     // On retombe alors sur le motif calculé, qui ne dépend d'aucun fichier.
     try {
-      const buffer = await sharp(sourcePath)
-        .resize(media.width, media.height, { fit: 'cover', position: 'centre' })
-        .jpeg({ quality: 82, progressive: true })
-        .toBuffer()
+      const source = sharp(sourcePath)
+      const resized = source.resize(media.width, media.height, {
+        // Les visuels approuvés sont déjà cadrés par le Client : ne jamais
+        // les recadrer pour les faire entrer dans le ratio de démonstration.
+        fit: media.approvedAsset ? 'inside' : 'cover',
+        position: 'centre',
+      })
+      // Le nom livré est l’identifiant de format attendu par Payload et par
+      // les outils de cache. Certaines sources du pack sont des PNG mais sont
+      // volontairement livrées sous un nom `.jpg` : convertir selon le nom de
+      // sortie évite un fichier JPG contenant en réalité un PNG.
+      const outputIsPng = media.filename.toLowerCase().endsWith('.png')
+      const buffer = outputIsPng
+        ? await resized.png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer()
+        : await resized.jpeg({ quality: media.approvedAsset ? 95 : 82, progressive: true }).toBuffer()
 
       await writeFile(filePath, buffer)
-      return { filePath, bytes: buffer.byteLength, mimeType: 'image/jpeg' }
+      return {
+        filePath,
+        bytes: buffer.byteLength,
+        mimeType: outputIsPng ? 'image/png' : 'image/jpeg',
+      }
     } catch (error) {
       console.warn(
         `[seed] visuel « ${assetFile} » illisible, motif de démonstration utilisé à la place : ` +

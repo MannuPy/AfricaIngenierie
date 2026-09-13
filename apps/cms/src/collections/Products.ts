@@ -5,18 +5,10 @@ import { contentCollection, GROUPS } from './factory'
 /**
  * Produits et équipements.
  *
- * Deux champs ont été RETIRÉS du formulaire parce qu'ils coûtaient plus qu'ils
- * ne rendaient :
- *
- *   • `gallery`  -  une galerie secondaire que le site public n'affichait pas.
- *     Un champ que personne ne voit est un champ que l'on remplit pour rien.
- *   • `ctaHref`  -  la destination du bouton, avec sa règle de validation
- *     (route interne ou URL https). Toutes les fiches pointaient vers la page
- *     Contact, et c'est le seul comportement sensé pour un catalogue sans
- *     prix. Le bouton y mène désormais toujours : la règle RG-023 devient sans
- *     objet, puisqu'aucune adresse arbitraire ne peut plus être saisie.
- *
- * Aucun prix : la vente en ligne est hors périmètre.
+ * Les contenus commerciaux restent facultatifs : un produit peut être publié
+ * sans prix et sans média complémentaire. Les éléments lourds (PDF, vidéo et
+ * galerie 360°) sont reliés à la médiathèque afin de réutiliser les contrôles
+ * de taille, de droits et de textes alternatifs déjà centralisés.
  */
 export const Products = contentCollection({
   slug: 'products',
@@ -35,7 +27,7 @@ export const Products = contentCollection({
     'seo.title',
     'seo.description',
   ],
-  defaultColumns: ['title', 'reference', 'category', 'editorialStatus', 'updatedAt'],
+  defaultColumns: ['title', 'media', 'reference', 'category', 'editorialStatus', 'updatedAt'],
 
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, label: { fr: 'Nom', en: 'Name' } },
@@ -131,6 +123,74 @@ export const Products = contentCollection({
         },
       },
     },
+    {
+      name: 'productSheet',
+      type: 'upload',
+      relationTo: 'media-assets',
+      label: { fr: 'Fiche détaillée PDF', en: 'Detailed PDF sheet' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Ajoutez une fiche technique PDF que le visiteur pourra télécharger depuis la page du produit.',
+          en: 'Optional. Add a technical PDF that visitors can download from the product page.',
+        },
+      },
+    },
+    {
+      name: 'videoMedia',
+      type: 'upload',
+      relationTo: 'media-assets',
+      label: { fr: 'Vidéo de présentation', en: 'Presentation video' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Téléversez une vidéo MP4, WebM ou OGG. Elle est prioritaire sur le lien YouTube.',
+          en: 'Optional. Upload an MP4, WebM or OGG video. It takes priority over the YouTube link.',
+        },
+      },
+    },
+    {
+      name: 'videoUrl',
+      type: 'text',
+      label: { fr: 'Lien YouTube de présentation', en: 'Presentation YouTube URL' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Collez un lien youtube.com/watch?v=… ou youtu.be/… .',
+          en: 'Optional. Paste a youtube.com/watch?v=… or youtu.be/… URL.',
+        },
+      },
+      validate: (value: unknown) => {
+        if (!value) return true
+        if (typeof value !== 'string') return 'Indiquez une URL YouTube valide.'
+        try {
+          const url = new URL(value)
+          return url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com' || url.hostname === 'youtu.be'
+            ? true
+            : 'Utilisez une URL youtube.com ou youtu.be.'
+        } catch {
+          return 'Indiquez une URL YouTube valide.'
+        }
+      },
+    },
+    {
+      name: 'gallery360',
+      type: 'array',
+      maxRows: 24,
+      label: { fr: 'Présentation 360° (photos)', en: '360° presentation (photos)' },
+      admin: {
+        description: {
+          fr: 'Facultatif. Ajoutez les photos dans l’ordre de rotation souhaité. Elles seront présentées dans une galerie défilante.',
+          en: 'Optional. Add photos in the desired rotation order. They are presented in a scrollable gallery.',
+        },
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media-assets',
+          required: true,
+          label: { fr: 'Photo', en: 'Photo' },
+        },
+      ],
+    },
   ],
 
   sidebar: [
@@ -146,6 +206,19 @@ export const Products = contentCollection({
         description: {
           fr: 'Unique. Sert à désigner le produit dans un devis.',
           en: 'Unique. Used to identify the product in a quotation.',
+        },
+      },
+    },
+    {
+      name: 'unitPrice',
+      type: 'number',
+      min: 0,
+      label: { fr: 'Prix unitaire (facultatif)', en: 'Unit price (optional)' },
+      admin: {
+        position: 'sidebar',
+        description: {
+          fr: 'Facultatif. Laissez vide si le produit est vendu sur devis ou si le prix doit rester confidentiel.',
+          en: 'Optional. Leave empty when the product is quoted individually or the price is confidential.',
         },
       },
     },

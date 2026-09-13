@@ -7,6 +7,7 @@ import { findPublished } from '../../../lib/cms'
 import { alternatePaths } from '../../../lib/paths'
 import { assertLocale, loadSectionPage, SectionShell } from '../../../lib/page-shell'
 import { pageMetadata } from '../../../lib/seo'
+import { sortEventsByUpcoming } from '../../../lib/events-order'
 import type { EventDoc } from '../../../lib/types'
 import { notFound } from 'next/navigation'
 
@@ -40,7 +41,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const { header } = await loadSectionPage(PAGE_KEY, locale)
   if (!header) notFound()
 
-  const docs = await findPublished<EventDoc>('events', locale, { sort: '-startsAt' })
+  const docs = sortEventsByUpcoming(await findPublished<EventDoc>('events', locale, { sort: 'startsAt' }))
 
   return (
     <SectionShell header={header} locale={locale} sectionKey={SECTION} isEmpty={docs.length === 0}>

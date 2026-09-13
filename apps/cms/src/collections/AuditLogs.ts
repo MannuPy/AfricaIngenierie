@@ -28,7 +28,7 @@ export const AuditLogs: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'summary',
-    defaultColumns: ['createdAt', 'action', 'entityType', 'actor'],
+    defaultColumns: ['createdAt', 'action', 'entityType', 'actor', 'requestId', 'result', 'path'],
     group: GROUPS.config,
     description: {
       fr: 'Journal en lecture seule  -  non modifiable, y compris par un administrateur.',
@@ -82,6 +82,13 @@ export const AuditLogs: CollectionConfig = {
         'login',
         'logout',
         'settings_change',
+        'read',
+        'export',
+        'preview',
+        'login_failed',
+        'access_denied',
+        'purge',
+        'security',
       ],
     },
     {
@@ -104,6 +111,27 @@ export const AuditLogs: CollectionConfig = {
     { name: 'before', type: 'json', label: { fr: 'Avant', en: 'Before' } },
     { name: 'after', type: 'json', label: { fr: 'Après', en: 'After' } },
     {
+      name: 'requestId',
+      type: 'text',
+      index: true,
+      label: { fr: 'Identifiant de requête', en: 'Request id' },
+      admin: { readOnly: true },
+    },
+    { name: 'method', type: 'text', label: { fr: 'Méthode HTTP', en: 'HTTP method' }, admin: { readOnly: true } },
+    { name: 'path', type: 'text', label: { fr: 'Chemin', en: 'Path' }, admin: { readOnly: true } },
+    {
+      name: 'statusCode',
+      type: 'number',
+      label: { fr: 'Code HTTP', en: 'HTTP status' },
+      admin: { readOnly: true },
+    },
+    {
+      name: 'result',
+      type: 'text',
+      label: { fr: 'Résultat', en: 'Result' },
+      admin: { readOnly: true },
+    },
+    {
       name: 'ipHash',
       type: 'text',
       label: { fr: 'Empreinte IP', en: 'IP hash' },
@@ -114,5 +142,12 @@ export const AuditLogs: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'userAgentHash',
+      type: 'text',
+      label: { fr: 'Empreinte navigateur', en: 'User-agent hash' },
+      admin: { readOnly: true },
+    },
+    { name: 'metadata', type: 'json', label: { fr: 'Métadonnées', en: 'Metadata' } },
   ],
 }

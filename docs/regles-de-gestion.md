@@ -48,7 +48,7 @@ RG-014  -  Les dates, références, identifiants et valeurs techniques ne sont p
 | Une section accueil  -  événements | N:N | Seuls les événements publiés et pertinents peuvent être mis en avant. |
 | Un produit  -  média principal | N:1 | Un produit peut avoir un média principal et une galerie future. |
 | Un média  -  contenus | 1:N | Un média peut illustrer plusieurs contenus. |
-| Un témoignage  -  consentement | 1:1 | La date de consentement est obligatoire avant publication. |
+| Un témoignage  -  consentement | 1:1 | La date de consentement est obligatoire avant publication ; une soumission publique arrive en brouillon pour modération. |
 | Un message  -  agent | N:1 | Un message peut être assigné à un utilisateur. |
 | Un contenu  -  révisions | 1:N | Chaque version conserve un snapshot immuable. |
 

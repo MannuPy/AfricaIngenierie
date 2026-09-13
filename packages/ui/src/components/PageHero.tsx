@@ -7,15 +7,16 @@ export type PageHeroProps = {
   title: string
   intro?: string
   crumbs?: Crumb[]
+  crumbLabel?: string
   children?: ReactNode
 }
 
 /** Hero bleu des pages internes, avec fil d'Ariane et motif blueprint. */
-export function PageHero({ eyebrow, title, intro, crumbs, children }: PageHeroProps) {
+export function PageHero({ eyebrow, title, intro, crumbs, crumbLabel, children }: PageHeroProps) {
   return (
     <section className="pagehero bp">
       <div className="wrap stack g16">
-        {crumbs?.length ? <Breadcrumbs items={crumbs} /> : null}
+        {crumbs?.length ? <Breadcrumbs items={crumbs} label={crumbLabel} /> : null}
         <p className="eyebrow on-brand" style={{ margin: '6px 0 0' }}>
           {eyebrow}
         </p>

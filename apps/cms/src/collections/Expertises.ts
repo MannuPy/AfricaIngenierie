@@ -12,7 +12,7 @@ export const Expertises = contentCollection({
   group: GROUPS.content,
   publicPath: COLLECTION_PATHS.expertises,
   requiredForPublish: ['title', 'summary', 'body', 'seo.title', 'seo.description'],
-  defaultColumns: ['title', 'editorialStatus', 'updatedAt'],
+  defaultColumns: ['title', 'media', 'editorialStatus', 'updatedAt'],
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, label: { fr: 'Titre', en: 'Title' } },
     {

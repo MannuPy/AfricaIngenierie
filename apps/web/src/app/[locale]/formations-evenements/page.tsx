@@ -9,8 +9,10 @@ import { findPublished } from '../../../lib/cms'
 import { alternatePaths } from '../../../lib/paths'
 import { assertLocale, loadSectionPage, sectionCrumbs } from '../../../lib/page-shell'
 import { pageMetadata } from '../../../lib/seo'
+import { sortEventsByUpcoming } from '../../../lib/events-order'
 import type { EventDoc, FormationDoc, PageHeaderDoc } from '../../../lib/types'
 import { findPublishedByKey } from '../../../lib/cms'
+import { ui } from '../../../lib/ui-strings'
 
 export const runtime = 'nodejs'
 export const revalidate = 300
@@ -50,14 +52,16 @@ export async function generateMetadata({
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const locale: Locale = assertLocale((await params).locale)
 
-  const [{ header }, formations, events, eventsHeader] = await Promise.all([
+  const [{ header }, formations, allEvents, eventsHeader] = await Promise.all([
     loadSectionPage(PAGE_KEY, locale),
     findPublished<FormationDoc>('formations', locale, { sort: 'title' }),
-    findPublished<EventDoc>('events', locale, { sort: '-startsAt', limit: 6 }),
+    findPublished<EventDoc>('events', locale, { sort: 'startsAt' }),
     findPublishedByKey<PageHeaderDoc>('pages', 'pageKey', 'evenements', locale),
   ])
 
   if (!header) notFound()
+
+  const events = sortEventsByUpcoming(allEvents).slice(0, 6)
 
   const nothing = formations.length === 0 && events.length === 0
 
@@ -68,6 +72,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         title={header.title}
         intro={header.intro ?? undefined}
         crumbs={sectionCrumbs(locale, { key: SECTION, label: header.title })}
+        crumbLabel={ui(locale).breadcrumb}
       />
 
       {nothing ? (

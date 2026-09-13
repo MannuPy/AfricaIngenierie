@@ -8,14 +8,14 @@ const CMS_URL = getCmsInternalUrl()
 
 /**
  * Disponibilité : le site ne peut rien rendre d'utile si le CMS est absent.
- * Utilisé par le healthcheck Docker et, plus tard, par la supervision.
+ * Utilisé par le healthcheck Docker et la supervision.
  */
 export async function GET() {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 3000)
 
   try {
-    const response = await fetch(`${CMS_URL}/healthz`, {
+    const response = await fetch(`${CMS_URL}/readyz`, {
       signal: controller.signal,
       cache: 'no-store',
     })

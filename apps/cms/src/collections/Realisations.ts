@@ -27,7 +27,7 @@ export const Realisations = contentCollection({
     'seo.title',
     'seo.description',
   ],
-  defaultColumns: ['title', 'clientName', 'year', 'editorialStatus', 'updatedAt'],
+  defaultColumns: ['title', 'media', 'clientName', 'year', 'editorialStatus', 'updatedAt'],
 
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, label: { fr: 'Titre', en: 'Title' } },

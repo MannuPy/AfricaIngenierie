@@ -1,16 +1,22 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Card, Icon, PageHero } from '@africa-ingenierie/ui'
+import { Card, Icon, MapFrame, PageHero } from '@africa-ingenierie/ui'
 import { listPath, type Locale } from '@africa-ingenierie/validation/routes'
 
 import { ContactForm } from '../../../components/contact-form'
+import { TestimonialForm } from '../../../components/testimonial-form'
 import { alternatePaths } from '../../../lib/paths'
 import { assertLocale, loadSectionPage, sectionCrumbs } from '../../../lib/page-shell'
 import { pageMetadata } from '../../../lib/seo'
+import { mapDetails, phoneHref, whatsappHref } from '../../../lib/site'
 import { ui } from '../../../lib/ui-strings'
 
 export const revalidate = 300
+// Le pied de page ouvre cette page avec `?sujet=temoignage`. Le rendu doit
+// lire ce paramètre à chaque requête afin de ne jamais servir le formulaire de
+// contact à la place du formulaire de témoignage.
+export const dynamic = 'force-dynamic'
 
 /**
  * Contact.
@@ -44,13 +50,23 @@ export async function generateMetadata({
   })
 }
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>
+  searchParams?: Promise<{ sujet?: string | string[] }>
+}) {
   const locale: Locale = assertLocale((await params).locale)
   const { header, settings } = await loadSectionPage(PAGE_KEY, locale)
 
   if (!header) notFound()
 
   const strings = ui(locale)
+  const subject = (await searchParams)?.sujet
+  const isTestimonial = subject === 'temoignage'
+  const map = mapDetails(settings, strings)
+  const whatsapp = whatsappHref(settings?.whatsapp)
 
   const addressLines = [
     settings?.addressLine1,
@@ -62,16 +78,30 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <>
       <PageHero
         eyebrow={header.eyebrow}
-        title={header.title}
-        intro={header.intro ?? undefined}
+        title={isTestimonial ? strings.testimonialPageTitle : header.title}
+        intro={isTestimonial ? strings.testimonialPageIntro : header.intro ?? undefined}
         crumbs={sectionCrumbs(locale, { key: SECTION, label: header.title })}
+        crumbLabel={strings.breadcrumb}
       />
 
       <section className="sec">
         <div className="wrap split">
-          <ContactForm strings={strings} locale={locale} />
+          {isTestimonial ? (
+            <TestimonialForm strings={strings} locale={locale} />
+          ) : (
+            <ContactForm strings={strings} locale={locale} />
+          )}
 
           <div className="stack g24">
+            {isTestimonial ? (
+              <Card padding="md">
+                <div className="stack g16">
+                  <h2 className="h3">{strings.testimonialPageTitle}</h2>
+                  <p className="body">{strings.testimonialReviewNotice}</p>
+                </div>
+              </Card>
+            ) : null}
+
             <Card padding="md">
               <div className="stack g16">
                 <h2 className="h3">{strings.contactDetails}</h2>
@@ -89,7 +119,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
                 {settings?.phone && settings?.phoneRaw ? (
                   <p className="meta">
                     <Icon name="phone" size={15} />
-                    <a className="tlink" href={`tel:${settings.phoneRaw}`}>
+                    <a className="tlink" href={phoneHref(settings.phoneRaw)}>
                       {settings.phone}
                     </a>
                   </p>
@@ -104,12 +134,12 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
                   </p>
                 ) : null}
 
-                {settings?.whatsapp ? (
+                {whatsapp ? (
                   <p className="meta">
                     <Icon name="wa" size={15} />
                     <a
                       className="tlink"
-                      href={`https://wa.me/${settings.whatsapp}`}
+                      href={whatsapp}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -133,6 +163,15 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
                     ))}
                   </dl>
                   {settings.replyDelay ? <p className="meta">{settings.replyDelay}</p> : null}
+                </div>
+              </Card>
+            ) : null}
+
+            {map ? (
+              <Card padding="md">
+                <div className="stack g16">
+                  <h2 className="h3">{strings.mapTitle}</h2>
+                  <MapFrame {...map} />
                 </div>
               </Card>
             ) : null}

@@ -2,9 +2,19 @@
 
 import { useState } from 'react'
 
-import { Button, Checkbox, Notice, TextAreaField, TextField } from '@africa-ingenierie/ui'
+import { Button, Checkbox, Notice, SelectField, TextAreaField, TextField } from '@africa-ingenierie/ui'
 
 import type { UiStrings } from '../lib/ui-strings'
+
+const SERVICE_DOMAINS = [
+  { value: 'energy', fr: 'Énergie', en: 'Energy' },
+  { value: 'home-automation-security', fr: 'Domotique & Sécurité', en: 'Home automation & Security' },
+  { value: 'industrial-equipment', fr: "Fourniture d'équipements industriels", en: 'Industrial equipment supply' },
+  { value: 'welding-metalwork', fr: 'Soudure & Chaudronnerie', en: 'Welding & Metalwork' },
+  { value: 'industrial-maintenance', fr: 'Maintenance industrielle', en: 'Industrial maintenance' },
+  { value: 'installation-commissioning', fr: 'Installation & Mise en service', en: 'Installation & Commissioning' },
+  { value: 'technical-training', fr: 'Formations Techniques & Optimisation Industrielle', en: 'Technical Training & Industrial Optimisation' },
+] as const
 
 /**
  * Formulaire de contact.
@@ -28,6 +38,12 @@ export function ContactForm({ strings, locale }: { strings: UiStrings; locale: s
     setState('sending')
 
     try {
+      const selectedNeeds = data
+        .getAll('need')
+        .map(String)
+        .map((value) => SERVICE_DOMAINS.find((domain) => domain.value === value)?.[locale === 'en' ? 'en' : 'fr'])
+        .filter(Boolean)
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -35,8 +51,9 @@ export function ContactForm({ strings, locale }: { strings: UiStrings; locale: s
           locale,
           fullName: String(data.get('fullName') ?? ''),
           email: String(data.get('email') ?? ''),
+          phone: String(data.get('phone') ?? ''),
           company: String(data.get('company') ?? ''),
-          need: String(data.get('need') ?? ''),
+          need: selectedNeeds.join(', '),
           message: String(data.get('message') ?? ''),
           consent: data.get('consent') === 'on',
         }),
@@ -66,8 +83,29 @@ export function ContactForm({ strings, locale }: { strings: UiStrings; locale: s
         required
         autoComplete="email"
       />
+      <TextField
+        label={strings.formPhone}
+        name="phone"
+        type="tel"
+        autoComplete="tel"
+        inputMode="tel"
+      />
       <TextField label={strings.formCompany} name="company" autoComplete="organization" />
-      <TextField label={strings.formNeed} name="need" required />
+      <SelectField
+        label={strings.formNeed}
+        name="need"
+        required
+        multiple
+        size={4}
+        hint={strings.formNeedHint}
+        aria-label={strings.formNeed}
+      >
+        {SERVICE_DOMAINS.map((domain) => (
+          <option key={domain.value} value={domain.value}>
+            {locale === 'en' ? domain.en : domain.fr}
+          </option>
+        ))}
+      </SelectField>
       <TextAreaField label={strings.formMessage} name="message" rows={6} required />
 
       <Checkbox name="consent" required>

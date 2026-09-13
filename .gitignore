@@ -15,9 +15,11 @@ build/
 .env.*.local
 .env.oracle
 .env.render
+.env.ovh.test
 !.env.oracle.example
 !.env.example
 !.env.render.example
+!.env.ovh.test.example
 .bootstrap-users.local.json
 *.pem
 *.key

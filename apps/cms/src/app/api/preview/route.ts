@@ -5,6 +5,7 @@ import config from '@payload-config'
 import { COLLECTION_PATHS, LOCALES, type Locale } from '@africa-ingenierie/validation/routes'
 
 import { mustChangePassword, roleOf } from '../../../access'
+import { writeAuditLog } from '../../../hooks/audit'
 import { signPreviewToken } from '../../../lib/preview-token'
 
 export const runtime = 'nodejs'
@@ -38,6 +39,24 @@ export async function GET(request: Request) {
   if (!user || !role || mustChangePassword(user as Parameters<typeof mustChangePassword>[0])) {
     return NextResponse.json({ error: 'Une session éditoriale active est requise.' }, { status: 401 })
   }
+
+  await writeAuditLog(
+    {
+      payload,
+      user: auth.user,
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+    } as never,
+    {
+      action: 'preview',
+      entityType: collection,
+      actorId: user.id,
+      result: 'success',
+      note: 'Prévisualisation d’un contenu',
+      metadata: { path, slug, locale },
+    },
+  )
 
   const token = signPreviewToken({
     collection,

@@ -62,6 +62,12 @@ export const Projects = contentCollection({
       type: 'upload',
       relationTo: 'media-assets',
       label: { fr: 'Visuel du projet', en: 'Project visual' },
+      admin: {
+        description: {
+          fr: 'Choisissez un média existant ou cliquez sur « Ajouter un média ». Les textes alternatifs FR et EN sont obligatoires.',
+          en: 'Choose an existing media item or click “Add media”. French and English alt text are required.',
+        },
+      },
     },
   ],
 

@@ -86,3 +86,4 @@ export {
 } from './components/AdminShell'
 export { Stats, type StatsProps, type StatItem } from './components/Stat'
 export { FilterBar, type FilterBarProps, type FilterOption } from './components/FilterBar'
+export { MapFrame, type MapFrameProps } from './components/MapFrame'

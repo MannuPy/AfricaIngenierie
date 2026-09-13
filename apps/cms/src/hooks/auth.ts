@@ -99,6 +99,8 @@ export const recordLogin: CollectionAfterLoginHook = async ({ req, user }) => {
     entityType: 'users',
     entityId: id,
     actorId: id,
+    result: 'success',
+    statusCode: 200,
   })
 
   if (id) {
@@ -124,5 +126,7 @@ export const recordLogout: CollectionAfterLogoutHook = async ({ req }) => {
     entityType: 'users',
     entityId: id,
     actorId: id,
+    result: 'success',
+    statusCode: 200,
   })
 }

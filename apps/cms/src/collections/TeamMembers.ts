@@ -48,6 +48,12 @@ export const TeamMembers = contentCollection({
       type: 'upload',
       relationTo: 'media-assets',
       label: { fr: 'Portrait', en: 'Portrait' },
+      admin: {
+        description: {
+          fr: 'Choisissez un média existant ou ajoutez un portrait depuis la médiathèque. Les textes alternatifs FR et EN sont obligatoires.',
+          en: 'Choose an existing media item or add a portrait from the media library. French and English alt text are required.',
+        },
+      },
     },
   ],
 

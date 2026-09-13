@@ -9,6 +9,7 @@ const CMS_INTERNAL_URL = getCmsInternalUrl()
 const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:8080'
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const LOCALE_VALUES = new Set<Locale>(['fr', 'en'])
+const CMS_REQUEST_TIMEOUT_MS = 3500
 
 export interface LocalizedText {
   fr: string
@@ -144,16 +145,21 @@ function cmsQuery(params: { slug?: string; from?: string }): string {
 }
 
 async function fetchCmsEvents(params: { slug?: string; from?: string }): Promise<CmsListResponse | null> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), CMS_REQUEST_TIMEOUT_MS)
   try {
     const response = await fetch(`${CMS_INTERNAL_URL}/api/events?${cmsQuery(params)}`, {
       headers: { accept: 'application/json' },
       next: { revalidate: EVENTS_CACHE_SECONDS, tags: ['cms:events'] },
+      signal: controller.signal,
     })
     if (!response.ok) return null
     return (await response.json()) as CmsListResponse
   } catch (error) {
     console.error('[events-api] CMS indisponible', error)
     return null
+  } finally {
+    clearTimeout(timeout)
   }
 }
 
@@ -204,8 +210,8 @@ export function buildIcs(event: PublicEvent, locale: Locale): string {
   const location = `${event.location.name[locale]}, ${event.location.city}, ${event.location.country}`
   const detailUrl = new URL(detailPath('evenements', event.slug, locale), PUBLIC_SITE_URL).toString()
   const lines = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Africa Ingenierie//Events//FR-EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-    `UID:${icsEscape(event.slug)}@africaingenieries.com`, `DTSTAMP:${icsDate(new Date().toISOString())}`, `DTSTART:${icsDate(event.startsAt)}`,
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Africa Ingenierie//Events//FR-EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+    `UID:${icsEscape(event.slug)}@ingenierieafrica.com`, `DTSTAMP:${icsDate(new Date().toISOString())}`, `DTSTART:${icsDate(event.startsAt)}`,
     ...(event.endsAt ? [`DTEND:${icsDate(event.endsAt)}`] : []), `SUMMARY:${icsEscape(title)}`, `DESCRIPTION:${icsEscape(description)}`,
     `LOCATION:${icsEscape(location)}`, `URL:${icsEscape(detailUrl)}`, 'END:VEVENT', 'END:VCALENDAR',
   ]

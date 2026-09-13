@@ -15,9 +15,20 @@ export const Partners = contentCollection({
   group: GROUPS.proof,
   requiredForPublish: [],
   useAsTitle: 'name',
-  defaultColumns: ['name', 'editorialStatus', 'position'],
+  defaultColumns: ['name', 'logo', 'editorialStatus', 'position'],
   fields: [
-    { name: 'name', type: 'text', required: true, unique: true, label: { fr: 'Nom', en: 'Name' } },
+    { name: 'name', type: 'text', required: true, unique: true, label: { fr: 'Nom français', en: 'French name' } },
+    {
+      name: 'nameEn',
+      type: 'text',
+      label: { fr: 'Nom anglais', en: 'English name' },
+      admin: {
+        description: {
+          fr: 'Facultatif pour les marques internationales. À renseigner si le nom français est une description à traduire.',
+          en: 'Optional for international brands. Fill this in when the French name is a description that needs translating.',
+        },
+      },
+    },
     {
       name: 'externalUrl',
       type: 'text',
@@ -41,6 +52,12 @@ export const Partners = contentCollection({
       type: 'upload',
       relationTo: 'media-assets',
       label: { fr: 'Logo', en: 'Logo' },
+      admin: {
+        description: {
+          fr: 'Cliquez sur « Choisir parmi les existant(e)s », puis « Ajouter un média » pour téléverser le logo. JPEG, PNG, WebP ou AVIF, avec textes alternatifs français et anglais.',
+          en: 'Click “Choose existing”, then “Add media” to upload the logo. JPEG, PNG, WebP or AVIF, with French and English alt text.',
+        },
+      },
     },
   ],
 

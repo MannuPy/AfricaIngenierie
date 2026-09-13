@@ -85,7 +85,8 @@ describe('Invariants du modèle de données', () => {
     const payload = await getTestPayload()
 
     for (const slug of CONTENT_COLLECTIONS) {
-      const collection = payload.collections[slug]?.config
+      const collections = payload.collections as unknown as Record<string, { config?: SanitizedCollectionConfig }>
+      const collection = collections[slug]?.config
       expect(collection, `collection absente : ${slug}`).toBeTruthy()
 
       const status = flattenFields(collection!.fields as Field[]).find(
@@ -137,6 +138,114 @@ describe('Invariants du modèle de données', () => {
     expect((altEn as { required?: boolean }).required).toBe(true)
   })
 
+  it('les formations permettent de gérer les objectifs et le visuel principal', async () => {
+    const payload = await getTestPayload()
+    const formations = payload.collections.formations!.config
+    const fields = flattenFields(formations.fields as Field[])
+    const objectives = fields.find(
+      (field) => 'name' in field && field.name === 'objectives',
+    ) as ({ type?: string; localized?: boolean; maxRows?: number } | undefined)
+    const objectiveText = fields.find(
+      (field) => 'name' in field && field.name === 'text',
+    ) as ({ required?: boolean; minLength?: number } | undefined)
+    const visual = fields.find(
+      (field) => 'name' in field && field.name === 'media',
+    ) as ({ type?: string; relationTo?: string } | undefined)
+
+    expect(objectives).toMatchObject({ type: 'array', localized: true, maxRows: 8 })
+    expect(objectiveText).toMatchObject({ required: true, minLength: 3 })
+    expect(visual).toMatchObject({ type: 'upload', relationTo: 'media-assets' })
+  })
+
+  it('la page d’accueil expose un carrousel de trois visuels et des chiffres publiables', async () => {
+    const payload = await getTestPayload()
+    const homepage = payload.config.globals.find((global) => global.slug === 'homepage')
+    expect(homepage, 'global Page de garde absent').toBeTruthy()
+    const fields = flattenFields(homepage!.fields as Field[])
+    const carousel = fields.find((field) => 'name' in field && field.name === 'heroMediaCarousel') as
+      | { type?: string; maxRows?: number; fields?: Field[] }
+      | undefined
+    expect(carousel).toMatchObject({ type: 'array', maxRows: 3 })
+    const carouselMedia = flattenFields(carousel?.fields ?? []).find(
+      (field) => 'name' in field && field.name === 'media',
+    )
+    expect(carouselMedia).toMatchObject({ type: 'upload', relationTo: 'media-assets', required: true })
+
+    const visibility = fields.find((field) => 'name' in field && field.name === 'isVisible')
+    expect(visibility).toMatchObject({ type: 'checkbox', defaultValue: true })
+  })
+
+  it('la page Qui sommes-nous accepte une vidéo locale ou YouTube', async () => {
+    const payload = await getTestPayload()
+    const about = payload.config.globals.find((global) => global.slug === 'about-page')
+    expect(about, 'global Qui sommes-nous absent').toBeTruthy()
+    const fields = flattenFields(about!.fields as Field[])
+    expect(fields.find((field) => 'name' in field && field.name === 'videoMedia')).toMatchObject({
+      type: 'upload',
+      relationTo: 'media-assets',
+    })
+    expect(fields.find((field) => 'name' in field && field.name === 'videoUrl')).toMatchObject({ type: 'text' })
+  })
+
+  it('les produits exposent les médias commerciaux optionnels', async () => {
+    const payload = await getTestPayload()
+    const products = payload.collections.products!.config
+    const fields = flattenFields(products.fields as Field[])
+    const pdf = fields.find((field) => 'name' in field && field.name === 'productSheet')
+    const video = fields.find((field) => 'name' in field && field.name === 'videoMedia')
+    const videoUrl = fields.find((field) => 'name' in field && field.name === 'videoUrl')
+    const gallery = fields.find((field) => 'name' in field && field.name === 'gallery360')
+    const unitPrice = fields.find((field) => 'name' in field && field.name === 'unitPrice')
+
+    expect(pdf).toMatchObject({ type: 'upload', relationTo: 'media-assets' })
+    expect(video).toMatchObject({ type: 'upload', relationTo: 'media-assets' })
+    expect(videoUrl).toMatchObject({ type: 'text' })
+    expect(gallery).toMatchObject({ type: 'array', maxRows: 24 })
+    expect(unitPrice).toMatchObject({ type: 'number' })
+    expect((unitPrice as { required?: boolean }).required).not.toBe(true)
+  })
+
+  it('tous les visuels éditoriaux utilisent la médiathèque contrôlée', async () => {
+    const payload = await getTestPayload()
+    const visualCollections = [
+      'expertises',
+      'projects',
+      'realisations',
+      'formations',
+      'events',
+      'products',
+      'team-members',
+      'partners',
+      'testimonials',
+    ]
+
+    const collections = payload.collections as unknown as Record<string, { config?: SanitizedCollectionConfig }>
+    for (const slug of visualCollections) {
+      const collection = collections[slug]?.config
+      const uploads = flattenFields(collection?.fields as Field[]).filter(
+        (field) => 'type' in field && field.type === 'upload',
+      ) as Array<{ relationTo?: string | string[] }>
+
+      expect(uploads.length, `visuel absent de ${slug}`).toBeGreaterThan(0)
+      uploads.forEach((field) => {
+        expect(field.relationTo, `${slug} : stockage média non contrôlé`).toBe('media-assets')
+      })
+    }
+  })
+
+  it('un partenaire peut être publié avec son nom seul', async () => {
+    const payload = await getTestPayload()
+    const partners = payload.collections.partners!.config
+    const fields = flattenFields(partners.fields as Field[])
+    const name = fields.find((field) => 'name' in field && field.name === 'name')
+    const externalUrl = fields.find((field) => 'name' in field && field.name === 'externalUrl')
+    const logo = fields.find((field) => 'name' in field && field.name === 'logo')
+
+    expect(name && 'required' in name && name.required).toBe(true)
+    expect(externalUrl && 'required' in externalUrl && externalUrl.required).not.toBe(true)
+    expect(logo && 'required' in logo && logo.required).not.toBe(true)
+  })
+
   it('masque les métadonnées techniques et les champs avancés du formulaire', async () => {
     const payload = await getTestPayload()
     const hidden = (slug: string, name: string): boolean => {
@@ -164,6 +273,7 @@ describe('Invariants du modèle de données', () => {
     expect(upload.mimeTypes).toBeTruthy()
     expect(upload.mimeTypes).not.toContain('image/svg+xml')
     expect(upload.mimeTypes).toContain('image/webp')
+    expect(upload.mimeTypes).toEqual(expect.arrayContaining(['video/mp4', 'video/webm', 'video/ogg']))
   })
 
   it('le bilinguisme est actif avec le français par défaut', async () => {
@@ -198,5 +308,30 @@ describe('Invariants du modèle de données', () => {
       } as never)
       expect(allowed, `${role} peut créer une entrée d'audit`).toBe(false)
     }
+  })
+
+  it('expose le téléphone des demandes et la carte administrable', async () => {
+    const payload = await getTestPayload()
+    const messages = payload.collections['contact-messages']!.config
+    const messageFields = flattenFields(messages.fields as Field[])
+    const phone = messageFields.find((field) => 'name' in field && field.name === 'phone')
+    expect(phone).toMatchObject({ type: 'text', maxLength: 40 })
+    const endpoints = messages.endpoints
+    expect(Array.isArray(endpoints) && endpoints.some((endpoint) => endpoint.path === '/export')).toBe(true)
+
+    const settings = payload.config.globals.find((global) => global.slug === 'site-settings')
+    expect(settings, 'global Réglages généraux absent').toBeTruthy()
+    const settingsFields = flattenFields(settings!.fields as Field[])
+    for (const name of ['mapLatitude', 'mapLongitude', 'mapZoom']) {
+      expect(
+        settingsFields.find((field) => 'name' in field && field.name === name),
+        `coordonnée cartographique absente : ${name}`,
+      ).toBeTruthy()
+    }
+
+    const whatsapp = settingsFields.find((field) => 'name' in field && field.name === 'whatsapp')
+    expect(whatsapp).toMatchObject({ type: 'text', maxLength: 25 })
+    const socialLinks = settingsFields.find((field) => 'name' in field && field.name === 'socialLinks')
+    expect(socialLinks).toMatchObject({ type: 'array', maxRows: 3 })
   })
 })

@@ -70,12 +70,24 @@ export const SiteSettings: GlobalConfig = {
               type: 'upload',
               relationTo: 'media-assets',
               label: { fr: 'Logo', en: 'Logo' },
+              admin: {
+                description: {
+                  fr: 'Choisissez le logo dans la médiathèque ou cliquez sur « Ajouter un média ». Préparez les textes alternatifs FR et EN.',
+                  en: 'Choose the logo from the media library or click “Add media”. Provide French and English alt text.',
+                },
+              },
             },
             {
               name: 'favicon',
               type: 'upload',
               relationTo: 'media-assets',
               label: { fr: 'Favicon', en: 'Favicon' },
+              admin: {
+                description: {
+                  fr: 'Icône du navigateur. Choisissez un média carré dans la médiathèque ou ajoutez-en un nouveau.',
+                  en: 'Browser icon. Choose a square media item from the library or add a new one.',
+                },
+              },
             },
           ],
         },
@@ -86,6 +98,40 @@ export const SiteSettings: GlobalConfig = {
             { name: 'addressLine2', type: 'text', label: { fr: 'Complément', en: 'Address line 2' } },
             { name: 'city', type: 'text', label: { fr: 'Ville', en: 'City' } },
             { name: 'country', type: 'text', label: { fr: 'Pays', en: 'Country' } },
+            {
+              name: 'mapLatitude',
+              type: 'number',
+              min: -90,
+              max: 90,
+              label: { fr: 'Latitude de la carte', en: 'Map latitude' },
+              admin: {
+                description: {
+                  fr: 'Exemple : 6.3703. La carte est affichée lorsque latitude et longitude sont renseignées.',
+                  en: 'Example: 6.3703. The map is shown when latitude and longitude are provided.',
+                },
+              },
+            },
+            {
+              name: 'mapLongitude',
+              type: 'number',
+              min: -180,
+              max: 180,
+              label: { fr: 'Longitude de la carte', en: 'Map longitude' },
+              admin: {
+                description: {
+                  fr: 'Exemple : 2.3912.',
+                  en: 'Example: 2.3912.',
+                },
+              },
+            },
+            {
+              name: 'mapZoom',
+              type: 'number',
+              min: 1,
+              max: 19,
+              defaultValue: 15,
+              label: { fr: 'Niveau de zoom', en: 'Map zoom' },
+            },
             { name: 'phone', type: 'text', label: { fr: 'Téléphone affiché', en: 'Displayed phone' } },
             {
               name: 'phoneRaw',
@@ -93,7 +139,26 @@ export const SiteSettings: GlobalConfig = {
               label: { fr: 'Téléphone (lien tel:)', en: 'Phone (tel: link)' },
               admin: { description: { fr: 'Chiffres et + uniquement.', en: 'Digits and + only.' } },
             },
-            { name: 'whatsapp', type: 'text', label: { fr: 'Numéro WhatsApp', en: 'WhatsApp number' } },
+            {
+              name: 'whatsapp',
+              type: 'text',
+              maxLength: 25,
+              label: { fr: 'Numéro WhatsApp', en: 'WhatsApp number' },
+              admin: {
+                description: {
+                  fr: 'Format international recommandé : +229 01 42 54 54 95. Les espaces et signes seront normalisés pour wa.me.',
+                  en: 'International format recommended: +229 01 42 54 54 95. Spaces and punctuation are normalized for wa.me.',
+                },
+              },
+              validate: (value: unknown) => {
+                if (!value) return true
+                if (typeof value !== 'string') return 'Indiquez un numéro WhatsApp valide.'
+                const digits = value.replace(/\D/g, '')
+                return digits.length >= 7 && digits.length <= 15
+                  ? true
+                  : 'Indiquez un numéro international de 7 à 15 chiffres.'
+              },
+            },
             { name: 'email', type: 'email', label: { fr: 'E-mail public', en: 'Public email' } },
             {
               name: 'openingHours',
@@ -141,6 +206,7 @@ export const SiteSettings: GlobalConfig = {
                 {
                   name: 'url',
                   type: 'text',
+                  maxLength: 500,
                   label: { fr: 'URL', en: 'URL' },
                   validate: (value: unknown) =>
                     !value || (typeof value === 'string' && value.startsWith('https://'))

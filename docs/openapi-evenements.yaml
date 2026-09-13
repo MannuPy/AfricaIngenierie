@@ -10,7 +10,7 @@ info:
     ni commande.
 servers:
   # Domaine cible Oracle Cloud : confirmer le DNS avant le déploiement.
-  - url: https://africaingenieries.com/api
+  - url: https://ingenierieafrica.com/api
     description: Production Oracle Cloud
   - url: http://localhost:8080/api
     description: Développement local derrière Nginx

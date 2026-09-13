@@ -21,6 +21,11 @@ export default defineConfig([
     '**/src/app/(payload)/admin/importMap.js',
   ]),
   {
+    // Le projet utilise exclusivement l’App Router de Next.js : il n’existe
+    // pas de dossier pages à analyser par la règle historique.
+    rules: { '@next/next/no-html-link-for-pages': 'off' },
+  },
+  {
     // Les migrations générées par Payload reçoivent toujours `payload` et
     // `req`, même lorsque l’opération SQL n’en a pas besoin.
     files: ['**/src/migrations/**/*.ts'],

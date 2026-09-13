@@ -77,6 +77,7 @@ export default async function Page({
           { key: 'evenements', label: header?.title ?? doc.title },
           doc.title,
         )}
+        crumbLabel={strings.breadcrumb}
       >
         <div className="row g8" style={{ marginTop: 18 }}>
           <Badge tone="red">{doc.eventType}</Badge>

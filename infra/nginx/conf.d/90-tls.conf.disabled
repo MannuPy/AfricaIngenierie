@@ -12,6 +12,7 @@
 # ──────────────────────────────────────────────────────────────────
 server {
     listen      8443 ssl;
+    listen      [::]:8443 ssl;
     # `http2 on;` est une directive autonome depuis nginx 1.25.1  -  l'image
     # `nginx:stable-alpine` du projet la supporte. Sur une version antérieure,
     # revenir à la forme héritée : `listen 8443 ssl http2;`.

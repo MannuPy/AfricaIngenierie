@@ -5,21 +5,22 @@ import { Badge, Button, PageHero } from '@africa-ingenierie/ui'
 import { detailPath, listPath, type Locale } from '@africa-ingenierie/validation/routes'
 
 import { CmsImage } from '../../../../components/cms-image'
-import { findGlobal, findPublishedBySlug } from '../../../../lib/cms'
+import { findGlobal, findPublishedBySlug, mediaUrl } from '../../../../lib/cms'
 import { alternatePaths } from '../../../../lib/paths'
 import { assertLocale, loadSectionPage, sectionCrumbs } from '../../../../lib/page-shell'
 import { pageMetadata } from '../../../../lib/seo'
-import type { ProductDoc, SiteSettingsDoc } from '../../../../lib/types'
+import { populated, type MediaDoc, type ProductDoc, type SiteSettingsDoc } from '../../../../lib/types'
 import { ui } from '../../../../lib/ui-strings'
+import { youtubeEmbedUrl } from '../../../../lib/youtube'
 
 export const revalidate = 300
 
 /**
  * Fiche produit.
  *
- * Aucun prix, aucun panier : la vente en ligne est hors périmètre. Le seul
- * appel à l'action est celui saisi dans le CMS, dont la destination est
- * validée à l'enregistrement (RG-023 : route interne ou URL https).
+ * Aucun panier : la vente en ligne est hors périmètre. Les médias commerciaux
+ * restent facultatifs et sont rendus uniquement lorsqu'ils sont publiés dans
+ * la fiche produit.
  */
 
 export async function generateMetadata({
@@ -65,6 +66,23 @@ export default async function Page({
   if (!doc) notFound()
 
   const strings = ui(locale)
+  const productSheet = populated<MediaDoc>(doc.productSheet)
+  const productSheetUrl = mediaUrl(productSheet?.url)
+  const uploadedVideo = populated<MediaDoc>(doc.videoMedia)
+  const uploadedVideoUrl = mediaUrl(uploadedVideo?.url)
+  const youtubeVideoUrl = youtubeEmbedUrl(doc.videoUrl)
+  const gallery = (doc.gallery360 ?? [])
+    .map((item, index) => ({
+      key: item.id ?? `gallery-${index}`,
+      media: populated<MediaDoc>(item.image),
+    }))
+    .filter((item): item is { key: string; media: MediaDoc } => Boolean(item.media))
+  const formattedUnitPrice =
+    typeof doc.unitPrice === 'number'
+      ? new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'fr-FR', {
+          maximumFractionDigits: 2,
+        }).format(doc.unitPrice)
+      : null
   // Le bouton mène toujours à la page Contact : la destination libre a été
   // retirée du modèle, elle n'apportait qu'un risque de lien cassé.
   const ctaHref = listPath('contact', locale)
@@ -80,6 +98,7 @@ export default async function Page({
           { key: 'produits', label: header?.title ?? doc.title },
           doc.title,
         )}
+        crumbLabel={strings.breadcrumb}
       >
         <div className="row g8" style={{ marginTop: 18 }}>
           <Badge tone="outline">{doc.category}</Badge>
@@ -104,6 +123,12 @@ export default async function Page({
               <dd>{doc.reference}</dd>
               <dt>{strings.availability}</dt>
               <dd>{doc.availability}</dd>
+              {formattedUnitPrice ? (
+                <>
+                  <dt>{strings.unitPrice}</dt>
+                  <dd>{formattedUnitPrice}</dd>
+                </>
+              ) : null}
               {doc.leadTime ? (
                 <>
                   <dt>{strings.leadTime}</dt>
@@ -112,10 +137,63 @@ export default async function Page({
               ) : null}
             </dl>
 
-            {doc.ctaLabel ? <Button href={ctaHref}>{doc.ctaLabel}</Button> : null}
+            <div className="row wrap g12">
+              {doc.ctaLabel ? <Button href={ctaHref}>{doc.ctaLabel}</Button> : null}
+              {productSheetUrl && productSheet?.mimeType === 'application/pdf' ? (
+                <a className="btn btn-outline" href={productSheetUrl} download target="_blank" rel="noreferrer">
+                  {strings.downloadProductSheet}
+                </a>
+              ) : null}
+            </div>
+
+            {uploadedVideoUrl && uploadedVideo?.mimeType?.startsWith('video/') ? (
+              <div className="product-video-block stack g12">
+                <h2 className="h3">{strings.presentationVideo}</h2>
+                <video className="product-video" controls playsInline preload="metadata">
+                  <source src={uploadedVideoUrl} type={uploadedVideo.mimeType} />
+                </video>
+              </div>
+            ) : youtubeVideoUrl ? (
+              <div className="product-video-block stack g12">
+                <h2 className="h3">{strings.presentationVideo}</h2>
+                <div className="product-video-frame">
+                  <iframe
+                    src={youtubeVideoUrl}
+                    title={`${strings.presentationVideo} — ${doc.title}`}
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
+
+      {gallery.length ? (
+        <section className="sec tint">
+          <div className="wrap stack g32">
+            <div className="stack g8">
+              <span className="eyebrow">{strings.gallery360}</span>
+              <h2 className="h2">{strings.gallery360}</h2>
+            </div>
+            <div className="product-gallery360" aria-label={strings.gallery360}>
+              {gallery.map((item, index) => (
+                <figure key={item.key} className="product-gallery360-item">
+                  <CmsImage
+                    media={item.media}
+                    locale={locale}
+                    fallbackLabel={`${doc.title} — ${index + 1}`}
+                    ratio="1/1"
+                    fit="contain"
+                  />
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {doc.specs?.length ? (
         <section className="sec tint">

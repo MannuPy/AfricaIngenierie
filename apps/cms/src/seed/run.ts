@@ -77,6 +77,7 @@ interface PayloadLike {
   find(args: Record<string, unknown>): Promise<{ docs: unknown[]; totalDocs: number }>
   create(args: Record<string, unknown>): Promise<unknown>
   update(args: Record<string, unknown>): Promise<unknown>
+  delete(args: Record<string, unknown>): Promise<unknown>
   findGlobal(args: Record<string, unknown>): Promise<unknown>
   updateGlobal(args: Record<string, unknown>): Promise<unknown>
 }
@@ -88,6 +89,211 @@ function isFilled(value: unknown): boolean {
   if (typeof value === 'string') return value.trim().length > 0
   if (Array.isArray(value)) return value.length > 0
   return true
+}
+
+/** Complète les lignes localisées d'un tableau sans remplacer une saisie. */
+function completeLocalizedValue(currentValue: unknown, seedValue: unknown): unknown {
+  if (Array.isArray(seedValue)) {
+    if (!Array.isArray(currentValue)) return seedValue
+
+    return seedValue.map((seedRow, index) => {
+      const currentRow = currentValue[index]
+      if (
+        !currentRow ||
+        typeof currentRow !== 'object' ||
+        Array.isArray(currentRow) ||
+        !seedRow ||
+        typeof seedRow !== 'object' ||
+        Array.isArray(seedRow)
+      ) {
+        return currentRow ?? seedRow
+      }
+
+      const completed = { ...(currentRow as Record<string, unknown>) }
+      for (const [key, value] of Object.entries(seedRow as Record<string, unknown>)) {
+        if (!isFilled(completed[key]) && isFilled(value)) completed[key] = value
+      }
+      return completed
+    })
+  }
+
+  return isFilled(currentValue) ? currentValue : seedValue
+}
+
+/**
+ * Réordonne uniquement l'ancien ordre de démonstration de l'accueil.
+ *
+ * L'ordre reste une donnée éditoriale : une personnalisation faite dans
+ * Payload ne doit jamais être écrasée par le seed. Cette réparation ciblée
+ * ne s'active que si la liste correspond encore exactement à l'ancien ordre
+ * livré avec le prototype.
+ */
+function repairLegacyHomepageOrder(currentValue: unknown, seedValue: unknown): unknown {
+  if (!Array.isArray(currentValue) || !Array.isArray(seedValue)) return undefined
+
+  const currentKeys = currentValue.map((row) =>
+    row && typeof row === 'object' && !Array.isArray(row)
+      ? (row as { key?: unknown }).key
+      : undefined,
+  )
+  const seedKeys = seedValue.map((row) =>
+    row && typeof row === 'object' && !Array.isArray(row)
+      ? (row as { key?: unknown }).key
+      : undefined,
+  )
+  const legacyKeys = [
+    'trust',
+    'about',
+    'expertises',
+    'products',
+    'figures',
+    'realisations',
+    'trainingEvents',
+    'leadership',
+    'testimonials',
+    'cta',
+  ]
+
+  if (
+    JSON.stringify(currentKeys) !== JSON.stringify(legacyKeys) ||
+    seedKeys.some((key) => typeof key !== 'string')
+  ) {
+    return undefined
+  }
+
+  const rowsByKey = new Map(
+    currentValue.map((row) => [
+      row && typeof row === 'object' && !Array.isArray(row)
+        ? (row as { key?: unknown }).key
+        : undefined,
+      row,
+    ]),
+  )
+  return seedKeys.map((key) => rowsByKey.get(key))
+}
+
+/**
+ * Met à niveau les libellés livrés par l'ancien contenu de démonstration vers
+ * les textes validés du site de référence. Une ligne personnalisée par
+ * l'administrateur reste intouchée : la réparation ne vise que les anciennes
+ * valeurs connues du seed.
+ */
+function repairReferenceHomepageSections(currentValue: unknown, locale: 'fr' | 'en', seedValue: unknown): unknown {
+  if (!Array.isArray(currentValue) || !Array.isArray(seedValue)) return undefined
+
+  const oldValues =
+    locale === 'fr'
+      ? {
+          expertisesEyebrow: 'Expertises',
+          expertisesTitle: "Six domaines d'intervention",
+          expertisesIntro:
+            "De la maintenance préventive à la fabrication métallique, nos équipes couvrent le cycle de vie complet de vos équipements.",
+          figuresTitle: 'Chiffres clés',
+          leadershipTitle: 'Mot du Directeur Général',
+          trainingEventsEyebrow: 'Formations & événements',
+          trainingEventsTitle: 'Renforcer les compétences sur le terrain',
+          trainingEventsCta: 'Voir le programme',
+          testimonialsTitle: 'Ce que disent nos clients',
+          ctaTitle: 'Un projet industriel à étudier ?',
+          ctaIntro: 'Décrivez votre besoin : nous revenons vers vous sous 24 heures ouvrées.',
+          ctaLabel: 'Nous contacter',
+        }
+      : {
+          expertisesEyebrow: 'Expertises',
+          expertisesTitle: 'Six fields of work',
+          expertisesIntro:
+            'From preventive maintenance to metal fabrication, our teams cover the full life cycle of your equipment.',
+          figuresTitle: 'Key figures',
+          leadershipTitle: 'A word from the Managing Director',
+          trainingEventsEyebrow: 'Training & events',
+          trainingEventsTitle: 'Strengthening skills on the ground',
+          trainingEventsCta: 'See the programme',
+          testimonialsTitle: 'What our clients say',
+          ctaTitle: 'An industrial project to study?',
+          ctaIntro: 'Describe what you need: we come back to you within 24 working hours.',
+          ctaLabel: 'Contact us',
+        }
+
+  const referenceRows = new Map(
+    seedValue.map((row) => {
+      const value = row && typeof row === 'object' && !Array.isArray(row) ? (row as Record<string, unknown>) : {}
+      return [value.key, value]
+    }),
+  )
+  let changed = false
+  const repaired = currentValue.map((row) => {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) return row
+    const currentRow = row as Record<string, unknown>
+    const referenceRow = referenceRows.get(currentRow.key)
+    if (!referenceRow) return row
+
+    const next = { ...currentRow }
+    const replaceKnown = (field: string, oldValue: string) => {
+      const desired = referenceRow[field]
+      if (typeof desired !== 'string') return
+      if (currentRow[field] === oldValue) {
+        next[field] = desired
+        changed = true
+      }
+    }
+
+    if (currentRow.key === 'expertises') {
+      replaceKnown('eyebrow', oldValues.expertisesEyebrow)
+      replaceKnown('title', oldValues.expertisesTitle)
+      replaceKnown('intro', oldValues.expertisesIntro)
+    }
+    if (currentRow.key === 'figures') replaceKnown('title', oldValues.figuresTitle)
+    if (currentRow.key === 'leadership') replaceKnown('title', oldValues.leadershipTitle)
+    if (currentRow.key === 'trainingEvents') {
+      replaceKnown('eyebrow', oldValues.trainingEventsEyebrow)
+      replaceKnown('title', oldValues.trainingEventsTitle)
+      replaceKnown('ctaLabel', oldValues.trainingEventsCta)
+    }
+    if (currentRow.key === 'testimonials') replaceKnown('title', oldValues.testimonialsTitle)
+    if (currentRow.key === 'cta') {
+      replaceKnown('title', oldValues.ctaTitle)
+      replaceKnown('intro', oldValues.ctaIntro)
+      replaceKnown('ctaLabel', oldValues.ctaLabel)
+    }
+
+    // Le tableau retourné par cette réparation est prioritaire sur les
+    // compléments génériques : ne pas perdre un champ qui était vide dans
+    // l'ancien global mais présent dans le contenu de référence.
+    for (const field of ['eyebrow', 'title', 'intro', 'ctaLabel']) {
+      if (!isFilled(next[field]) && isFilled(referenceRow[field])) {
+        next[field] = referenceRow[field]
+        changed = true
+      }
+    }
+
+    return next
+  })
+
+  return changed ? repaired : undefined
+}
+
+/** Répare les quatre indicateurs du prototype uniquement s'ils sont encore intacts. */
+function repairReferenceHomepageFigures(currentValue: unknown, seedValue: unknown, locale: 'fr' | 'en'): unknown {
+  if (!Array.isArray(currentValue) || !Array.isArray(seedValue) || currentValue.length !== 4 || seedValue.length !== 4) {
+    return undefined
+  }
+
+  const oldLabels =
+    locale === 'fr'
+      ? ["D'expérience industrielle", "Domaines d'expertise", "Pays d'intervention", 'Gain de productivité']
+      : ['Of industrial experience', 'Fields of expertise', 'Countries of operation', 'Productivity gain']
+  const legacy = currentValue.every((row, index) => {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) return false
+    const value = row as Record<string, unknown>
+    return value.label === oldLabels[index]
+  })
+  if (!legacy) return undefined
+
+  return seedValue.map((row, index) => {
+    const currentRow = currentValue[index] as Record<string, unknown>
+    const seedRow = row as Record<string, unknown>
+    return { ...currentRow, ...seedRow }
+  })
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -135,8 +341,9 @@ async function seedMedia(
         altFr: media.altFr,
         altEn: media.altEn,
         caption: media.captionFr,
-        rightsNote: DEMO_RIGHTS_NOTE,
-        isDemo: true,
+        rightsNote: media.rightsNote ?? DEMO_RIGHTS_NOTE,
+        isDemo: media.approvedAsset ? false : true,
+        isPublic: media.approvedAsset === true,
       }
 
       if (found) {
@@ -348,6 +555,43 @@ async function seedGlobal({
     depth: 0,
     overrideAccess: true,
   })) as unknown as Record<string, unknown>
+  const currentEnglish = (await payload.findGlobal({
+    slug,
+    locale: 'en',
+    fallbackLocale: 'none',
+    depth: 0,
+    overrideAccess: true,
+  })) as unknown as Record<string, unknown>
+
+  // Compléter une traduction absente sans écraser une traduction déjà saisie.
+  // Sans `fallbackLocale: none`, Payload renvoie le français et masque cette
+  // absence ; le site anglais finissait alors par afficher une valeur française.
+  const englishRepairs = Object.fromEntries(
+    Object.entries(en).flatMap(([key, value]) => {
+      const completed = completeLocalizedValue(currentEnglish?.[key], value)
+      return JSON.stringify(completed) !== JSON.stringify(currentEnglish?.[key])
+        ? [[key, completed]]
+        : []
+    }),
+  )
+
+  const frenchRepairs = Object.fromEntries(
+    Object.entries(fr).flatMap(([key, value]) => {
+      const completed = completeLocalizedValue(current?.[key], value)
+      return JSON.stringify(completed) !== JSON.stringify(current?.[key])
+        ? [[key, completed]]
+        : []
+    }),
+  )
+
+  const sharedRepairs = Object.fromEntries(
+    Object.entries(shared).flatMap(([key, value]) => {
+      const completed = completeLocalizedValue(current?.[key], value)
+      return JSON.stringify(completed) !== JSON.stringify(current?.[key])
+        ? [[key, completed]]
+        : []
+    }),
+  )
 
   /**
    * Les premiers seeds ont pu écrire un global avec un média abstrait dont
@@ -388,11 +632,70 @@ async function seedGlobal({
     slug === 'navigation' &&
     currentMenu.some((item, index) => !isFilled(item.label) && isFilled(seedMenu[index]?.label))
 
+  const currentFrenchHomepageOrder =
+    slug === 'homepage' ? repairLegacyHomepageOrder(current.sections, fr.sections) : undefined
+  const currentEnglishHomepageOrder =
+    slug === 'homepage'
+      ? repairLegacyHomepageOrder(currentEnglish?.sections, en.sections)
+      : undefined
+  const referenceFrenchHomepageSections =
+    slug === 'homepage'
+      ? repairReferenceHomepageSections(current.sections, 'fr', fr.sections)
+      : undefined
+  const referenceEnglishHomepageSections =
+    slug === 'homepage'
+      ? repairReferenceHomepageSections(currentEnglish?.sections, 'en', en.sections)
+      : undefined
+  const referenceFrenchHomepageFigures =
+    slug === 'homepage' ? repairReferenceHomepageFigures(current.keyFigures, fr.keyFigures, 'fr') : undefined
+  const referenceEnglishHomepageFigures =
+    slug === 'homepage'
+      ? repairReferenceHomepageFigures(currentEnglish?.keyFigures, en.keyFigures, 'en')
+      : undefined
+  const legacyHomepageFrenchCopy =
+    slug === 'homepage' && current.heroTitle === "Valoriser l'expertise industrielle africaine"
+  const legacyHomepageEnglishCopy =
+    slug === 'homepage' && currentEnglish?.heroTitle === 'Building up African industrial expertise'
+  const missingHeroMediaCarousel =
+    slug === 'homepage' &&
+    Array.isArray(shared.heroMediaCarousel) &&
+    (!Array.isArray(current.heroMediaCarousel) || current.heroMediaCarousel.length === 0)
+  const missingAboutVideoUrl =
+    slug === 'about-page' &&
+    typeof fr.videoUrl === 'string' &&
+    !isFilled(current.videoUrl)
+  const legacyHomepageFrenchEyebrow =
+    slug === 'homepage' &&
+    typeof fr.heroEyebrow === 'string' &&
+    (current.heroEyebrow === 'Ingénierie industrielle' || !isFilled(current.heroEyebrow))
+  const legacyHomepageEnglishEyebrow =
+    slug === 'homepage' &&
+    typeof en.heroEyebrow === 'string' &&
+    (currentEnglish?.heroEyebrow === 'Industrial engineering' || !isFilled(currentEnglish?.heroEyebrow))
+
   // Un réglage global n'a pas de marqueur `isDemo` : il n'existe qu'un seul
   // exemplaire, et il porte des contenus que le Client saisira lui-même. Le
   // seed ne l'écrase donc que s'il est vide.
   if (isFilled(current?.[probe]) && !options.force) {
-    if (Object.keys(legacyMediaPatch).length > 0 || missingFrenchMenuLabels) {
+    if (
+      Object.keys(legacyMediaPatch).length > 0 ||
+      Object.keys(sharedRepairs).length > 0 ||
+      missingFrenchMenuLabels ||
+      currentFrenchHomepageOrder !== undefined ||
+      currentEnglishHomepageOrder !== undefined ||
+      Object.keys(frenchRepairs).length > 0 ||
+      Object.keys(englishRepairs).length > 0 ||
+      referenceFrenchHomepageSections !== undefined ||
+      referenceEnglishHomepageSections !== undefined ||
+      referenceFrenchHomepageFigures !== undefined ||
+      referenceEnglishHomepageFigures !== undefined ||
+      legacyHomepageFrenchCopy ||
+      legacyHomepageEnglishCopy ||
+      legacyHomepageFrenchEyebrow ||
+      legacyHomepageEnglishEyebrow ||
+      missingHeroMediaCarousel ||
+      missingAboutVideoUrl
+    ) {
       const currentData = Object.fromEntries(
         Object.entries(current).filter(
           ([key]) => !['id', 'createdAt', 'updatedAt'].includes(key),
@@ -418,19 +721,115 @@ async function seedGlobal({
           return merged
         })
       }
-      await payload.updateGlobal({
-        slug,
-        // Payload revalide le global entier : conserver les champs localisés
-        // déjà présents évite de transformer une réparation de relation en
-        // erreur de validation (« champ requis manquant »).
-        data: {
-          ...currentData,
-          ...(slug === 'about-page' ? fr : {}),
-          ...legacyMediaPatch,
-        },
-        locale: 'fr',
-        overrideAccess: true,
-      })
+      if (currentFrenchHomepageOrder !== undefined) {
+        currentData.sections = currentFrenchHomepageOrder
+      }
+      if (referenceFrenchHomepageSections !== undefined) {
+        currentData.sections = referenceFrenchHomepageSections
+      }
+      if (referenceFrenchHomepageFigures !== undefined) {
+        currentData.keyFigures = referenceFrenchHomepageFigures
+      }
+      if (legacyHomepageFrenchEyebrow) {
+        currentData.heroEyebrow = fr.heroEyebrow
+      }
+      if (missingHeroMediaCarousel) {
+        currentData.heroMediaCarousel = shared.heroMediaCarousel
+      }
+      if (
+        Object.keys(legacyMediaPatch).length > 0 ||
+        Object.keys(sharedRepairs).length > 0 ||
+        missingFrenchMenuLabels ||
+        currentFrenchHomepageOrder !== undefined ||
+        referenceFrenchHomepageSections !== undefined ||
+        referenceFrenchHomepageFigures !== undefined ||
+        Object.keys(frenchRepairs).length > 0 ||
+        legacyHomepageFrenchCopy ||
+        legacyHomepageFrenchEyebrow ||
+        missingHeroMediaCarousel ||
+        missingAboutVideoUrl
+      ) {
+        await payload.updateGlobal({
+          slug,
+          // Payload revalide le global entier : conserver les champs localisés
+          // déjà présents évite de transformer une réparation de relation en
+          // erreur de validation (« champ requis manquant »).
+          data: {
+            ...currentData,
+            ...sharedRepairs,
+            ...frenchRepairs,
+            ...(slug === 'about-page' ? fr : {}),
+            ...(legacyHomepageFrenchCopy ? fr : {}),
+            ...(legacyHomepageFrenchEyebrow ? { heroEyebrow: fr.heroEyebrow } : {}),
+            ...(referenceFrenchHomepageSections !== undefined
+              ? { sections: referenceFrenchHomepageSections }
+              : {}),
+            ...(referenceFrenchHomepageFigures !== undefined
+              ? { keyFigures: referenceFrenchHomepageFigures }
+              : {}),
+            ...legacyMediaPatch,
+          },
+          locale: 'fr',
+          overrideAccess: true,
+        })
+      }
+
+      if (
+        Object.keys(englishRepairs).length > 0 ||
+        referenceEnglishHomepageSections !== undefined ||
+        referenceEnglishHomepageFigures !== undefined ||
+        legacyHomepageEnglishCopy ||
+        legacyHomepageEnglishEyebrow
+      ) {
+        const currentEnglishData = Object.fromEntries(
+      Object.entries(currentEnglish ?? {}).filter(
+            ([key]) => !['id', 'createdAt', 'updatedAt'].includes(key),
+          ),
+        )
+        if (currentEnglishHomepageOrder !== undefined) {
+          currentEnglishData.sections = currentEnglishHomepageOrder
+        }
+        if (referenceEnglishHomepageSections !== undefined) {
+          currentEnglishData.sections = referenceEnglishHomepageSections
+        }
+        if (referenceEnglishHomepageFigures !== undefined) {
+          currentEnglishData.keyFigures = referenceEnglishHomepageFigures
+        }
+        if (legacyHomepageEnglishEyebrow) {
+          currentEnglishData.heroEyebrow = en.heroEyebrow
+        }
+        await payload.updateGlobal({
+          slug,
+          data: {
+            ...currentEnglishData,
+            ...englishRepairs,
+            ...(legacyHomepageEnglishCopy ? en : {}),
+            ...(legacyHomepageEnglishEyebrow ? { heroEyebrow: en.heroEyebrow } : {}),
+            ...(referenceEnglishHomepageSections !== undefined
+              ? { sections: referenceEnglishHomepageSections }
+              : {}),
+            ...(referenceEnglishHomepageFigures !== undefined
+              ? { keyFigures: referenceEnglishHomepageFigures }
+              : {}),
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+      } else if (currentEnglishHomepageOrder !== undefined) {
+        const currentEnglishData = Object.fromEntries(
+          Object.entries(currentEnglish ?? {}).filter(
+            ([key]) => !['id', 'createdAt', 'updatedAt'].includes(key),
+          ),
+        )
+        currentEnglishData.sections = currentEnglishHomepageOrder
+        await payload.updateGlobal({
+          slug,
+          data: currentEnglishData,
+          locale: 'en',
+          overrideAccess: true,
+        })
+      }
+
       options.log?.(`[seed] ${slug} : donnée(s) de démonstration réparée(s).`)
     }
     report.globals.protected.push(slug)
@@ -603,13 +1002,52 @@ export async function seedDemo(client: Payload, options: SeedOptions = {}): Prom
   }
 
   // 6. Produits.
+  // Les quatre fiches de démonstration historiques ne doivent pas rester
+  // visibles après le remplacement par les produits validés fournis par le
+  // client. On ne supprime que ces slugs et uniquement lorsqu'ils sont encore
+  // marqués comme démonstration : un produit saisi par l'administrateur est
+  // toujours protégé.
+  const obsoleteDemoProductSlugs = [
+    'pieces-rechange-egrenage',
+    'equipements-humidification',
+    'structures-metalliques',
+    'tableaux-electriques',
+  ]
+  for (const slug of obsoleteDemoProductSlugs) {
+    const obsoleteResult = await payload.find({
+      collection: 'products',
+      where: { slug: { equals: slug } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const obsolete = obsoleteResult.docs[0] as { id: number | string; isDemo?: boolean } | undefined
+    if (obsolete?.isDemo) {
+      await payload.delete({
+        collection: 'products',
+        id: obsolete.id,
+        overrideAccess: true,
+      })
+      options.log?.(`[seed] fiche produit de démonstration retirée : ${slug}`)
+    }
+  }
+
   const productIds = new Map<string, number | string>()
   for (const product of products) {
+    const resolved: Record<string, unknown> = { media: mediaId(product.mediaKey) }
+    if (product.productSheetKey) resolved.productSheet = mediaId(product.productSheetKey)
+    if (product.videoUrl) resolved.videoUrl = product.videoUrl
+    if (product.galleryMediaKeys?.length) {
+      resolved.gallery360 = product.galleryMediaKeys
+        .map((key) => ({ image: mediaId(key) }))
+        .filter((item): item is { image: number | string } => item.image !== undefined)
+    }
+
     const id = await upsertDocument({
       payload,
       collection: 'products',
       document: product,
-      resolved: { media: mediaId(product.mediaKey) },
+      resolved,
       report,
       options,
     })
@@ -628,7 +1066,16 @@ export async function seedDemo(client: Payload, options: SeedOptions = {}): Prom
   }
 
   for (const partner of partners) {
-    await upsertDocument({ payload, collection: 'partners', document: partner, report, options })
+    await upsertDocument({
+      payload,
+      collection: 'partners',
+      document: partner,
+      // Une absence explicite efface aussi un ancien logo de démonstration
+      // qui aurait été attaché avant le pack de médias validés.
+      resolved: { logo: partner.mediaKey ? mediaId(partner.mediaKey) : null },
+      report,
+      options,
+    })
   }
 
   // 8. Documents légaux  -  identifiés par `documentKey`, sans slug.
@@ -740,6 +1187,10 @@ export async function seedDemo(client: Payload, options: SeedOptions = {}): Prom
     probe: 'heroTitle',
     shared: {
       heroMedia: mediaId(homepage.mediaKey),
+      heroMediaCarousel: homepage.mediaKeys
+        .map((key) => mediaId(key))
+        .filter((value): value is number | string => value !== undefined)
+        .map((media) => ({ media })),
       featuredProducts: featuredProductIds,
       featuredRealisations: featuredRealisationIds,
       featuredFormations: featuredFormationIds,

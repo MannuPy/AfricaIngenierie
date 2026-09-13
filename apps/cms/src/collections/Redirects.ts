@@ -23,7 +23,9 @@ export const Redirects: CollectionConfig = {
     // URL ; un visiteur ne peut donc plus énumérer l’inventaire historique.
     read: ({ req }) => {
       if (roleOf(req.user as Parameters<typeof roleOf>[0])) return true
-      const secret = process.env.CMS_INTERNAL_READ_SECRET || process.env.PAYLOAD_SECRET
+      const secret =
+        process.env.CMS_INTERNAL_READ_SECRET ||
+        (process.env.NODE_ENV === 'production' ? '' : process.env.PAYLOAD_SECRET)
       return Boolean(secret && req.headers.get('x-cms-internal-read') === secret)
     },
     create: isAdminOrPublisher,

@@ -25,6 +25,9 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { AdminLogoIcon as AdminLogoIcon_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
 import { AdminLogo as AdminLogo_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
 import { MustChangePasswordBanner as MustChangePasswordBanner_0f475fc3481f6d013df73545e99d0ba6 } from '@/components/MustChangePasswordBanner'
+import { AdminDashboardSummary as AdminDashboardSummary_28c827d02bf8a1ba67fb7916362a53d5 } from '@/components/AdminDashboardSummary'
+import { AdminBrand as AdminBrand_5fee7b1d7887f8ee4c45775348e4cb18 } from '@/components/AdminBrand'
+import { ContactMessagesExport as ContactMessagesExport_4e2c0d8e9a1f4a8c9c2ce9d9c4e8f101 } from '@/components/ContactMessagesExport'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -57,6 +60,9 @@ export const importMap = {
   "@/components/AdminLogo#AdminLogoIcon": AdminLogoIcon_aa0a2d19d38a4839dbd373417e210b89,
   "@/components/AdminLogo#AdminLogo": AdminLogo_aa0a2d19d38a4839dbd373417e210b89,
   "@/components/MustChangePasswordBanner#MustChangePasswordBanner": MustChangePasswordBanner_0f475fc3481f6d013df73545e99d0ba6,
+  "@/components/AdminDashboardSummary#AdminDashboardSummary": AdminDashboardSummary_28c827d02bf8a1ba67fb7916362a53d5,
+  "@/components/AdminBrand#AdminBrand": AdminBrand_5fee7b1d7887f8ee4c45775348e4cb18,
+  "@/components/ContactMessagesExport#ContactMessagesExport": ContactMessagesExport_4e2c0d8e9a1f4a8c9c2ce9d9c4e8f101,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

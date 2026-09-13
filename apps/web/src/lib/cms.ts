@@ -17,9 +17,8 @@ import { getCmsInternalUrl } from './cms-url'
  * contenu non publié est invisible même si une requête l'appelait par son
  * identifiant  -  et le modèle peut évoluer sans que le site connaisse le schéma.
  *
- * Les requêtes partent du réseau interne (`CMS_INTERNAL_URL` ou
- * `CMS_INTERNAL_HOSTPORT`), donc sans traverser le navigateur. En local il
- * s'agit du réseau Docker ; sur Render il s'agit du réseau privé Render.
+ * Les requêtes partent du réseau interne (`CMS_INTERNAL_URL`), donc sans
+ * traverser le navigateur. En local et sur OVH, il s'agit du réseau Docker.
  */
 
 const INTERNAL = getCmsInternalUrl()
@@ -27,6 +26,7 @@ const INTERNAL = getCmsInternalUrl()
 /** Base publique du CMS  -  sert à rendre absolues les URL de médias. */
 const PUBLIC_CMS = process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://admin.localhost:8080'
 const PREVIEW_COOKIE = 'ai-preview-token'
+const CMS_REQUEST_TIMEOUT_MS = 3500
 
 /**
  * Durée de revalidation.
@@ -54,9 +54,9 @@ function buildQuery(params: Record<string, QueryValue>): string {
 }
 
 /**
- * Payload 3 accepte de façon fiable les filtres REST complexes dans le
- * paramètre `where` JSON. Les appels métier gardent une notation lisible
- * (`where[slug][equals]`) et sont normalisés ici, à la frontière CMS.
+ * Payload REST attend les filtres complexes en notation bracketée. Garder
+ * cette conversion à la frontière CMS évite de dupliquer la syntaxe dans les
+ * pages publiques et évite les réponses 400 provoquées par `where` en JSON.
  */
 function buildWhere(
   filters: Record<string, QueryValue> = {},
@@ -77,11 +77,35 @@ function buildWhere(
   return where
 }
 
+function appendWhere(
+  search: URLSearchParams,
+  where: Record<string, Record<string, QueryValue>>,
+): void {
+  for (const [field, clauses] of Object.entries(where)) {
+    for (const [operator, value] of Object.entries(clauses)) {
+      if (value === undefined) continue
+      search.set(`where[${field}][${operator}]`, String(value))
+    }
+  }
+}
+
+/** Évite qu'une navigation reste suspendue si le CMS démarre ou redémarre. */
+async function fetchCms(input: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), CMS_REQUEST_TIMEOUT_MS)
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 async function request<T>(path: string, tags: string[]): Promise<T | null> {
   const url = `${INTERNAL}${path}`
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchCms(url, {
       headers: { accept: 'application/json' },
       next: { revalidate: REVALIDATE_SECONDS, tags },
     })
@@ -116,7 +140,7 @@ async function requestPreview<T>(
   const url = `${INTERNAL}/api/preview/data?${query.toString()}`
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchCms(url, {
       headers: { accept: 'application/json', 'x-preview-token': token },
       cache: 'no-store',
     })
@@ -149,13 +173,14 @@ export async function findPublished<T>(
 ): Promise<T[]> {
   const query = buildQuery({
     locale,
+    'fallback-locale': 'none',
     depth: options.depth ?? 1,
     limit: options.limit ?? 100,
     sort: options.sort,
     draft: 'false',
   })
   const search = new URLSearchParams(query)
-  search.set('where', JSON.stringify(buildWhere(options.where)))
+  appendWhere(search, buildWhere(options.where))
 
   const result = await request<PaginatedResult<T>>(`/api/${collection}?${search.toString()}`, [
     `cms:${collection}`,
@@ -214,7 +239,7 @@ export async function findPublishedByKey<T>(
  */
 export const findGlobal = cache(
   async <T,>(slug: string, locale: Locale, depth = 1): Promise<T | null> => {
-    const query = buildQuery({ locale, depth })
+    const query = buildQuery({ locale, 'fallback-locale': 'none', depth })
     return request<T>(`/api/globals/${slug}?${query}`, [`cms:global:${slug}`])
   },
 )
@@ -230,4 +255,10 @@ export function mediaUrl(url: string | null | undefined): string | null {
   if (!url) return null
   if (url.startsWith('http://') || url.startsWith('https://')) return url
   return `${PUBLIC_CMS}${url}`
+}
+
+/** URL du proxy CMS réservé aux logos partenaires avec fond isolé. */
+export function mediaLogoUrl(id: number, version?: string | null): string {
+  const suffix = version ? `&v=${encodeURIComponent(version)}` : ''
+  return `${PUBLIC_CMS}/api/logo?id=${encodeURIComponent(id)}${suffix}`
 }

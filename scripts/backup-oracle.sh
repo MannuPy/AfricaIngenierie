@@ -37,6 +37,9 @@ encrypt() {
   openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
     -pass env:BACKUP_ENCRYPTION_KEY -in "$input" -out "$output"
   sha256sum "$output" > "${output}.sha256"
+  # Le checksum détecte la corruption accidentelle ; le HMAC empêche qu’un
+  # fichier et son checksum soient modifiés ensemble sans détection.
+  openssl dgst -sha256 -hmac "${BACKUP_ENCRYPTION_KEY}:integrity" "$output" > "${output}.hmac"
 }
 
 mkdir -p "$BACKUP_DIR"
@@ -53,11 +56,14 @@ if [ -n "${BACKUP_S3_ENDPOINT:-}" ]; then
   mc mb --ignore-existing "offsite/${BACKUP_S3_BUCKET}" >/dev/null
   mc cp "${BACKUP_DIR}/postgres-${STAMP}.dump.enc" "offsite/${BACKUP_S3_BUCKET}/"
   mc cp "${BACKUP_DIR}/postgres-${STAMP}.dump.enc.sha256" "offsite/${BACKUP_S3_BUCKET}/"
+  mc cp "${BACKUP_DIR}/postgres-${STAMP}.dump.enc.hmac" "offsite/${BACKUP_S3_BUCKET}/"
   mc cp "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc" "offsite/${BACKUP_S3_BUCKET}/"
   mc cp "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc.sha256" "offsite/${BACKUP_S3_BUCKET}/"
+  mc cp "${BACKUP_DIR}/minio-${STAMP}.tar.gz.enc.hmac" "offsite/${BACKUP_S3_BUCKET}/"
 fi
 
 # Nettoyage strict du seul répertoire de sauvegarde.
 find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.enc' -mtime "+${RETENTION_DAYS}" -delete
 find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.sha256' -mtime "+${RETENTION_DAYS}" -delete
+find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.hmac' -mtime "+${RETENTION_DAYS}" -delete
 echo "[backup] sauvegarde chiffrée terminée dans ${BACKUP_DIR}"

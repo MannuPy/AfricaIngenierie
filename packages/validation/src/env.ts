@@ -21,11 +21,7 @@ export const serverEnvSchema = z.object({
 
   NEXT_PUBLIC_SITE_URL: z.url(),
   PAYLOAD_PUBLIC_SERVER_URL: z.url(),
-  CMS_INTERNAL_URL: z.url().optional(),
-  CMS_INTERNAL_HOSTPORT: z
-    .string()
-    .regex(/^[a-zA-Z0-9.-]+:\d+$/, 'CMS_INTERNAL_HOSTPORT doit être au format hôte:port')
-    .optional(),
+  CMS_INTERNAL_URL: z.url(),
 
   MINIO_ENDPOINT: z.string().min(1),
   MINIO_PORT: z.coerce.number().int().positive().default(9000),
@@ -41,10 +37,7 @@ export const serverEnvSchema = z.object({
   SMTP_PORT: z.coerce.number().int().positive().default(1025),
   SMTP_FROM_ADDRESS: z.email(),
   CONTACT_TO: z.email(),
-}).refine(
-  (value) => Boolean(value.CMS_INTERNAL_URL || value.CMS_INTERNAL_HOSTPORT),
-  'CMS_INTERNAL_URL ou CMS_INTERNAL_HOSTPORT est requis',
-)
+})
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>
 
